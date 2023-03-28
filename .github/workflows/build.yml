@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - "**"
-    tags:
-      - "v*"
 
 jobs:
   Test:
@@ -15,17 +13,3 @@ jobs:
         with:
           go-version: "1.20"
       - run: go test ./...
-  Release:
-    runs-on: ubuntu-latest
-    needs: Test
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
-        with:
-          go-version: "1.20"
-      - if: ${{ github.event.ref_type != 'tag' }}
-        run: echo Skipping publishing of release
-      - run: echo "Event is ${{ github.event_name }} and type is ${{ github.ref_type }}"
-      - name: Deploy Release
-        if: ${{ github.event_name == 'push' && github.ref_type == 'tag' }}
-        run: GOPROXY=proxy.golang.org go list -m github.com/${{ github.repository }}@$GITHUB_REF_NAM
