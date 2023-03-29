@@ -27,7 +27,6 @@ func run(args *rootArgs) {
 	fmt.Printf("Generating from %s to %s...\n", args.sourcePath, args.targetPath)
 }
 
-// TODO: Find a way to encode the path associated with each of these errors
 var PathNotFound = fmt.Errorf("Path not found")
 var PathNotEmpty = fmt.Errorf("Path must be empty")
 
@@ -37,8 +36,8 @@ func validateArgs(args []string) error {
 		return PathNotFound
 	}
 	if lib.DirExists(args[1]) {
-		// TODO: check to see if the folder is empty
-		return PathNotEmpty
+		// TODO: check to see if the folder is empty, and only fail if it isn't
+		return fmt.Errorf("Target folder must not exist: %s", args[1])
 	}
 	return nil
 }
