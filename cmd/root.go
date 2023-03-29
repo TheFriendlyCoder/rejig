@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/TheFriendlyCoder/rejigger/lib"
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -26,29 +27,18 @@ func run(args *rootArgs) {
 	fmt.Printf("Generating from %s to %s...\n", args.sourcePath, args.targetPath)
 }
 
-// dirExists checks to see if the path given points to a folder that exists
-func dirExists(path string) bool {
-	info, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		return false
-	}
-	if err != nil {
-		fmt.Println(err.Error())
-		// TODO: consider what other errors can happen here
-	}
-	return info.IsDir()
-
-}
+// TODO: Find a way to encode the path associated with each of these errors
+var PathNotFound = fmt.Errorf("Path not found")
+var PathNotEmpty = fmt.Errorf("Path must be empty")
 
 // validateArgs checks to see if the command line args provided to the app are valid
 func validateArgs(args []string) error {
-	if !dirExists(args[0]) {
-		return fmt.Errorf("path does not exist: %s", args[0])
+	if !lib.DirExists(args[0]) {
+		return PathNotFound
 	}
-	if !dirExists(args[1]) {
-		// TODO: maybe prompt to create the folder
-		// TODO: maybe fail only if the path DOES exist
-		return fmt.Errorf("path does not exist: %s", args[1])
+	if lib.DirExists(args[1]) {
+		// TODO: check to see if the folder is empty
+		return PathNotEmpty
 	}
 	return nil
 }

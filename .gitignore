@@ -16,3 +16,6 @@
 .vscode/
 .idea/
 dist/
+
+# Platform specific
+.DS_Store
