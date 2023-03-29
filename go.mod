@@ -1,6 +1,6 @@
 module github.com/TheFriendlyCoder/rejigger
 
-go 1.18
+go 1.20
 
 require (
 	github.com/ivanpirog/coloredcobra v1.0.1
