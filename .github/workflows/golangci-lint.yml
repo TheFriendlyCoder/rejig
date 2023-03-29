@@ -18,6 +18,8 @@ jobs:
           go-version: '1.20'
           cache: false
       - uses: actions/checkout@v3
+        # TODO: have this job share dependencies with build job
+        # TODO: generate a config file for linter and add to repo
       - run: go get
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
@@ -30,6 +32,7 @@ jobs:
 
           # Optional: golangci-lint command line arguments.
           # args: --issues-exit-code=0
+          args: -p bugs -p error
 
           # Optional: show only new issues if it's a pull request. The default value is `false`.
           # only-new-issues: true
