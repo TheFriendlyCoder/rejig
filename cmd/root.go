@@ -6,6 +6,7 @@ import (
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"log"
 	"os"
 	"reflect"
 	"strings"
@@ -27,18 +28,25 @@ func run(args *rootArgs) {
 	fmt.Printf("Generating from %s to %s...\n", args.sourcePath, args.targetPath)
 }
 
-// TODO: Find a way to encode the path associated with each of these errors
-var PathNotFound = fmt.Errorf("Path not found")
-var PathNotEmpty = fmt.Errorf("Path must be empty")
-
 // validateArgs checks to see if the command line args provided to the app are valid
 func validateArgs(args []string) error {
 	if !lib.DirExists(args[0]) {
-		return PathNotFound
+		return pathError{
+			path:      args[0],
+			errorType: pathNotFound,
+		}
 	}
 	if lib.DirExists(args[1]) {
-		// TODO: check to see if the folder is empty
-		return PathNotEmpty
+		contents, err := os.ReadDir(args[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+		if len(contents) != 0 {
+			return pathError{
+				path:      args[1],
+				errorType: pathNotEmpty,
+			}
+		}
 	}
 	return nil
 }
