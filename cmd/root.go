@@ -24,8 +24,11 @@ type rootArgs struct {
 }
 
 // run Primary entry point function for our generator
-func run(args *rootArgs) {
-	fmt.Printf("Generating from %s to %s...\n", args.sourcePath, args.targetPath)
+func run(cmd *cobra.Command, args *rootArgs) {
+	// We have to use cmd.OutOrStdout() to ensure output is redirected to Cobra
+	// stream handler, to facilitate testing (ie: it allows us to capture output
+	// during unit testing to validate results of CLI operations)
+	fmt.Fprintf(cmd.OutOrStdout(), "Generating from %s to %s...\n", args.sourcePath, args.targetPath)
 }
 
 // validateArgs checks to see if the command line args provided to the app are valid
@@ -39,7 +42,7 @@ func validateArgs(args []string) error {
 	if lib.DirExists(args[1]) {
 		contents, err := os.ReadDir(args[1])
 		if err != nil {
-			log.Fatal(err)
+			log.Panic(err)
 		}
 		if len(contents) != 0 {
 			return pathError{
@@ -71,7 +74,7 @@ specially formatted files stored on disk or in Git repositories`,
 			sourcePath: args[0],
 			targetPath: args[1],
 		}
-		run(&parsedArgs)
+		run(cmd, &parsedArgs)
 	},
 }
 
@@ -112,15 +115,9 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
+	// Global application flags
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.rejig.yaml)")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads app config info from a config file if provided

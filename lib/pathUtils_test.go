@@ -7,12 +7,12 @@ import (
 	"testing"
 )
 
-func TestDirExists(t *testing.T) {
+func Test_DirExists(t *testing.T) {
 	result := DirExists(".")
 	require.True(t, result)
 }
 
-func TestDirNotExists(t *testing.T) {
+func Test_DirNotExists(t *testing.T) {
 	r := require.New(t)
 
 	// Given an empty temp folder
@@ -21,8 +21,7 @@ func TestDirNotExists(t *testing.T) {
 
 	// Make sure we always clean up our temp folder
 	defer func() {
-		err = os.RemoveAll(tmpDir)
-		r.NoError(err, "Error deleting temp folder")
+		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
 	}()
 
 	// When we request a check on a file system object that doesn't exist
@@ -30,7 +29,7 @@ func TestDirNotExists(t *testing.T) {
 	r.False(result, "Path should not exist")
 }
 
-func TestDirExistsButIsFile(t *testing.T) {
+func Test_DirExistsButIsFile(t *testing.T) {
 	r := require.New(t)
 
 	// Given a test folder with a file in it
@@ -39,8 +38,7 @@ func TestDirExistsButIsFile(t *testing.T) {
 
 	// Make sure we always clean up our temp folder
 	defer func() {
-		err = os.RemoveAll(tmpDir)
-		r.NoError(err, "Error deleting temp folder")
+		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
 	}()
 
 	var filename = path.Join(tmpDir, "fubar")
@@ -55,7 +53,7 @@ func TestDirExistsButIsFile(t *testing.T) {
 
 }
 
-func TestInvalidDirExists(t *testing.T) {
+func Test_InvalidDirExists(t *testing.T) {
 	// The stat method doesn't accept strings with nested null characters in it
 	// but we expect that error to get swallowed and just return a false result
 	result := DirExists(".\x00asdf")

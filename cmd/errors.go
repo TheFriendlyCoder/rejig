@@ -3,8 +3,10 @@ package cmd
 type pathErrorTypes int64
 
 const (
-	pathNotFound pathErrorTypes = iota
+	undefined pathErrorTypes = iota
+	pathNotFound
 	pathNotEmpty
+	fileNotFound
 )
 
 type pathError struct {
@@ -13,12 +15,16 @@ type pathError struct {
 }
 
 func (p pathError) Error() string {
+	var retval string
 	switch p.errorType {
 	case pathNotFound:
-		return "Path not found: " + p.path
+		retval = "Path not found: " + p.path
 	case pathNotEmpty:
-		return "Path must be empty: " + p.path
-	default:
-		panic("Unsupported error")
+		retval = "Path must be empty: " + p.path
+	case fileNotFound:
+		retval = "File not found: " + p.path
+	case undefined:
+		panic("Unsupported path error")
 	}
+	return retval
 }
