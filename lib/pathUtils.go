@@ -1,7 +1,7 @@
 package lib
 
 import (
-	"fmt"
+	"log"
 	"os"
 )
 
@@ -12,8 +12,7 @@ func DirExists(path string) bool {
 		return false
 	}
 	if err != nil {
-		// TODO: convert this print to a logger
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return false
 	}
 	return info.IsDir()

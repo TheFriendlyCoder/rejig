@@ -20,6 +20,7 @@ func sampleData(filename string) (string, error) {
 
 func Test_parseManifest(t *testing.T) {
 	r := require.New(t)
+	a := assert.New(t)
 
 	srcFile, err := sampleData("simple_manifest.yml")
 	r.NoError(err, "Failed to locate sample data")
@@ -34,12 +35,22 @@ func Test_parseManifest(t *testing.T) {
 	expTemplateVersion, err := version.NewVersion("2.0")
 	r.NoError(err)
 
-	r.Equal(*expSchemaVersion, manifest.Versions.Schema)
-	r.Equal(*expJiggerVersion, manifest.Versions.Jigger)
-	r.Equal(*expTemplateVersion, manifest.Versions.Template)
-	r.Equal(1, len(manifest.TemplateParams))
-	r.Contains(manifest.TemplateParams, "project_name")
-	r.Equal("MyProj", manifest.TemplateParams["project_name"])
+	// Validate version info
+	a.Equal(*expSchemaVersion, manifest.Versions.Schema)
+	a.Equal(*expJiggerVersion, manifest.Versions.Jigger)
+	a.Equal(*expTemplateVersion, manifest.Versions.Template)
+
+	// Validate template metadata
+	a.Equal(2, len(manifest.Template.Args))
+	a.Equal("project_name", manifest.Template.Args[0].Name)
+	a.Equal("Name of the source code project", manifest.Template.Args[0].Description)
+	a.Equal("version", manifest.Template.Args[1].Name)
+	a.Equal("Initial version number for the project", manifest.Template.Args[1].Description)
+
+	// Validate unparsed values
+	a.Equal(1, len(manifest.MiscParams))
+	a.Contains(manifest.MiscParams, "misc")
+	a.Equal("fubar", manifest.MiscParams["misc"])
 }
 
 func Test_parseManifestNotExist(t *testing.T) {
@@ -89,3 +100,15 @@ func Test_parseManifestInvalidYAML(t *testing.T) {
 	a.Contains(err.Error(), emptyTypeErr.Error())
 	a.Nil(manifest)
 }
+
+//func Test_parseManifestInvalidTemplateArgs(t *testing.T) {
+//	r := require.New(t)
+//	a := assert.New(t)
+//
+//	srcFile, err := sampleData("simple_manifest_with_invalid_args.yml")
+//	r.NoError(err, "Failed to locate sample data")
+//
+//	manifest, err := ParseManifest(srcFile)
+//	a.Error(err, "Manifest file should fail to parse")
+//	a.Nil(manifest, "No valid manifest data should be returned")
+//}

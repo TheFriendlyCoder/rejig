@@ -7,6 +7,9 @@ import (
 	"os"
 )
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//									DATA STRUCTURES
+
 // VersionData stores version information about the template
 type VersionData struct {
 	// Schema version describing the format of the manifest file and its contents
@@ -17,29 +20,68 @@ type VersionData struct {
 	Template version.Version `yaml:"template"`
 }
 
+// ArgData metadata describing the input args supported by the template. Values for these
+// args must be provided by the user to customize the content produced by the template
+type ArgData struct {
+	// Name of the argument, exactly as will be used in the template contents
+	Name string `yaml:"name"`
+	// Description descriptive text explaining the purpose of the argument
+	Description string `yaml:"description"`
+}
+
+// TemplateData metadata describing the template being processed
+type TemplateData struct {
+	// Args list of input parameters supported by the template. These provide user configurable
+	// options that customize the content produced by the template
+	Args []ArgData `yaml:"args"`
+}
+
 // ManifestData parsed content of the manifest file associated with a template
 type ManifestData struct {
-	Versions       VersionData            `yaml:"versions"`
-	TemplateParams map[string]interface{} `yaml:"-,flow"`
+	// Versions version identifiers for various aspects of the template
+	Versions VersionData `yaml:"versions"`
+	// Template metadata describing the template
+	Template TemplateData `yaml:"template"`
+	// MiscParams all unparsed values in the manifest will be dumped into a simple map structure
+	MiscParams map[string]interface{} `yaml:"-,flow"`
 }
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//									PARSING LOGIC
 
 // UnmarshalYAML custom YAML decoding method compatible with the YAML parsing library
 func (m *ManifestData) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	// Start by parsing version info from the manifest file
 	var versionFields struct {
 		Versions VersionData `yaml:"versions"`
 	}
 	if err := unmarshal(&versionFields); err != nil {
 		return err
 	}
+	m.Versions = versionFields.Versions
+
+	// Then parse template metadata
+	var templateFields struct {
+		Template TemplateData `yaml:"template"`
+	}
+	if err := unmarshal(&templateFields); err != nil {
+		return err
+	}
+	m.Template = templateFields.Template
+
+	// Dump all remaining content into a simple map
 	var remaining map[string]interface{}
 	if err := unmarshal(&remaining); err != nil {
 		return err
 	}
-	m.Versions = versionFields.Versions
 	delete(remaining, "versions")
-	m.TemplateParams = remaining
+	delete(remaining, "template")
+	m.MiscParams = remaining
 	return nil
 }
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//									PUBLIC INTERFACE
 
 // ParseManifest parses a template manifest file and returns a reference to
 // the parsed representation of the contents of the file
