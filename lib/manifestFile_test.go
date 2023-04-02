@@ -101,14 +101,16 @@ func Test_parseManifestInvalidYAML(t *testing.T) {
 	a.Nil(manifest)
 }
 
-//func Test_parseManifestInvalidTemplateArgs(t *testing.T) {
-//	r := require.New(t)
-//	a := assert.New(t)
-//
-//	srcFile, err := sampleData("simple_manifest_with_invalid_args.yml")
-//	r.NoError(err, "Failed to locate sample data")
-//
-//	manifest, err := ParseManifest(srcFile)
-//	a.Error(err, "Manifest file should fail to parse")
-//	a.Nil(manifest, "No valid manifest data should be returned")
-//}
+func Test_parseManifestInvalidTemplateArgs(t *testing.T) {
+	r := require.New(t)
+	a := assert.New(t)
+
+	srcFile, err := sampleData("simple_manifest_with_invalid_args.yml")
+	r.NoError(err, "Failed to locate sample data")
+
+	manifest, err := ParseManifest(srcFile)
+	// TODO: Find some way to make error reporting here more user friendly
+	//		 may require a different YAML parsing library
+	a.Error(err, "Manifest file should fail to parse")
+	a.Nil(manifest, "No valid manifest data should be returned")
+}
