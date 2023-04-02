@@ -50,13 +50,13 @@ type ManifestData struct {
 //									PARSING LOGIC
 
 // UnmarshalYAML custom YAML decoding method compatible with the YAML parsing library
-func (m *ManifestData) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (m *ManifestData) UnmarshalYAML(value *yaml.Node) error {
 	// Start by parsing version info from the manifest file
 	var versionFields struct {
 		Versions VersionData `yaml:"versions"`
 	}
-	if err := unmarshal(&versionFields); err != nil {
-		return err
+	if err := value.Decode(&versionFields); err != nil {
+		return errors.Wrap(err, "Failed to parse version information")
 	}
 	m.Versions = versionFields.Versions
 
@@ -64,15 +64,15 @@ func (m *ManifestData) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var templateFields struct {
 		Template TemplateData `yaml:"template"`
 	}
-	if err := unmarshal(&templateFields); err != nil {
-		return err
+	if err := value.Decode(&templateFields); err != nil {
+		return errors.Wrap(err, "Failed to parse template metadata")
 	}
 	m.Template = templateFields.Template
 
 	// Dump all remaining content into a simple map
 	var remaining map[string]interface{}
-	if err := unmarshal(&remaining); err != nil {
-		return err
+	if err := value.Decode(&remaining); err != nil {
+		return errors.Wrap(err, "Failed to parse additional config options")
 	}
 	delete(remaining, "versions")
 	delete(remaining, "template")
@@ -92,6 +92,9 @@ func ParseManifest(path string) (*ManifestData, error) {
 	}
 
 	retval := &ManifestData{}
+	// TODO: Find some way to get "Strict" mode to work properly (aka: KnownFields in v3)
+	//		https://github.com/go-yaml/yaml/issues/460
+	//		https://github.com/go-yaml/yaml/issues/642
 	err = yaml.Unmarshal(buf, retval)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to parse YAML content from manifest file")

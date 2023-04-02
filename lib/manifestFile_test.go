@@ -111,6 +111,7 @@ func Test_parseManifestInvalidTemplateArgs(t *testing.T) {
 	manifest, err := ParseManifest(srcFile)
 	// TODO: Find some way to make error reporting here more user friendly
 	//		 may require a different YAML parsing library
+	// https://github.com/go-yaml/yaml/pull/901
 	a.Error(err, "Manifest file should fail to parse")
 	a.Nil(manifest, "No valid manifest data should be returned")
 }
