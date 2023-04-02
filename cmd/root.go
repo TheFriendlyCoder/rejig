@@ -30,7 +30,7 @@ func run(cmd *cobra.Command, args *rootArgs) error {
 	// We have to use cmd.OutOrStdout() to ensure output is redirected to Cobra
 	// stream handler, to facilitate testing (ie: it allows us to capture output
 	// during unit testing to validate results of CLI operations)
-	fmt.Fprintf(cmd.OutOrStdout(), "Loading template from %s...\n", args.sourcePath)
+	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Loading template from %s...\n", args.sourcePath))
 
 	manifest := filepath.Join(args.sourcePath, ".rejig.yml")
 	_, err := os.Stat(manifest)
@@ -46,12 +46,12 @@ func run(cmd *cobra.Command, args *rootArgs) error {
 
 	context := map[string]any{}
 	for _, arg := range manifestData.Template.Args {
-		fmt.Fprintf(cmd.OutOrStdout(), "%s(%s): ", arg.Description, arg.Name)
+		lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "%s(%s): ", arg.Description, arg.Name))
 		var temp string
-		fmt.Fscanln(cmd.InOrStdin(), &temp)
+		lib.SNF(fmt.Fscanln(cmd.InOrStdin(), &temp))
 		context[arg.Name] = temp
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from %s...\n", args.targetPath, args.sourcePath)
+	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from %s...\n", args.targetPath, args.sourcePath))
 
 	return errors.Wrap(lib.Generate(args.sourcePath, args.targetPath, context), "Failed generating project")
 	// TODO: after generating, put a manifest file in the root folder summarizing what we did so we
@@ -105,7 +105,7 @@ specially formatted files stored on disk or in Git repositories`,
 		}
 		err := run(cmd, &parsedArgs)
 		if err != nil {
-			fmt.Fprintf(cmd.ErrOrStderr(), "Failed to generate project")
+			lib.SNF(fmt.Fprintf(cmd.ErrOrStderr(), "Failed to generate project"))
 		}
 	},
 }
@@ -170,6 +170,9 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		lib.SNF(fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed()))
+		if err != nil {
+			panic("Failed to write error output: " + err.Error())
+		}
 	}
 }
