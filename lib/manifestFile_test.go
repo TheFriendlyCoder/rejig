@@ -29,10 +29,14 @@ func Test_parseManifest(t *testing.T) {
 
 	expSchemaVersion, err := version.NewVersion("1.0")
 	r.NoError(err)
-	expJiggerVersion, err := version.NewVersion("0.0")
+	expJiggerVersion, err := version.NewVersion("0.0.1")
 	r.NoError(err)
-	r.Equal(*expSchemaVersion, manifest.Schema.Version)
-	r.Equal(*expJiggerVersion, manifest.Schema.JiggerVersion)
+	expTemplateVersion, err := version.NewVersion("2.0")
+	r.NoError(err)
+
+	r.Equal(*expSchemaVersion, manifest.Versions.Schema)
+	r.Equal(*expJiggerVersion, manifest.Versions.Jigger)
+	r.Equal(*expTemplateVersion, manifest.Versions.Template)
 	r.Equal(1, len(manifest.TemplateParams))
 	r.Contains(manifest.TemplateParams, "project_name")
 	r.Equal("MyProj", manifest.TemplateParams["project_name"])

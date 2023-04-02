@@ -1,4 +1,5 @@
-schema:
-  version: 1.0
-  rejigger_version: 0.0
+versions:
+  schema: 1.0
+  rejigger: 0.0.1
+  template: 2.0
 project_name: MyProj

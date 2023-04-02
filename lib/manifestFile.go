@@ -7,34 +7,36 @@ import (
 	"os"
 )
 
-// SchemaData stores metadata about a template manifest used by the rejigger tool
-type SchemaData struct {
-	// Version schema version describing the format of the manifest file and its contents
-	Version version.Version `yaml:"version"`
-	// JiggerVersion the minimum version of the Rejigger app needed to process to the template
-	JiggerVersion version.Version `yaml:"rejigger_version"`
+// VersionData stores version information about the template
+type VersionData struct {
+	// Schema version describing the format of the manifest file and its contents
+	Schema version.Version `yaml:"schema"`
+	// Jigger the minimum version of the Rejigger app needed to process to the template
+	Jigger version.Version `yaml:"rejigger"`
+	// Template the version number associated with the current template
+	Template version.Version `yaml:"template"`
 }
 
 // ManifestData parsed content of the manifest file associated with a template
 type ManifestData struct {
-	Schema         SchemaData             `yaml:"schema"`
+	Versions       VersionData            `yaml:"versions"`
 	TemplateParams map[string]interface{} `yaml:"-,flow"`
 }
 
 // UnmarshalYAML custom YAML decoding method compatible with the YAML parsing library
 func (m *ManifestData) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var schemaFields struct {
-		Schema SchemaData `yaml:"schema"`
+	var versionFields struct {
+		Versions VersionData `yaml:"versions"`
 	}
-	if err := unmarshal(&schemaFields); err != nil {
+	if err := unmarshal(&versionFields); err != nil {
 		return err
 	}
 	var remaining map[string]interface{}
 	if err := unmarshal(&remaining); err != nil {
 		return err
 	}
-	m.Schema = schemaFields.Schema
-	delete(remaining, "schema")
+	m.Versions = versionFields.Versions
+	delete(remaining, "versions")
 	m.TemplateParams = remaining
 	return nil
 }
