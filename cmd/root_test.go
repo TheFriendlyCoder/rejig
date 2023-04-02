@@ -203,7 +203,7 @@ func Test_RootCommandInvalidArgs(t *testing.T) {
 
 func Test_loadManifestFile(t *testing.T) {
 	r := require.New(t)
-	sampleManifest, err := sampleData("simple_manifest.yml")
+	sampleConfig, err := sampleData("sample_config.yml")
 	r.NoError(err, "sample config file not found")
 
 	// Given an empty temp folder
@@ -225,7 +225,7 @@ func Test_loadManifestFile(t *testing.T) {
 	actual := new(bytes.Buffer)
 	rootCmd.SetOut(actual)
 	rootCmd.SetErr(actual)
-	rootCmd.SetArgs([]string{srcDir, destDir, "--config=" + sampleManifest})
+	rootCmd.SetArgs([]string{srcDir, destDir, "--config=" + sampleConfig})
 	err = rootCmd.Execute()
 
 	// We expect no error from our command
