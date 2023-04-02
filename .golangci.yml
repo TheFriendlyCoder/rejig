@@ -1,0 +1,21 @@
+linters:
+  enable:
+  # default
+  - errcheck
+  - gosimple
+  - govet
+  - ineffassign
+  - staticcheck
+  - typecheck
+  - unused
+  # custom
+  - cyclop
+  - goerr113
+linters-settings:
+  cyclop:
+    # TODO: Reduce to default 10
+    max-complexity: 15
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+    disable-default-exclusions: true

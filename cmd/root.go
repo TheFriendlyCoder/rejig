@@ -54,6 +54,10 @@ func run(cmd *cobra.Command, args *rootArgs) error {
 	fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from %s...\n", args.targetPath, args.sourcePath)
 
 	return errors.Wrap(lib.Generate(args.sourcePath, args.targetPath, context), "Failed generating project")
+	// TODO: after generating, put a manifest file in the root folder summarizing what we did so we
+	//		 can regenerate or update the project later
+	// TODO: make terminology consistent (ie: config file for the app, manifest file for the template,
+	//		 and something else for storing status of generated project - maybe audit file?
 }
 
 // validateArgs checks to see if the command line args provided to the app are valid

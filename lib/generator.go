@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 )
 
+// Generate applies a set of user defined options (ie: the 'context') to a set of template
+// files stored in srcPath, and produces a complete project in the targetPath with the
+// user defined parameters applied throughout
 func Generate(srcPath string, targetPath string, context map[string]any) error {
 	// loop through all files
 	var err = filepath.WalkDir(srcPath, func(path string, info os.DirEntry, err error) error {

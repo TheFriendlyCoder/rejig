@@ -27,6 +27,10 @@ type ArgData struct {
 	Name string `yaml:"name"`
 	// Description descriptive text explaining the purpose of the argument
 	Description string `yaml:"description"`
+	// TODO: Consider adding default value here
+	// TODO: Consider having a short and long description, with the former limited to like 40 chars
+	// TODO: Consider having an optional flag here
+	// TODO: Consider having a data type identifier here to do some input validation on
 }
 
 // TemplateData metadata describing the template being processed
@@ -34,6 +38,9 @@ type TemplateData struct {
 	// Args list of input parameters supported by the template. These provide user configurable
 	// options that customize the content produced by the template
 	Args []ArgData `yaml:"args"`
+	// TODO: Consider adding 'Features' section for optional args, with mapping to specific files
+	// TODO: Consider adding an "Skip" section to list files that shouldn't be templated
+	// TODO: Consider adding an "Exclude" section to list files that should be ignored completely
 }
 
 // ManifestData parsed content of the manifest file associated with a template
@@ -59,6 +66,9 @@ func (m *ManifestData) UnmarshalYAML(value *yaml.Node) error {
 		return errors.Wrap(err, "Failed to parse version information")
 	}
 	m.Versions = versionFields.Versions
+
+	// TODO: Validate the version identifier for the app here and fail if we are not
+	// 		 using a supported version
 
 	// Then parse template metadata
 	var templateFields struct {
