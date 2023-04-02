@@ -1,0 +1,6 @@
+# editor folders
+.vscode/
+.idea/
+
+# Platform specific
+.DS_Store
