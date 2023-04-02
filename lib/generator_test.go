@@ -2,7 +2,6 @@ package lib
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -73,7 +72,7 @@ func Test_basicGenerator(t *testing.T) {
 	err = Generate(*srcPath, tmpDir, context)
 
 	r.NoError(err, "Failed to run generator")
-	fmt.Println(tmpDir)
+
 	a.DirExists(filepath.Join(tmpDir, "MyProj"))
 	a.NoFileExists(filepath.Join(tmpDir, ".rejig.yml"))
 

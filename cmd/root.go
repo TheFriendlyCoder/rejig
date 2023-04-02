@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	cc "github.com/ivanpirog/coloredcobra"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 )
@@ -24,11 +26,34 @@ type rootArgs struct {
 }
 
 // run Primary entry point function for our generator
-func run(cmd *cobra.Command, args *rootArgs) {
+func run(cmd *cobra.Command, args *rootArgs) error {
 	// We have to use cmd.OutOrStdout() to ensure output is redirected to Cobra
 	// stream handler, to facilitate testing (ie: it allows us to capture output
 	// during unit testing to validate results of CLI operations)
-	fmt.Fprintf(cmd.OutOrStdout(), "Generating from %s to %s...\n", args.sourcePath, args.targetPath)
+	fmt.Fprintf(cmd.OutOrStdout(), "Loading template from %s...\n", args.sourcePath)
+
+	manifest := filepath.Join(args.sourcePath, ".rejig.yml")
+	_, err := os.Stat(manifest)
+	if err != nil {
+		// TODO: See if there's any need to check for the IsNotExist error
+		return errors.Wrap(err, "Unable to read manifest file")
+	}
+
+	manifestData, err := lib.ParseManifest(manifest)
+	if err != nil {
+		return errors.Wrap(err, "Failed parsing manifest file")
+	}
+
+	context := map[string]any{}
+	for _, arg := range manifestData.Template.Args {
+		fmt.Fprintf(cmd.OutOrStdout(), "%s(%s): ", arg.Description, arg.Name)
+		var temp string
+		fmt.Fscanln(cmd.InOrStdin(), &temp)
+		context[arg.Name] = temp
+	}
+	fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from %s...\n", args.targetPath, args.sourcePath)
+
+	return errors.Wrap(lib.Generate(args.sourcePath, args.targetPath, context), "Failed generating project")
 }
 
 // validateArgs checks to see if the command line args provided to the app are valid
@@ -74,7 +99,10 @@ specially formatted files stored on disk or in Git repositories`,
 			sourcePath: args[0],
 			targetPath: args[1],
 		}
-		run(cmd, &parsedArgs)
+		err := run(cmd, &parsedArgs)
+		if err != nil {
+			fmt.Fprintf(cmd.ErrOrStderr(), "Failed to generate project")
+		}
 	},
 }
 

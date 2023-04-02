@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"os"
 	"path"
+	"path/filepath"
 	"testing"
 )
 
@@ -15,6 +16,19 @@ func sampleData(filename string) (string, error) {
 	retval := path.Join("testdata", filename)
 	var _, err = os.Stat(retval)
 	return retval, errors.Wrap(err, "checking existence of test data file")
+}
+
+// sampleProj loads path to a specific sample project to use for testing the generator logic
+func sampleProj(projName string) (*string, error) {
+	retval, err := filepath.Abs(path.Join("..", "testProjects", projName))
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to generate absolute path")
+	}
+	_, err = os.Stat(retval)
+	if err != nil {
+		return nil, errors.Wrap(err, "checking existence of test data file")
+	}
+	return &retval, nil
 }
 
 func Test_generateUsageLine(t *testing.T) {
@@ -109,6 +123,7 @@ func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
 func Test_RootCommandSucceeds(t *testing.T) {
 
 	r := require.New(t)
+	a := assert.New(t)
 
 	// Given an empty temp folder
 	tmpDir, err := os.MkdirTemp("", "")
@@ -119,21 +134,43 @@ func Test_RootCommandSucceeds(t *testing.T) {
 		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
 	}()
 
-	// with 2 empty subfolders
-	srcDir := path.Join(tmpDir, "src")
-	destDir := path.Join(tmpDir, "dest")
-	r.NoError(os.Mkdir(srcDir, 0700), "Error creating source folder")
-	r.NoError(os.Mkdir(destDir, 0700), "Error creating destination folder")
+	srcDir, err := sampleProj("simple")
+	r.NoError(err, "Locating sample project should always succeed")
 
-	actual := new(bytes.Buffer)
-	rootCmd.SetOut(actual)
-	rootCmd.SetErr(actual)
-	rootCmd.SetArgs([]string{srcDir, destDir})
+	output := new(bytes.Buffer)
+	fakeInput := new(bytes.Buffer)
+	_, err = fakeInput.WriteString("MyProj\n")
+	r.NoError(err, "Failed generating sample input")
+	_, err = fakeInput.WriteString("1.2.3\n")
+	r.NoError(err, "Failed generating sample input")
+
+	rootCmd.SetOut(output)
+	rootCmd.SetErr(output)
+	rootCmd.SetIn(fakeInput)
+	rootCmd.SetArgs([]string{*srcDir, tmpDir})
 	err = rootCmd.Execute()
 	r.NoError(err, "CLI command should have succeeded")
 
-	r.Contains(actual.String(), srcDir)
-	r.Contains(actual.String(), destDir)
+	r.Contains(output.String(), *srcDir)
+	r.Contains(output.String(), tmpDir)
+
+	a.DirExists(filepath.Join(tmpDir, "MyProj"))
+	a.NoFileExists(filepath.Join(tmpDir, ".rejig.yml"))
+
+	//exp := filepath.Join(*srcDir, ".gitignore")
+	act := filepath.Join(tmpDir, ".gitignore")
+	a.FileExists(act)
+	//a.True(unmodified(r, exp, act))
+
+	act = filepath.Join(tmpDir, "version.txt")
+	a.FileExists(act)
+	//a.True(contains(r, act, expVersion))
+	//a.False(contains(r, act, "{{version}}"))
+
+	act = filepath.Join(tmpDir, "MyProj", "main.txt")
+	a.FileExists(act)
+	//a.True(contains(r, act, expProj))
+	//a.False(contains(r, act, "{{project_name}}"))
 }
 
 func Test_RootCommandTooFewArgs(t *testing.T) {
