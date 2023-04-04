@@ -1,16 +1,29 @@
 linters:
   enable:
-  # default
-  - errcheck
-  - gosimple
-  - govet
-  - ineffassign
-  - staticcheck
-  - typecheck
-  - unused
-  # custom
-  - cyclop
-  - goerr113
+    # default
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - unused
+    # custom
+    - cyclop
+    - goerr113
+  presets:
+    - bugs
+#    - complexity
+    - error
+#    - format
+#    - import
+#    - metalinter
+    - module
+    - performance
+#    - sql
+#    - style
+#    - test
+#    - unused
 linters-settings:
   cyclop:
     # TODO: Reduce to default 10
@@ -19,3 +32,5 @@ linters-settings:
     check-type-assertions: true
     check-blank: true
     disable-default-exclusions: true
+#run:
+  #tests: false

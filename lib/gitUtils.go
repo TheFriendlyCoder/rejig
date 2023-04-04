@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-billy.v4"
 	"gopkg.in/src-d/go-billy.v4/memfs"
 	"gopkg.in/src-d/go-git.v4"
@@ -14,7 +15,7 @@ func getTemplate(gitURL string) (*billy.Filesystem, error) {
 		URL: gitURL,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed querying Git repo")
 	}
 	return &fs, nil
 }
