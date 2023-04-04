@@ -1,4 +1,4 @@
-package cmd
+package lib
 
 import (
 	"github.com/stretchr/testify/require"
@@ -8,13 +8,13 @@ import (
 
 func Test_FilePathInErrorMessage(t *testing.T) {
 	type data struct {
-		errorType pathErrorTypes
+		errorType PathErrorTypes
 	}
 
 	tests := []data{
-		{errorType: pathNotFound},
-		{errorType: pathNotEmpty},
-		{errorType: fileNotFound},
+		{errorType: PE_PATH_NOT_FOUND},
+		{errorType: PE_PATH_NOT_EMPTY},
+		{errorType: PE_FILE_NOT_FOUND},
 	}
 
 	for _, tt := range tests {
@@ -23,12 +23,12 @@ func Test_FilePathInErrorMessage(t *testing.T) {
 		expectedPath, err := os.Getwd()
 		r.NoError(err, "Failed to get current working folder")
 
-		val := pathError{
-			path:      expectedPath,
-			errorType: tt.errorType,
+		val := PathError{
+			Path:      expectedPath,
+			ErrorType: tt.errorType,
 		}
 
-		r.Contains(val.Error(), expectedPath, "Error message should include the name of the path that caused the error")
+		r.Contains(val.Error(), expectedPath, "Error message should include the name of the Path that caused the error")
 	}
 }
 
@@ -38,8 +38,8 @@ func Test_UnknownPathError(t *testing.T) {
 	expectedPath, err := os.Getwd()
 	r.NoError(err, "Failed to get current working folder")
 
-	val := pathError{
-		path: expectedPath,
+	val := PathError{
+		Path: expectedPath,
 	}
 
 	r.Panics(func() { _ = val.Error() }, "Attempting to reference an error on an unsupported type should panic")

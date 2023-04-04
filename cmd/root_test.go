@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"github.com/TheFriendlyCoder/rejigger/lib"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -86,7 +87,7 @@ func Test_ValidateArgsSourceDirNotExists(t *testing.T) {
 
 	// we expect the proper error to be returned
 	r.Error(result)
-	r.ErrorAs(result, &pathError{path: srcDir, errorType: pathNotFound})
+	r.ErrorAs(result, &lib.PathError{Path: srcDir, ErrorType: lib.PE_PATH_NOT_FOUND})
 }
 
 func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
@@ -117,7 +118,7 @@ func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
 
 	// we expect the proper error to be returned
 	r.Error(result)
-	r.ErrorAs(result, &pathError{path: destDir, errorType: pathNotEmpty})
+	r.ErrorAs(result, &lib.PathError{Path: destDir, ErrorType: lib.PE_PATH_NOT_EMPTY})
 }
 
 func Test_RootCommandSucceeds(t *testing.T) {
@@ -238,9 +239,11 @@ func Test_RootCommandInvalidArgs(t *testing.T) {
 	r.Contains(actual.String(), srcDir)
 }
 
-func Test_loadManifestFile(t *testing.T) {
+func Test_loadAppOptionsFile(t *testing.T) {
 	r := require.New(t)
-	sampleConfig, err := sampleData("sample_config.yml")
+	a := assert.New(t)
+
+	sampleConfig, err := sampleData("app_options.yml")
 	r.NoError(err, "sample config file not found")
 
 	// Given an empty temp folder
@@ -268,6 +271,42 @@ func Test_loadManifestFile(t *testing.T) {
 	// We expect no error from our command
 	r.NoError(err, "CLI command should have succeeded")
 
-	// And some status info to be reported
-	//r.Contains(actual.String(), sampleManifest)
+	// TODO: Validate parsed options
+	a.Equal(1, len(appOptions.Templates))
+	a.Equal("simple1", appOptions.Templates[0].Name)
+	a.Equal("testProjects/simple", appOptions.Templates[0].Folder)
+	a.Equal("https://github.com/TheFriendlyCoder/rejigger", appOptions.Templates[0].Source)
+	a.Equal(lib.TST_GIT, appOptions.Templates[0].Type)
 }
+
+func Test_loadAppOptionsFileInvalidTemplateType(t *testing.T) {
+	r := require.New(t)
+
+	sampleConfig, err := sampleData("app_options_invalid_template_type.yml")
+	r.NoError(err, "sample config file not found")
+
+	// Given an empty temp folder
+	tmpDir, err := os.MkdirTemp("", "")
+	r.NoError(err, "Error creating temp folder")
+
+	// Make sure we always clean up our temp folder
+	defer func() {
+		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
+	}()
+
+	// with 2 empty subfolders
+	srcDir := path.Join(tmpDir, "src")
+	destDir := path.Join(tmpDir, "dest")
+	r.NoError(os.Mkdir(srcDir, 0700), "Error creating source folder")
+	r.NoError(os.Mkdir(destDir, 0700), "Error creating destination folder")
+
+	// When we run the root command with a custom config file
+	actual := new(bytes.Buffer)
+	rootCmd.SetOut(actual)
+	rootCmd.SetErr(actual)
+	rootCmd.SetArgs([]string{srcDir, destDir, "--config=" + sampleConfig})
+	r.PanicsWithValue("Critical application failure", func() { err = rootCmd.Execute() })
+	r.NoError(err)
+}
+
+// TODO: have suite auto-reset viper singleton on each test loop

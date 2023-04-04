@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	cc "github.com/ivanpirog/coloredcobra"
+	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -17,12 +18,24 @@ import (
 // cfgFile path to the file containing config options for the app
 var cfgFile string
 
+// appOptions global config options for the app
+var appOptions *lib.AppOptions
+
 // rootArgs parsed command line arguments
 type rootArgs struct {
 	// sourcePath path to the folder containing the template to be loaded
 	sourcePath string
 	// targetPath path to the folder where the new project is to be created
 	targetPath string
+}
+
+// checkErr replacement for the cobra method of the same name, which unfortunately calls os.exit
+// under the hood, making it impossible to write unit tests for it. This helper calls out to panic()
+// which allows us to intercept the termination signal during testing
+func checkErr(err error) {
+	if err != nil {
+		panic("Critical application failure")
+	}
 }
 
 // run Primary entry point function for our generator
@@ -63,9 +76,9 @@ func run(cmd *cobra.Command, args *rootArgs) error {
 // validateArgs checks to see if the command line args provided to the app are valid
 func validateArgs(args []string) error {
 	if !lib.DirExists(args[0]) {
-		return pathError{
-			path:      args[0],
-			errorType: pathNotFound,
+		return lib.PathError{
+			Path:      args[0],
+			ErrorType: lib.PE_PATH_NOT_FOUND,
 		}
 	}
 	if lib.DirExists(args[1]) {
@@ -74,9 +87,9 @@ func validateArgs(args []string) error {
 			log.Panic(err)
 		}
 		if len(contents) != 0 {
-			return pathError{
-				path:      args[1],
-				errorType: pathNotEmpty,
+			return lib.PathError{
+				Path:      args[1],
+				ErrorType: lib.PE_PATH_NOT_EMPTY,
 			}
 		}
 	}
@@ -152,15 +165,50 @@ func init() {
 
 }
 
+// appOptionsDecoder custom hook method used to translate raw config data into a format
+// compatible
+func appOptionsDecoder() mapstructure.DecodeHookFuncType {
+	// Based on example found here:
+	//		https://sagikazarmark.hu/blog/decoding-custom-formats-with-viper/
+	return func(
+		src reflect.Type,
+		target reflect.Type,
+		raw interface{},
+	) (interface{}, error) {
+
+		if (target != reflect.TypeOf(lib.TemplateOptions{})) {
+			return raw, nil
+		}
+
+		// Map the "type" field from a character string format to an enumerated type
+		templateData, ok := raw.(map[string]interface{})
+		if !ok {
+			return nil, lib.APP_OPTIONS_DECODE_ERROR
+		}
+
+		var newVal lib.TemplateSourceType
+		switch templateData["type"] {
+		case "":
+			newVal = lib.TST_UNDEFINED
+		case "git":
+			newVal = lib.TST_GIT
+		default:
+			return nil, lib.APP_OPTIONS_INVALID_SOURCE_TYPE_ERROR
+		}
+		templateData["type"] = newVal
+		return templateData, nil
+	}
+}
+
 // initConfig reads app config info from a config file if provided
 func initConfig() {
 	if cfgFile != "" {
-		// Use config file from the flag.
+		// Use config file from the command line flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
 		// Find home directory.
 		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
+		checkErr(err)
 
 		// Search config in home directory with name ".rejig" (without extension).
 		viper.AddConfigPath(home)
@@ -169,10 +217,19 @@ func initConfig() {
 	}
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		lib.SNF(fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed()))
-		if err != nil {
-			panic("Failed to write error output: " + err.Error())
-		}
+	err := viper.ReadInConfig()
+	// If there is no config file, we ignore that error and assume
+	// there is no app config
+	if errors.As(err, &viper.ConfigFileNotFoundError{}) {
+		return
 	}
+	checkErr(err)
+
+	// Parse the config data
+	err = viper.Unmarshal(&appOptions, viper.DecodeHook(appOptionsDecoder()))
+	checkErr(err)
+
+	// Then validate the results to make sure they meet the application requirements
+	err = appOptions.Validate()
+	checkErr(err)
 }

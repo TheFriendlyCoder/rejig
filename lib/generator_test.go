@@ -33,11 +33,11 @@ func contains(r *require.Assertions, file string, pattern string) bool {
 	return strings.Contains(string(contents), pattern)
 }
 
-// sampleProj loads path to a specific sample project to use for testing the generator logic
+// sampleProj loads Path to a specific sample project to use for testing the generator logic
 func sampleProj(projName string) (*string, error) {
 	retval, err := filepath.Abs(path.Join("..", "testProjects", projName))
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed to generate absolute path")
+		return nil, errors.Wrap(err, "Failed to generate absolute Path")
 	}
 	_, err = os.Stat(retval)
 	if err != nil {

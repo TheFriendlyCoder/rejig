@@ -24,7 +24,7 @@ func Generate(srcPath string, targetPath string, context map[string]any) error {
 
 		relPath, err := filepath.Rel(srcPath, path)
 		if err != nil {
-			return errors.Wrap(err, "Failed to parse relative path name")
+			return errors.Wrap(err, "Failed to parse relative Path name")
 		}
 		// Skip processing the root dir
 		if relPath == "." {
@@ -35,14 +35,14 @@ func Generate(srcPath string, targetPath string, context map[string]any) error {
 			return nil
 		}
 
-		// apply template to the path being processed
+		// apply template to the Path being processed
 		tpl, err := pongo2.FromString(relPath)
 		if err != nil {
-			return errors.Wrap(err, "Failed to load path as template")
+			return errors.Wrap(err, "Failed to load Path as template")
 		}
 		newDirName, err := tpl.Execute(context)
 		if err != nil {
-			return errors.Wrap(err, "Failed to apply template to path")
+			return errors.Wrap(err, "Failed to apply template to Path")
 		}
 		newOutputPath := filepath.Join(targetPath, newDirName)
 
