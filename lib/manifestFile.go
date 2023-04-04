@@ -39,7 +39,7 @@ type TemplateData struct {
 	// options that customize the content produced by the template
 	Args []ArgData `yaml:"args"`
 	// TODO: Consider adding 'Features' section for optional args, with mapping to specific files
-	// TODO: Consider adding an "Skip" section to list files that shouldn't be templated
+	// TODO: Consider adding a "Skip" section to list files that shouldn't be templated
 	// TODO: Consider adding an "Exclude" section to list files that should be ignored completely
 }
 
