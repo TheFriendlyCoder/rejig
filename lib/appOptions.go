@@ -19,9 +19,9 @@ type TemplateOptions struct {
 	// Folder sub-folder within the source location where the template source is defined
 	// defaults to the root folder of the source location
 	Folder string
-	// Name friendly name associated with the template. Used when referring to the template
+	// Alias friendly name associated with the template. Used when referring to the template
 	// from the command line
-	Name string
+	Alias string
 }
 
 // AppOptions parsed config options supported by the app
@@ -35,14 +35,14 @@ type AppOptions struct {
 func (a *AppOptions) Validate() error {
 	var messages []string
 	for i, curTemplate := range a.Templates {
-		if len(curTemplate.Name) == 0 {
-			messages = append(messages, fmt.Sprintf("template %d name is PE_UNDEFINED", i))
+		if len(curTemplate.Alias) == 0 {
+			messages = append(messages, fmt.Sprintf("template %d alias is undefined", i))
 		}
 		if curTemplate.Type == TST_UNDEFINED {
-			messages = append(messages, fmt.Sprintf("template %d type is PE_UNDEFINED", i))
+			messages = append(messages, fmt.Sprintf("template %d type is undefined", i))
 		}
 		if len(curTemplate.Source) == 0 {
-			messages = append(messages, fmt.Sprintf("template %d source is PE_UNDEFINED", i))
+			messages = append(messages, fmt.Sprintf("template %d source is undefined", i))
 		}
 	}
 	if len(messages) == 0 {

@@ -273,7 +273,7 @@ func Test_loadAppOptionsFile(t *testing.T) {
 
 	// TODO: Validate parsed options
 	a.Equal(1, len(appOptions.Templates))
-	a.Equal("simple1", appOptions.Templates[0].Name)
+	a.Equal("simple1", appOptions.Templates[0].Alias)
 	a.Equal("testProjects/simple", appOptions.Templates[0].Folder)
 	a.Equal("https://github.com/TheFriendlyCoder/rejigger", appOptions.Templates[0].Source)
 	a.Equal(lib.TST_GIT, appOptions.Templates[0].Type)

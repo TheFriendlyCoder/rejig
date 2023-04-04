@@ -11,7 +11,7 @@ func Test_successfulValidation(t *testing.T) {
 
 	opts := AppOptions{
 		Templates: []TemplateOptions{{
-			Name:   "My Template",
+			Alias:  "My Template",
 			Source: "https://some/location",
 			Type:   TST_GIT,
 			Folder: "subfolder",
@@ -36,7 +36,7 @@ func Test_successfulValidationWithoutOptionals(t *testing.T) {
 
 	opts := AppOptions{
 		Templates: []TemplateOptions{{
-			Name:   "My Template",
+			Alias:  "My Template",
 			Source: "https://some/location",
 			Type:   TST_GIT,
 		}},
@@ -51,7 +51,7 @@ func Test_validationTemplateWithoutType(t *testing.T) {
 
 	opts := AppOptions{
 		Templates: []TemplateOptions{{
-			Name:   "My Template",
+			Alias:  "My Template",
 			Source: "https://some/location",
 			Folder: "subfolder",
 		}},
@@ -61,7 +61,7 @@ func Test_validationTemplateWithoutType(t *testing.T) {
 	r.Error(err, "Validation should have failed")
 }
 
-func Test_validationTemplateWithoutName(t *testing.T) {
+func Test_validationTemplateWithoutAlias(t *testing.T) {
 	r := require.New(t)
 
 	opts := AppOptions{
@@ -81,7 +81,7 @@ func Test_validationTemplateWithoutSource(t *testing.T) {
 
 	opts := AppOptions{
 		Templates: []TemplateOptions{{
-			Name:   "My Template",
+			Alias:  "My Template",
 			Type:   TST_GIT,
 			Folder: "subfolder",
 		}},
@@ -102,7 +102,7 @@ func Test_validationTemplateCompoundError(t *testing.T) {
 	err := opts.Validate()
 	r.Error(err, "Validation should have failed")
 
-	a.Contains(err.Error(), "source is PE_UNDEFINED")
-	a.Contains(err.Error(), "type is PE_UNDEFINED")
-	a.Contains(err.Error(), "name is PE_UNDEFINED")
+	a.Contains(err.Error(), "source is undefined")
+	a.Contains(err.Error(), "type is undefined")
+	a.Contains(err.Error(), "alias is undefined")
 }

@@ -165,8 +165,8 @@ func init() {
 
 }
 
-// appOptionsDecoder custom hook method used to translate raw config data into a format
-// compatible
+// appOptionsDecoder custom hook method used to translate raw config data into a structure
+// that is easier to leverage in the application code
 func appOptionsDecoder() mapstructure.DecodeHookFuncType {
 	// Based on example found here:
 	//		https://sagikazarmark.hu/blog/decoding-custom-formats-with-viper/
@@ -176,6 +176,7 @@ func appOptionsDecoder() mapstructure.DecodeHookFuncType {
 		raw interface{},
 	) (interface{}, error) {
 
+		// For now we only need to customize the "type" field of the TemplateOptions
 		if (target != reflect.TypeOf(lib.TemplateOptions{})) {
 			return raw, nil
 		}

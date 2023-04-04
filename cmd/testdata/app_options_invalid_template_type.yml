@@ -2,4 +2,4 @@ templates:
   - type: fubar
     source: https://github.com/TheFriendlyCoder/rejigger
     folder: testProjects/simple
-    name: simple1
+    alias: simple1
