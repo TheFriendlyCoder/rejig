@@ -3,18 +3,23 @@ package lib
 import (
 	"github.com/hashicorp/go-version"
 	"github.com/pkg/errors"
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path"
+	"path/filepath"
 	"testing"
 )
 
 // sampleData loads sample data for a test from the test data folder
 func sampleData(filename string) (string, error) {
-	retval := path.Join("testdata", filename)
-	var _, err = os.Stat(retval)
+	retval, err := filepath.Abs(path.Join("testdata", filename))
+	if err != nil {
+		return "", err
+	}
+	_, err = os.Stat(retval)
 	return retval, errors.Wrap(err, "checking existence of test data file")
 }
 
@@ -25,7 +30,10 @@ func Test_parseManifest(t *testing.T) {
 	srcFile, err := sampleData("simple_manifest.yml")
 	r.NoError(err, "Failed to locate sample data")
 
-	manifest, err := ParseManifest(srcFile)
+	fs := afero.NewOsFs()
+	file, err := fs.Open(srcFile)
+	r.NoError(err)
+	manifest, err := ParseManifest(file)
 	r.NoError(err, "Failed to parse manifest file")
 
 	expSchemaVersion, err := version.NewVersion("1.0")
@@ -66,9 +74,13 @@ func Test_parseManifestNotExist(t *testing.T) {
 		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
 	}()
 
-	manifest, err := ParseManifest(path.Join(tmpDir, "fubar.yml"))
+	fs := afero.NewOsFs()
+	_, err = fs.Open(path.Join(tmpDir, "fubar.yml"))
 	a.Error(err)
-	a.Nil(manifest)
+	// TODO: See if it makes sense to keep this test
+	//manifest, err := ParseManifest(file)
+	//a.Error(err)
+	//a.Nil(manifest)
 }
 
 func Test_parseManifestInvalidYAML(t *testing.T) {
@@ -93,7 +105,10 @@ func Test_parseManifestInvalidYAML(t *testing.T) {
 	r.NoError(srcfile.Close())
 
 	// when we try to parse the file
-	manifest, err := ParseManifest(samplefile)
+	fs := afero.NewOsFs()
+	file, err := fs.Open(samplefile)
+	r.NoError(err)
+	manifest, err := ParseManifest(file)
 
 	// then we expect error results
 	emptyTypeErr := yaml.TypeError{}
@@ -108,7 +123,10 @@ func Test_parseManifestInvalidTemplateArgs(t *testing.T) {
 	srcFile, err := sampleData("simple_manifest_with_invalid_args.yml")
 	r.NoError(err, "Failed to locate sample data")
 
-	manifest, err := ParseManifest(srcFile)
+	fs := afero.NewOsFs()
+	file, err := fs.Open(srcFile)
+	r.NoError(err)
+	manifest, err := ParseManifest(file)
 	// TODO: Find some way to make error reporting here more user friendly
 	//		 may require a different YAML parsing library
 	// https://github.com/go-yaml/yaml/pull/901

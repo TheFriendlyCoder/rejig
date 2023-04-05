@@ -34,6 +34,8 @@ type AppOptions struct {
 // meet the requirements for the application
 func (a *AppOptions) Validate() error {
 	var messages []string
+	// TODO: make sure no 2 templates have the same name
+	// TODO: parse templates into a map instead of a list, using the alias as the key
 	for i, curTemplate := range a.Templates {
 		if len(curTemplate.Alias) == 0 {
 			messages = append(messages, fmt.Sprintf("template %d alias is undefined", i))
@@ -49,4 +51,16 @@ func (a *AppOptions) Validate() error {
 		return nil
 	}
 	return AppOptionsError{Messages: messages}
+}
+
+// GetTemplate looks up a specific template in the app inventory based on its name
+// This method assumes the requested alias exists in the inventory, and will panic
+// if this assumption is broken
+func (a *AppOptions) GetTemplate(alias string) TemplateOptions {
+	for _, curTemplate := range a.Templates {
+		if curTemplate.Alias == alias {
+			return curTemplate
+		}
+	}
+	panic("Template " + alias + " not found")
 }

@@ -3,8 +3,8 @@ package lib
 import (
 	"github.com/hashicorp/go-version"
 	"github.com/pkg/errors"
+	"github.com/spf13/afero"
 	"gopkg.in/yaml.v3"
-	"os"
 )
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -95,17 +95,24 @@ func (m *ManifestData) UnmarshalYAML(value *yaml.Node) error {
 
 // ParseManifest parses a template manifest file and returns a reference to
 // the parsed representation of the contents of the file
-func ParseManifest(path string) (*ManifestData, error) {
-	buf, err := os.ReadFile(path)
+func ParseManifest(path afero.File) (*ManifestData, error) {
+	// TODO: Consider if it would be better to pass the afero.FS in and the path instead
+	//		then I could use fs.ReadFile(path) instead
+	stat, err := path.Stat()
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed to open manifest file")
+		return nil, err
+	}
+	var buff = make([]byte, stat.Size())
+	_, err = path.Read(buff)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to load manifest file")
 	}
 
 	retval := &ManifestData{}
 	// TODO: Find some way to get "Strict" mode to work properly (aka: KnownFields in v3)
 	//		https://github.com/go-yaml/yaml/issues/460
 	//		https://github.com/go-yaml/yaml/issues/642
-	err = yaml.Unmarshal(buf, retval)
+	err = yaml.Unmarshal(buff, retval)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to parse YAML content from manifest file")
 	}

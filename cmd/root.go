@@ -15,7 +15,7 @@ import (
 var cfgFile string
 
 // appOptions global config options for the app
-var appOptions *lib.AppOptions
+var appOptions lib.AppOptions
 
 // checkErr replacement for the cobra method of the same name, which unfortunately calls os.exit
 // under the hood, making it impossible to write unit tests for it. This helper calls out to panic()
@@ -125,6 +125,9 @@ func initConfig() {
 	// Parse the config data
 	err = viper.Unmarshal(&appOptions, viper.DecodeHook(appOptionsDecoder()))
 	checkErr(err)
+	//if appOptions.Templates == nil {
+	//	appOptions.Templates = []lib.TemplateOptions{}
+	//}
 
 	// Then validate the results to make sure they meet the application requirements
 	err = appOptions.Validate()

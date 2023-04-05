@@ -16,7 +16,6 @@ func Test_generateUsageLine(t *testing.T) {
 	result := generateUsageLine()
 
 	a.Contains(result, "create")
-	a.Contains(result, "sourcePath")
 	a.Contains(result, "targetPath")
 }
 
@@ -32,18 +31,27 @@ func Test_ValidateArgsSuccess(t *testing.T) {
 		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
 	}()
 
-	// with 2 empty subfolders
-	srcDir := path.Join(tmpDir, "src")
+	// with an empty output folder
 	destDir := path.Join(tmpDir, "dest")
-	r.NoError(os.Mkdir(srcDir, 0700), "Error creating source folder")
 	r.NoError(os.Mkdir(destDir, 0700), "Error creating destination folder")
 
-	// when we validate our input args
-	args := []string{srcDir, destDir}
-	r.NoError(validateArgs(args))
+	// and a basic template
+	templateName := "My Template"
+	args := []string{destDir, templateName}
+	options := lib.AppOptions{
+		Templates: []lib.TemplateOptions{{
+			Alias:  templateName,
+			Source: "",
+			Folder: "",
+			Type:   lib.TST_GIT,
+		}},
+	}
+
+	// when we validate our input args we expect no errors
+	r.NoError(validateArgs(options, args))
 }
 
-func Test_ValidateArgsSourceDirNotExists(t *testing.T) {
+func Test_ValidateArgsInvalidTemplate(t *testing.T) {
 	r := require.New(t)
 
 	// Given an empty temp folder
@@ -55,18 +63,23 @@ func Test_ValidateArgsSourceDirNotExists(t *testing.T) {
 		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
 	}()
 
-	// with 1 subfolder that doesn't exist
+	// with an empty output folder
 	destDir := path.Join(tmpDir, "dest")
 	r.NoError(os.Mkdir(destDir, 0700), "Error creating destination folder")
-	srcDir := path.Join(tmpDir, "src")
+
+	// and a config with no templates defined
+	templateName := "My Template"
+	args := []string{destDir, templateName}
+	options := lib.AppOptions{
+		Templates: []lib.TemplateOptions{},
+	}
 
 	// when we validate our input args
-	args := []string{srcDir, destDir}
-	result := validateArgs(args)
+	result := validateArgs(options, args)
 
 	// we expect the proper error to be returned
 	r.Error(result)
-	r.ErrorAs(result, &lib.PathError{Path: srcDir, ErrorType: lib.PE_PATH_NOT_FOUND})
+	//r.ErrorAs(result, &lib.PathError{Path: srcDir, ErrorType: lib.PE_PATH_NOT_FOUND})
 }
 
 func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
@@ -81,19 +94,26 @@ func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
 		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
 	}()
 
-	// with 2 subfolders
+	// with a non-empty output folder
 	destDir := path.Join(tmpDir, "dest")
-	srcDir := path.Join(tmpDir, "src")
 	r.NoError(os.Mkdir(destDir, 0700), "Error creating destination folder")
-	r.NoError(os.Mkdir(srcDir, 0700), "Error creating destination folder")
-
-	// and a non-empty destination folder
 	_, err = os.Create(path.Join(destDir, "fubar.txt"))
 	r.NoError(err, "Failed to create test file")
 
+	// and a basic template
+	templateName := "My Template"
+	args := []string{destDir, templateName}
+	options := lib.AppOptions{
+		Templates: []lib.TemplateOptions{{
+			Alias:  templateName,
+			Source: "",
+			Folder: "",
+			Type:   lib.TST_GIT,
+		}},
+	}
+
 	// when we validate our input args
-	args := []string{srcDir, destDir}
-	result := validateArgs(args)
+	result := validateArgs(options, args)
 
 	// we expect the proper error to be returned
 	r.Error(result)

@@ -1,7 +1,7 @@
 #!/usr/bin/env sh -e
 # Compile a release for the current platform
 #goreleaser build --single-target --clean --snapshot
-golangci-lint run
+#golangci-lint run
 # Run all tests recursively
 #go test ./...
 

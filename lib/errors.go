@@ -53,6 +53,17 @@ func (e AppOptionsError) Error() string {
 }
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//										TemplateNotFoundError
+
+type TemplateNotFoundError struct {
+	TemplateAlias string
+}
+
+func (e TemplateNotFoundError) Error() string {
+	return "Template not found in inventory: " + e.TemplateAlias
+}
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //										Misc Errors
 
 var APP_OPTIONS_INVALID_SOURCE_TYPE_ERROR = fmt.Errorf("Unsupported template source type")
