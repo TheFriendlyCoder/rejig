@@ -14,7 +14,6 @@ func Test_successfulValidation(t *testing.T) {
 			Alias:  "My Template",
 			Source: "https://some/location",
 			Type:   TST_GIT,
-			Folder: "subfolder",
 		}},
 	}
 
@@ -53,7 +52,6 @@ func Test_validationTemplateWithoutType(t *testing.T) {
 		Templates: []TemplateOptions{{
 			Alias:  "My Template",
 			Source: "https://some/location",
-			Folder: "subfolder",
 		}},
 	}
 
@@ -68,7 +66,6 @@ func Test_validationTemplateWithoutAlias(t *testing.T) {
 		Templates: []TemplateOptions{{
 			Source: "https://some/location",
 			Type:   TST_GIT,
-			Folder: "subfolder",
 		}},
 	}
 
@@ -81,9 +78,8 @@ func Test_validationTemplateWithoutSource(t *testing.T) {
 
 	opts := AppOptions{
 		Templates: []TemplateOptions{{
-			Alias:  "My Template",
-			Type:   TST_GIT,
-			Folder: "subfolder",
+			Alias: "My Template",
+			Type:  TST_GIT,
 		}},
 	}
 

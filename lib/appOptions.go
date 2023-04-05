@@ -16,9 +16,6 @@ type TemplateOptions struct {
 	Type TemplateSourceType
 	// Source Path or URL where the source template can be found
 	Source string
-	// Folder sub-folder within the source location where the template source is defined
-	// defaults to the root folder of the source location
-	Folder string
 	// Alias friendly name associated with the template. Used when referring to the template
 	// from the command line
 	Alias string
