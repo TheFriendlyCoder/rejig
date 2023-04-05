@@ -7,6 +7,7 @@ type TemplateSourceType int64
 
 const (
 	TST_UNDEFINED TemplateSourceType = iota
+	TST_LOCAL
 	TST_GIT
 )
 

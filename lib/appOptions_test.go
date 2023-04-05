@@ -7,18 +7,25 @@ import (
 )
 
 func Test_successfulValidation(t *testing.T) {
-	r := require.New(t)
+	a := assert.New(t)
 
-	opts := AppOptions{
-		Templates: []TemplateOptions{{
-			Alias:  "My Template",
-			Source: "https://some/location",
-			Type:   TST_GIT,
-		}},
+	allTypes := [...]TemplateSourceType{
+		TST_LOCAL,
+		TST_GIT,
 	}
 
-	err := opts.Validate()
-	r.NoError(err, "Validation should have succeeded")
+	for _, t := range allTypes {
+		opts := AppOptions{
+			Templates: []TemplateOptions{{
+				Alias:  "My Template",
+				Source: "https://some/location",
+				Type:   t,
+			}},
+		}
+
+		err := opts.Validate()
+		a.NoError(err, "Validation should have succeeded")
+	}
 }
 
 func Test_successfulValidationEmptyConfig(t *testing.T) {
