@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	"github.com/pkg/errors"
@@ -27,6 +28,14 @@ func run(cmd *cobra.Command, args *rootArgs) error {
 	// stream handler, to facilitate testing (ie: it allows us to capture output
 	// during unit testing to validate results of CLI operations)
 	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Loading template %s...\n", args.templateAlias))
+	// TODO: Consider not using context objects - the main purpose of them is to share config
+	// options between commands, but it seems like the pre-run / run functions for each
+	// command are run independently from all other commands so they aren't run in a
+	// hierarchy ... so there's not much use here (To Be Confirmed)
+	appOptions, ok := cmd.Context().Value(CK_OPTIONS).(lib.AppOptions)
+	if !ok {
+		return lib.InternalError{Message: "Failed to retrieve app options"}
+	}
 
 	// Lookup our template information
 	var curTemplate lib.TemplateOptions
@@ -109,7 +118,14 @@ var createCmd = &cobra.Command{
 		if err := cobra.ExactArgs(2)(cmd, args); err != nil {
 			return err
 		}
-		if err := validateArgs(appOptions, args); err != nil {
+		appOptions, err := initConfig()
+		if err != nil {
+			return err
+		}
+		ctx := context.WithValue(cmd.Context(), CK_OPTIONS, *appOptions)
+		cmd.SetContext(ctx)
+
+		if err := validateArgs(*appOptions, args); err != nil {
 			return err
 		}
 		return nil

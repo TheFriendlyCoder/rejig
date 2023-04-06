@@ -14,8 +14,13 @@ import (
 // cfgFile path to the file containing config options for the app
 var cfgFile string
 
-// appOptions global config options for the app
-var appOptions lib.AppOptions
+// ContextKey enumerated type defining keys in the Cobra context manager used to store
+// and retrieve common command properties
+type ContextKey int64
+
+const (
+	CK_OPTIONS ContextKey = iota
+)
 
 // checkErr replacement for the cobra method of the same name, which unfortunately calls os.exit
 // under the hood, making it impossible to write unit tests for it. This helper calls out to panic()
@@ -46,6 +51,7 @@ func Execute() {
 		NoExtraNewlines: true,
 	})
 	rootCmd.Use = "rejig"
+
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
@@ -54,8 +60,6 @@ func Execute() {
 
 // init function called by GO when the module is first loaded, to initialize the application state
 func init() {
-	cobra.OnInitialize(initConfig)
-
 	// Global application flags
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.rejig.yaml)")
 
@@ -100,7 +104,7 @@ func appOptionsDecoder() mapstructure.DecodeHookFuncType {
 }
 
 // initConfig reads app config info from a config file if provided
-func initConfig() {
+func initConfig() (*lib.AppOptions, error) {
 	if cfgFile != "" {
 		// Use config file from the command line flag.
 		viper.SetConfigFile(cfgFile)
@@ -120,15 +124,22 @@ func initConfig() {
 	// If there is no config file, we ignore that error and assume
 	// there is no app config
 	if errors.As(err, &viper.ConfigFileNotFoundError{}) {
-		return
+		return nil, nil
+	} else if err != nil {
+		return nil, errors.Wrap(err, "Failure reading options file")
 	}
-	checkErr(err)
 
 	// Parse the config data
+	var appOptions lib.AppOptions
 	err = viper.Unmarshal(&appOptions, viper.DecodeHook(appOptionsDecoder()))
-	checkErr(err)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed parsing app options file")
+	}
 
 	// Then validate the results to make sure they meet the application requirements
 	err = appOptions.Validate()
-	checkErr(err)
+	if err != nil {
+		return nil, errors.Wrap(err, "App options file failed validation")
+	}
+	return &appOptions, nil
 }

@@ -217,7 +217,7 @@ func Test_CreateCommandTooFewArgs(t *testing.T) {
 	r.Contains(actual.String(), "Error:")
 }
 
-func Test_CreateCommandInvalidArgs(t *testing.T) {
+func Test_CreateCommandInvalidTemplateName(t *testing.T) {
 
 	r := require.New(t)
 
@@ -231,7 +231,16 @@ func Test_CreateCommandInvalidArgs(t *testing.T) {
 	}()
 
 	// with an absent source folder
+	templateName := "MyTemplate"
 	srcDir := path.Join(tmpDir, "src")
+	optionsText := fmt.Sprintf(`
+templates:
+  - type: local
+    source: %s
+    alias: %s`, srcDir, templateName)
+	configFile := path.Join(tmpDir, "options.yml")
+	err = os.WriteFile(configFile, []byte(optionsText), 0600)
+	r.NoError(err)
 
 	// with a valid dest folder
 	destDir := path.Join(tmpDir, "dest")
@@ -241,12 +250,12 @@ func Test_CreateCommandInvalidArgs(t *testing.T) {
 	actual := new(bytes.Buffer)
 	rootCmd.SetOut(actual)
 	rootCmd.SetErr(actual)
-	rootCmd.SetArgs([]string{"create", srcDir, destDir})
+	rootCmd.SetArgs([]string{"--config=" + configFile, "create", destDir, "DoesNotExist"})
 	err = rootCmd.Execute()
 
 	// We expect an error to be returned
 	r.Error(err, "CLI command should have succeeded")
 
 	// And some status info to be reported
-	r.Contains(actual.String(), srcDir)
+	r.Contains(actual.String(), "DoesNotExist")
 }

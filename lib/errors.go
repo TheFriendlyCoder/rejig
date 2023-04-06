@@ -64,6 +64,17 @@ func (e UnknownTemplateError) Error() string {
 }
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//										InternalError
+
+type InternalError struct {
+	Message string
+}
+
+func (e InternalError) Error() string {
+	return "Internal implementation error: " + e.Message
+}
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //										Misc Errors
 
 var APP_OPTIONS_INVALID_SOURCE_TYPE_ERROR = fmt.Errorf("Unsupported template source type")
