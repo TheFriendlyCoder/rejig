@@ -15,7 +15,7 @@ import (
 var cfgFile string
 
 // appOptions global config options for the app
-var appOptions *lib.AppOptions
+var appOptions lib.AppOptions
 
 // checkErr replacement for the cobra method of the same name, which unfortunately calls os.exit
 // under the hood, making it impossible to write unit tests for it. This helper calls out to panic()
@@ -89,6 +89,8 @@ func appOptionsDecoder() mapstructure.DecodeHookFuncType {
 			newVal = lib.TST_UNDEFINED
 		case "git":
 			newVal = lib.TST_GIT
+		case "local":
+			newVal = lib.TST_LOCAL
 		default:
 			return nil, lib.APP_OPTIONS_INVALID_SOURCE_TYPE_ERROR
 		}

@@ -1,5 +1,4 @@
 templates:
   - type: git
     source: https://github.com/TheFriendlyCoder/rejigger
-    folder: testProjects/simple
     alias: simple1

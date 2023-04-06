@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,8 +17,8 @@ func Test_generateUsageLine(t *testing.T) {
 	result := generateUsageLine()
 
 	a.Contains(result, "create")
-	a.Contains(result, "sourcePath")
 	a.Contains(result, "targetPath")
+	a.Contains(result, "templateAlias")
 }
 
 func Test_ValidateArgsSuccess(t *testing.T) {
@@ -32,18 +33,26 @@ func Test_ValidateArgsSuccess(t *testing.T) {
 		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
 	}()
 
-	// with 2 empty subfolders
-	srcDir := path.Join(tmpDir, "src")
+	// with an empty output folder
 	destDir := path.Join(tmpDir, "dest")
-	r.NoError(os.Mkdir(srcDir, 0700), "Error creating source folder")
 	r.NoError(os.Mkdir(destDir, 0700), "Error creating destination folder")
 
+	// and a mock set of app options
+	templateName := "MyTemplate"
+	options := lib.AppOptions{
+		Templates: []lib.TemplateOptions{{
+			Alias:  templateName,
+			Source: ".",
+			Type:   lib.TST_LOCAL,
+		}},
+	}
+
 	// when we validate our input args
-	args := []string{srcDir, destDir}
-	r.NoError(validateArgs(args))
+	args := []string{destDir, templateName}
+	r.NoError(validateArgs(options, args))
 }
 
-func Test_ValidateArgsSourceDirNotExists(t *testing.T) {
+func Test_ValidateArgsTemplateNotExists(t *testing.T) {
 	r := require.New(t)
 
 	// Given an empty temp folder
@@ -55,18 +64,22 @@ func Test_ValidateArgsSourceDirNotExists(t *testing.T) {
 		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
 	}()
 
-	// with 1 subfolder that doesn't exist
+	// with an empty output folder
 	destDir := path.Join(tmpDir, "dest")
 	r.NoError(os.Mkdir(destDir, 0700), "Error creating destination folder")
-	srcDir := path.Join(tmpDir, "src")
 
+	// and a mock set of app options
+	templateName := "MyTemplate"
+	options := lib.AppOptions{
+		Templates: []lib.TemplateOptions{},
+	}
 	// when we validate our input args
-	args := []string{srcDir, destDir}
-	result := validateArgs(args)
+	args := []string{destDir, templateName}
+	result := validateArgs(options, args)
 
 	// we expect the proper error to be returned
 	r.Error(result)
-	r.ErrorAs(result, &lib.PathError{Path: srcDir, ErrorType: lib.PE_PATH_NOT_FOUND})
+	r.ErrorAs(result, &lib.UnknownTemplateError{TemplateAlias: templateName})
 }
 
 func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
@@ -81,19 +94,25 @@ func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
 		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
 	}()
 
-	// with 2 subfolders
+	// with a non-empty destination folder
 	destDir := path.Join(tmpDir, "dest")
-	srcDir := path.Join(tmpDir, "src")
 	r.NoError(os.Mkdir(destDir, 0700), "Error creating destination folder")
-	r.NoError(os.Mkdir(srcDir, 0700), "Error creating destination folder")
-
-	// and a non-empty destination folder
 	_, err = os.Create(path.Join(destDir, "fubar.txt"))
 	r.NoError(err, "Failed to create test file")
 
+	// and a mock set of app options
+	templateName := "MyTemplate"
+	options := lib.AppOptions{
+		Templates: []lib.TemplateOptions{{
+			Alias:  templateName,
+			Source: ".",
+			Type:   lib.TST_LOCAL,
+		}},
+	}
+
 	// when we validate our input args
-	args := []string{srcDir, destDir}
-	result := validateArgs(args)
+	args := []string{destDir, templateName}
+	result := validateArgs(options, args)
 
 	// we expect the proper error to be returned
 	r.Error(result)
@@ -114,8 +133,22 @@ func Test_CreateCommandSucceeds(t *testing.T) {
 		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
 	}()
 
+	// an empty output folder
+	outputDir := path.Join(tmpDir, "output")
+	r.NoError(os.Mkdir(outputDir, 0700), "Error creating output folder")
+
+	// and an app options file with a template pointing to our project
+	templateName := "MyTemplate"
 	srcDir, err := sampleProj("simple")
 	r.NoError(err, "Locating sample project should always succeed")
+	optionsText := fmt.Sprintf(`
+templates:
+  - type: local
+    source: %s
+    alias: %s`, *srcDir, templateName)
+	configFile := path.Join(tmpDir, "options.yml")
+	err = os.WriteFile(configFile, []byte(optionsText), 0600)
+	r.NoError(err)
 
 	output := new(bytes.Buffer)
 	fakeInput := new(bytes.Buffer)
@@ -127,27 +160,27 @@ func Test_CreateCommandSucceeds(t *testing.T) {
 	rootCmd.SetOut(output)
 	rootCmd.SetErr(output)
 	rootCmd.SetIn(fakeInput)
-	rootCmd.SetArgs([]string{"create", *srcDir, tmpDir})
+	rootCmd.SetArgs([]string{"--config=" + configFile, "create", outputDir, templateName})
 	err = rootCmd.Execute()
 	r.NoError(err, "CLI command should have succeeded")
 
-	r.Contains(output.String(), *srcDir)
-	r.Contains(output.String(), tmpDir)
+	// r.Contains(output.String(), *srcDir)
+	r.Contains(output.String(), outputDir)
 
-	a.DirExists(filepath.Join(tmpDir, "MyProj"))
-	a.NoFileExists(filepath.Join(tmpDir, ".rejig.yml"))
+	a.DirExists(filepath.Join(outputDir, "MyProj"))
+	a.NoFileExists(filepath.Join(outputDir, ".rejig.yml"))
 
 	//exp := filepath.Join(*srcDir, ".gitignore")
-	act := filepath.Join(tmpDir, ".gitignore")
+	act := filepath.Join(outputDir, ".gitignore")
 	a.FileExists(act)
 	//a.True(unmodified(r, exp, act))
 
-	act = filepath.Join(tmpDir, "version.txt")
+	act = filepath.Join(outputDir, "version.txt")
 	a.FileExists(act)
 	//a.True(contains(r, act, expVersion))
 	//a.False(contains(r, act, "{{version}}"))
 
-	act = filepath.Join(tmpDir, "MyProj", "main.txt")
+	act = filepath.Join(outputDir, "MyProj", "main.txt")
 	a.FileExists(act)
 	//a.True(contains(r, act, expProj))
 	//a.False(contains(r, act, "{{project_name}}"))
