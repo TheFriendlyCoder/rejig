@@ -1,6 +1,7 @@
 package template
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	"github.com/pkg/errors"
@@ -17,13 +18,17 @@ type Template struct {
 }
 
 func (t *Template) Validate() error {
+	// TODO: Validate file system
+	// TODO: Validate manifest file
 
+	// TODO: Maybe make this a New method to run it on creation
 	return nil
 }
 
 const manifestFileName = ".rejig.yml"
 
 func (t *Template) LoadManifest(cmd *cobra.Command) error {
+	// TODO: Break dependency between cmd and this class - we shouldn't be doing direct IO here
 	err := errors.Wrap(t.loadFilesystem(), "Error loading template file system")
 	if err != nil {
 		return err
@@ -38,13 +43,21 @@ func (t *Template) LoadManifest(cmd *cobra.Command) error {
 	for _, arg := range t.manifestData.Template.Args {
 		lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "%s(%s): ", arg.Description, arg.Name))
 		var temp string
-		lib.SNF(fmt.Fscanln(cmd.InOrStdin(), &temp))
+		// TODO: Find out why scan doesn't like input with spaces in it
+		in := bufio.NewReader(cmd.InOrStdin())
+		temp, err := in.ReadString('\n')
+		if err != nil {
+			return errors.Wrap(err, "Failed reading input")
+		}
+		//lib.SNF(fmt.Fscanln(cmd.InOrStdin(), &temp))
 		t.templateContext[arg.Name] = temp
 	}
 	return nil
 }
 
 func (t *Template) getRootFolder() string {
+	// TODO: Docstrings
+	// TODO: Test coverage
 	switch t.Options.Type {
 	case lib.TstGit:
 		return "."
@@ -59,7 +72,8 @@ func (t *Template) getRootFolder() string {
 func (t *Template) Generate(targetPath string) error {
 	rootDir := t.getRootFolder()
 
-	// TODO: See if there are times when we don't need a wrap
+	// TODO: see if there are times we don't need to use wrap
+	// TODO: move Generate function into this method
 	return errors.Wrap(lib.Generate(t.filesys, rootDir, targetPath, t.templateContext), "Failed generating project")
 }
 
