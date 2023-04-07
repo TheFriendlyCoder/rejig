@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/mitchellh/mapstructure"
@@ -36,6 +37,20 @@ var rootCmd = &cobra.Command{
 	Short: "Project templating tool",
 	Long: `The rejigger app allows you to generate source code projects from
 specially formatted files stored on disk or in Git repositories`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		// Parse options file, if it exists, and register the results
+		// in our command context
+		if err := cobra.ExactArgs(2)(cmd, args); err != nil {
+			return err
+		}
+		appOptions, err := initConfig()
+		if err != nil {
+			return err
+		}
+		ctx := context.WithValue(cmd.Context(), CK_OPTIONS, appOptions)
+		cmd.SetContext(ctx)
+		return nil
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	"github.com/pkg/errors"
@@ -64,17 +63,17 @@ func run(cmd *cobra.Command, args rootArgs) error {
 		return errors.Wrap(err, "Failed parsing manifest file")
 	}
 
-	context := map[string]any{}
+	templateContext := map[string]any{}
 	for _, arg := range manifestData.Template.Args {
 		lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "%s(%s): ", arg.Description, arg.Name))
 		var temp string
 		lib.SNF(fmt.Fscanln(cmd.InOrStdin(), &temp))
-		context[arg.Name] = temp
+		templateContext[arg.Name] = temp
 	}
 	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from template %s...\n", args.targetPath, curTemplate.Alias))
 
 	fs := afero.NewOsFs()
-	return errors.Wrap(lib.Generate(fs, curTemplate.Source, args.targetPath, context), "Failed generating project")
+	return errors.Wrap(lib.Generate(fs, curTemplate.Source, args.targetPath, templateContext), "Failed generating project")
 	// TODO: after generating, put a manifest file in the root folder summarizing what we did so we
 	//		 can regenerate or update the project later
 	// TODO: make terminology consistent (ie: config file for the app, manifest file for the template,
@@ -115,29 +114,18 @@ var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "create a new project from a template",
 	Long:  `Creates a new project in an empty folder using content defined in a template`,
-	Args: func(cmd *cobra.Command, args []string) error {
-		// TODO: Put config file parsing in base command prerun and call it from
-		// prerun in all sub-commands:
-		// cmd.Parent().PreRun(cmd, args)
-		// NOTE: context object only works within a single command and is used
-		// exclusively for passing info between pre-run, run, post-run operations
-		// TODO: Is there a benefit of using this technique and not just calling the
-		// arg parser directly
-		// Optionally run one of the validators provided by cobra
-		if err := cobra.ExactArgs(2)(cmd, args); err != nil {
-			return err
-		}
-		appOptions, err := initConfig()
+	Args:  cobra.MinimumNArgs(2),
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		// Initialize our command context from the root command
+		err := cmd.Parent().PreRunE(cmd, args)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "Initialization error")
 		}
-		ctx := context.WithValue(cmd.Context(), CK_OPTIONS, appOptions)
-		cmd.SetContext(ctx)
-
-		if err := validateArgs(appOptions, args); err != nil {
-			return err
+		appOptions, ok := cmd.Context().Value(CK_OPTIONS).(lib.AppOptions)
+		if !ok {
+			return lib.CommandContextNotDefined
 		}
-		return nil
+		return validateArgs(appOptions, args)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		parsedArgs := rootArgs{

@@ -74,6 +74,8 @@ func (e InternalError) Error() string {
 	return "Internal implementation error: " + e.Message
 }
 
+var CommandContextNotDefined = InternalError{"Command context not properly initialized"}
+
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //										Misc Errors
 
