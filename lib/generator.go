@@ -38,55 +38,75 @@ func Generate(srcFS afero.Fs, rootDir string, targetPath string, context map[str
 		}
 
 		// apply template to the Path being processed
-		tpl, err := pongo2.FromString(relPath)
+		newOutputPath, err := processPath(relPath, targetPath, context)
 		if err != nil {
-			return errors.Wrap(err, "Failed to load Path as template")
+			return err
 		}
-		newDirName, err := tpl.Execute(context)
-		if err != nil {
-			return errors.Wrap(err, "Failed to apply template to Path")
-		}
-		newOutputPath := filepath.Join(targetPath, newDirName)
-
-		originalMode := info.Mode()
 
 		// Generate output content
 		if info.IsDir() {
-			// Make sure to preserve the file mode
-			err = os.MkdirAll(newOutputPath, originalMode)
-			if err != nil {
-				return errors.Wrap(err, "Failed to create output folder")
-			}
+			err = createOutputDir(newOutputPath, info.Mode())
 		} else {
-			// Apply template to the file contents
-			var data []byte
-			data, err = os.ReadFile(path)
-			if err != nil {
-				return errors.Wrap(err, "Failed to read source file")
-			}
-			tpl, err = pongo2.FromString(string(data))
-			if err != nil {
-				return errors.Wrap(err, "Failed to load template source")
-			}
-
-			var newData string
-			newData, err = tpl.Execute(context)
-			if err != nil {
-				return errors.Wrap(err, "Failed to apply template")
-			}
-
-			// Create a new output file with the processed content
-			// making sure to preserve the file mode in the process
-			err = os.WriteFile(newOutputPath, []byte(newData), originalMode)
-			if err != nil {
-				return errors.Wrap(err, "Failed to create output file")
-			}
+			err = createOutputFile(path, newOutputPath, info.Mode(), context)
 		}
 
-		return nil
+		return err
 	})
 	if err != nil {
 		return errors.Wrap(err, "Failed to generate project")
+	}
+	return nil
+}
+
+// processPath applies template processor to a folder name
+func processPath(relPath string, targetPath string, context map[string]any) (string, error) {
+	tpl, err := pongo2.FromString(relPath)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed to load Path as template")
+	}
+	newDirName, err := tpl.Execute(context)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed to apply template to Path")
+	}
+	return filepath.Join(targetPath, newDirName), nil
+}
+
+// createOutputDir applies template processor to a directory
+func createOutputDir(newOutputPath string, mode os.FileMode) error {
+	// Make sure to preserve the file mode
+	err := os.MkdirAll(newOutputPath, mode)
+	if err != nil {
+		return errors.Wrap(err, "Failed to create output folder")
+	}
+	return nil
+}
+
+// createOutputFile applies template processor to a file
+func createOutputFile(originalPath string, newOutputPath string, mode os.FileMode, context map[string]any) error {
+	// Read in the original file contents
+	var data []byte
+	data, err := os.ReadFile(originalPath)
+	if err != nil {
+		return errors.Wrap(err, "Failed to read source file")
+	}
+
+	// Apply our template to the file contents
+	tpl, err := pongo2.FromString(string(data))
+	if err != nil {
+		return errors.Wrap(err, "Failed to load template source")
+	}
+
+	var newData string
+	newData, err = tpl.Execute(context)
+	if err != nil {
+		return errors.Wrap(err, "Failed to apply template")
+	}
+
+	// Write processed output to new file location
+	// making sure to preserve the file mode in the process
+	err = os.WriteFile(newOutputPath, []byte(newData), mode)
+	if err != nil {
+		return errors.Wrap(err, "Failed to create output file")
 	}
 	return nil
 }

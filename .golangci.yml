@@ -26,8 +26,7 @@ linters:
 #    - unused
 linters-settings:
   cyclop:
-    # TODO: Reduce to default 10
-    max-complexity: 15
+    max-complexity: 10
   errcheck:
     check-type-assertions: true
     check-blank: true
