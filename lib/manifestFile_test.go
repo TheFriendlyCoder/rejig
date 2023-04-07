@@ -22,12 +22,17 @@ func Test_parseManifest(t *testing.T) {
 	r := require.New(t)
 	a := assert.New(t)
 
+	// Given a sample manifest file
 	srcFile, err := sampleData("simple_manifest.yml")
-	r.NoError(err, "Failed to locate sample data")
+	r.NoError(err)
 
+	// When we parse it
 	manifest, err := ParseManifest(srcFile)
-	r.NoError(err, "Failed to parse manifest file")
 
+	// We expect no errors
+	r.NoError(err)
+
+	// and the parsed data should look as expected
 	expSchemaVersion, err := version.NewVersion("1.0")
 	r.NoError(err)
 	expJiggerVersion, err := version.NewVersion("0.0.1")
@@ -59,16 +64,11 @@ func Test_parseManifestNotExist(t *testing.T) {
 
 	// Given an empty temp folder
 	tmpDir, err := os.MkdirTemp("", "")
-	r.NoError(err, "Error creating temp folder")
+	r.NoError(err)
+	defer os.RemoveAll(tmpDir)
 
-	// Make sure we always clean up our temp folder
-	defer func() {
-		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
-	}()
-
-	manifest, err := ParseManifest(path.Join(tmpDir, "fubar.yml"))
+	_, err = ParseManifest(path.Join(tmpDir, "fubar.yml"))
 	a.Error(err)
-	a.Nil(manifest)
 }
 
 func Test_parseManifestInvalidYAML(t *testing.T) {
@@ -77,28 +77,23 @@ func Test_parseManifestInvalidYAML(t *testing.T) {
 
 	// Given an empty temp folder
 	tmpDir, err := os.MkdirTemp("", "")
-	r.NoError(err, "Error creating temp folder")
-
-	// Make sure we always clean up our temp folder
-	defer func() {
-		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
-	}()
+	r.NoError(err)
+	defer os.RemoveAll(tmpDir)
 
 	// and a sample config file that contains non-yaml data
 	samplefile := path.Join(tmpDir, "fubar.yml")
 	srcfile, err := os.Create(samplefile)
-	r.NoError(err, "Failed to create test file")
+	r.NoError(err)
 	_, err = srcfile.WriteString("This is not compatible yaml")
-	r.NoError(err, "Failed writing test data to disk")
+	r.NoError(err)
 	r.NoError(srcfile.Close())
 
 	// when we try to parse the file
-	manifest, err := ParseManifest(samplefile)
+	_, err = ParseManifest(samplefile)
 
 	// then we expect error results
 	emptyTypeErr := yaml.TypeError{}
 	a.Contains(err.Error(), emptyTypeErr.Error())
-	a.Nil(manifest)
 }
 
 func Test_parseManifestInvalidTemplateArgs(t *testing.T) {
@@ -106,12 +101,11 @@ func Test_parseManifestInvalidTemplateArgs(t *testing.T) {
 	a := assert.New(t)
 
 	srcFile, err := sampleData("simple_manifest_with_invalid_args.yml")
-	r.NoError(err, "Failed to locate sample data")
+	r.NoError(err)
 
-	manifest, err := ParseManifest(srcFile)
+	_, err = ParseManifest(srcFile)
 	// TODO: Find some way to make error reporting here more user friendly
 	//		 may require a different YAML parsing library
 	// https://github.com/go-yaml/yaml/pull/901
-	a.Error(err, "Manifest file should fail to parse")
-	a.Nil(manifest, "No valid manifest data should be returned")
+	a.Error(err)
 }

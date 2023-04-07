@@ -9,6 +9,7 @@ import (
 func Test_successfulValidation(t *testing.T) {
 	a := assert.New(t)
 
+	// TODO: Convert this to a table test
 	allTypes := [...]TemplateSourceType{
 		TST_LOCAL,
 		TST_GIT,
@@ -24,7 +25,7 @@ func Test_successfulValidation(t *testing.T) {
 		}
 
 		err := opts.Validate()
-		a.NoError(err, "Validation should have succeeded")
+		a.NoError(err)
 	}
 }
 
@@ -49,7 +50,7 @@ func Test_successfulValidationWithoutOptionals(t *testing.T) {
 	}
 
 	err := opts.Validate()
-	r.NoError(err, "Validation should have succeeded")
+	r.NoError(err)
 }
 
 func Test_validationTemplateWithoutType(t *testing.T) {
@@ -63,7 +64,7 @@ func Test_validationTemplateWithoutType(t *testing.T) {
 	}
 
 	err := opts.Validate()
-	r.Error(err, "Validation should have failed")
+	r.Error(err)
 }
 
 func Test_validationTemplateWithoutAlias(t *testing.T) {
@@ -77,7 +78,7 @@ func Test_validationTemplateWithoutAlias(t *testing.T) {
 	}
 
 	err := opts.Validate()
-	r.Error(err, "Validation should have failed")
+	r.Error(err)
 }
 
 func Test_validationTemplateWithoutSource(t *testing.T) {
@@ -91,7 +92,7 @@ func Test_validationTemplateWithoutSource(t *testing.T) {
 	}
 
 	err := opts.Validate()
-	r.Error(err, "Validation should have failed")
+	r.Error(err)
 }
 
 func Test_validationTemplateCompoundError(t *testing.T) {
@@ -103,7 +104,7 @@ func Test_validationTemplateCompoundError(t *testing.T) {
 	}
 
 	err := opts.Validate()
-	r.Error(err, "Validation should have failed")
+	r.Error(err)
 
 	a.Contains(err.Error(), "source is undefined")
 	a.Contains(err.Error(), "type is undefined")

@@ -9,13 +9,13 @@ import (
 )
 
 // getTemplate loads a template source from a Git repository
-func getTemplate(gitURL string) (*billy.Filesystem, error) {
+func getTemplate(gitURL string) (billy.Filesystem, error) {
 	fs := memfs.New()
 	_, err := git.Clone(memory.NewStorage(), fs, &git.CloneOptions{
 		URL: gitURL,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed querying Git repo")
+		return fs, errors.Wrap(err, "Failed querying Git repo")
 	}
-	return &fs, nil
+	return fs, nil
 }

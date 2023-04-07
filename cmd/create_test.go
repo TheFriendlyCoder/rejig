@@ -26,16 +26,12 @@ func Test_ValidateArgsSuccess(t *testing.T) {
 
 	// Given an empty temp folder
 	tmpDir, err := os.MkdirTemp("", "")
-	r.NoError(err, "Error creating temp folder")
-
-	// Make sure we always clean up our temp folder
-	defer func() {
-		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
-	}()
+	r.NoError(err)
+	defer os.RemoveAll(tmpDir)
 
 	// with an empty output folder
 	destDir := path.Join(tmpDir, "dest")
-	r.NoError(os.Mkdir(destDir, 0700), "Error creating destination folder")
+	r.NoError(os.Mkdir(destDir, 0700))
 
 	// and a mock set of app options
 	templateName := "MyTemplate"
@@ -47,7 +43,7 @@ func Test_ValidateArgsSuccess(t *testing.T) {
 		}},
 	}
 
-	// when we validate our input args
+	// validation should succeed
 	args := []string{destDir, templateName}
 	r.NoError(validateArgs(options, args))
 }
@@ -57,16 +53,12 @@ func Test_ValidateArgsTemplateNotExists(t *testing.T) {
 
 	// Given an empty temp folder
 	tmpDir, err := os.MkdirTemp("", "")
-	r.NoError(err, "Error creating temp folder")
-
-	// Make sure we always clean up our temp folder
-	defer func() {
-		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
-	}()
+	r.NoError(err)
+	defer os.RemoveAll(tmpDir)
 
 	// with an empty output folder
 	destDir := path.Join(tmpDir, "dest")
-	r.NoError(os.Mkdir(destDir, 0700), "Error creating destination folder")
+	r.NoError(os.Mkdir(destDir, 0700))
 
 	// and a mock set of app options
 	templateName := "MyTemplate"
@@ -87,18 +79,14 @@ func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
 
 	// Given an empty temp folder
 	tmpDir, err := os.MkdirTemp("", "")
-	r.NoError(err, "Error creating temp folder")
-
-	// Make sure we always clean up our temp folder
-	defer func() {
-		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
-	}()
+	r.NoError(err)
+	defer os.RemoveAll(tmpDir)
 
 	// with a non-empty destination folder
 	destDir := path.Join(tmpDir, "dest")
-	r.NoError(os.Mkdir(destDir, 0700), "Error creating destination folder")
+	r.NoError(os.Mkdir(destDir, 0700))
 	_, err = os.Create(path.Join(destDir, "fubar.txt"))
-	r.NoError(err, "Failed to create test file")
+	r.NoError(err)
 
 	// and a mock set of app options
 	templateName := "MyTemplate"
@@ -126,37 +114,35 @@ func Test_CreateCommandSucceeds(t *testing.T) {
 
 	// Given an empty temp folder
 	tmpDir, err := os.MkdirTemp("", "")
-	r.NoError(err, "Error creating temp folder")
-
-	// Make sure we always clean up our temp folder
-	defer func() {
-		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
-	}()
+	r.NoError(err)
+	defer os.RemoveAll(tmpDir)
 
 	// an empty output folder
 	outputDir := path.Join(tmpDir, "output")
-	r.NoError(os.Mkdir(outputDir, 0700), "Error creating output folder")
+	r.NoError(os.Mkdir(outputDir, 0700))
 
 	// and an app options file with a template pointing to our project
 	templateName := "MyTemplate"
 	srcDir, err := sampleProj("simple")
-	r.NoError(err, "Locating sample project should always succeed")
+	r.NoError(err)
 	optionsText := fmt.Sprintf(`
 templates:
   - type: local
     source: %s
-    alias: %s`, *srcDir, templateName)
+    alias: %s`, srcDir, templateName)
 	configFile := path.Join(tmpDir, "options.yml")
 	err = os.WriteFile(configFile, []byte(optionsText), 0600)
 	r.NoError(err)
 
+	// and some fake user input to respond to prompts from the template
 	output := new(bytes.Buffer)
 	fakeInput := new(bytes.Buffer)
 	_, err = fakeInput.WriteString("MyProj\n")
-	r.NoError(err, "Failed generating sample input")
+	r.NoError(err)
 	_, err = fakeInput.WriteString("1.2.3\n")
-	r.NoError(err, "Failed generating sample input")
+	r.NoError(err)
 
+	// When we trigger the create command
 	rootCmd.SetOut(output)
 	rootCmd.SetErr(output)
 	rootCmd.SetIn(fakeInput)
@@ -192,16 +178,12 @@ func Test_CreateCommandTooFewArgs(t *testing.T) {
 
 	// Given an empty temp folder
 	tmpDir, err := os.MkdirTemp("", "")
-	r.NoError(err, "Error creating temp folder")
-
-	// Make sure we always clean up our temp folder
-	defer func() {
-		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
-	}()
+	r.NoError(err)
+	defer os.RemoveAll(tmpDir)
 
 	// with 1 empty subfolder
 	srcDir := path.Join(tmpDir, "src")
-	r.NoError(os.Mkdir(srcDir, 0700), "Error creating source folder")
+	r.NoError(os.Mkdir(srcDir, 0700))
 
 	// When we execute our root command with a missing positional arg
 	actual := new(bytes.Buffer)
@@ -211,7 +193,7 @@ func Test_CreateCommandTooFewArgs(t *testing.T) {
 	err = rootCmd.Execute()
 
 	// We expect an error to be returned
-	r.Error(err, "CLI command should have failed")
+	r.Error(err)
 
 	// and some status information to be reported
 	r.Contains(actual.String(), "Error:")
@@ -223,12 +205,8 @@ func Test_CreateCommandInvalidTemplateName(t *testing.T) {
 
 	// Given an empty temp folder
 	tmpDir, err := os.MkdirTemp("", "")
-	r.NoError(err, "Error creating temp folder")
-
-	// Make sure we always clean up our temp folder
-	defer func() {
-		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
-	}()
+	r.NoError(err)
+	defer os.RemoveAll(tmpDir)
 
 	// with an absent source folder
 	templateName := "MyTemplate"
@@ -242,11 +220,11 @@ templates:
 	err = os.WriteFile(configFile, []byte(optionsText), 0600)
 	r.NoError(err)
 
-	// with a valid dest folder
+	// and an empty output folder
 	destDir := path.Join(tmpDir, "dest")
-	r.NoError(os.Mkdir(destDir, 0700), "Error creating destination folder")
+	r.NoError(os.Mkdir(destDir, 0700))
 
-	// when we attempt to execute our root command
+	// when we attempt to execute our create command
 	actual := new(bytes.Buffer)
 	rootCmd.SetOut(actual)
 	rootCmd.SetErr(actual)
@@ -254,7 +232,7 @@ templates:
 	err = rootCmd.Execute()
 
 	// We expect an error to be returned
-	r.Error(err, "CLI command should have succeeded")
+	r.Error(err)
 
 	// And some status info to be reported
 	r.Contains(actual.String(), "DoesNotExist")

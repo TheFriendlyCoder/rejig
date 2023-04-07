@@ -77,5 +77,5 @@ func (e InternalError) Error() string {
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //										Misc Errors
 
-var APP_OPTIONS_INVALID_SOURCE_TYPE_ERROR = fmt.Errorf("Unsupported template source type")
-var APP_OPTIONS_DECODE_ERROR = fmt.Errorf("Unable to decode template options")
+var AppOptionsInvalidSourceTypeError = fmt.Errorf("unsupported template source type")
+var AppOptionsDecodeError = fmt.Errorf("unable to decode template options")

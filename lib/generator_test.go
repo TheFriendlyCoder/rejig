@@ -34,16 +34,16 @@ func contains(r *require.Assertions, file string, pattern string) bool {
 }
 
 // sampleProj loads Path to a specific sample project to use for testing the generator logic
-func sampleProj(projName string) (*string, error) {
+func sampleProj(projName string) (string, error) {
 	retval, err := filepath.Abs(path.Join("..", "testProjects", projName))
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed to generate absolute Path")
+		return retval, errors.Wrap(err, "Failed to generate absolute Path")
 	}
 	_, err = os.Stat(retval)
 	if err != nil {
-		return nil, errors.Wrap(err, "checking existence of test data file")
+		return retval, errors.Wrap(err, "checking existence of test data file")
 	}
-	return &retval, nil
+	return retval, nil
 }
 
 func Test_basicGenerator(t *testing.T) {
@@ -51,16 +51,12 @@ func Test_basicGenerator(t *testing.T) {
 	a := assert.New(t)
 
 	srcPath, err := sampleProj("simple")
-	r.NoError(err, "Failed to locate sample project")
+	r.NoError(err)
 
 	// Given an empty temp folder
 	tmpDir, err := os.MkdirTemp("", "")
-	r.NoError(err, "Error creating temp folder")
-
-	// Make sure we always clean up our temp folder
-	defer func() {
-		r.NoError(os.RemoveAll(tmpDir), "Error deleting temp folder")
-	}()
+	r.NoError(err)
+	defer os.RemoveAll(tmpDir)
 
 	// We attempt to run the generator
 	expVersion := "1.6.9"
@@ -69,14 +65,14 @@ func Test_basicGenerator(t *testing.T) {
 		"project_name": expProj,
 		"version":      expVersion,
 	}
-	err = Generate(*srcPath, tmpDir, context)
+	err = Generate(srcPath, tmpDir, context)
 
 	r.NoError(err, "Failed to run generator")
 
 	a.DirExists(filepath.Join(tmpDir, "MyProj"))
 	a.NoFileExists(filepath.Join(tmpDir, ".rejig.yml"))
 
-	exp := filepath.Join(*srcPath, ".gitignore")
+	exp := filepath.Join(srcPath, ".gitignore")
 	act := filepath.Join(tmpDir, ".gitignore")
 	a.FileExists(act)
 	a.True(unmodified(r, exp, act))

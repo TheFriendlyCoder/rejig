@@ -84,7 +84,7 @@ func appOptionsDecoder() mapstructure.DecodeHookFuncType {
 		// Map the "type" field from a character string format to an enumerated type
 		templateData, ok := raw.(map[string]interface{})
 		if !ok {
-			return nil, lib.APP_OPTIONS_DECODE_ERROR
+			return nil, lib.AppOptionsDecodeError
 		}
 
 		var newVal lib.TemplateSourceType
@@ -96,7 +96,7 @@ func appOptionsDecoder() mapstructure.DecodeHookFuncType {
 		case "local":
 			newVal = lib.TST_LOCAL
 		default:
-			return nil, lib.APP_OPTIONS_INVALID_SOURCE_TYPE_ERROR
+			return nil, lib.AppOptionsInvalidSourceTypeError
 		}
 		templateData["type"] = newVal
 		return templateData, nil
@@ -104,7 +104,7 @@ func appOptionsDecoder() mapstructure.DecodeHookFuncType {
 }
 
 // initConfig reads app config info from a config file if provided
-func initConfig() (*lib.AppOptions, error) {
+func initConfig() (lib.AppOptions, error) {
 	if cfgFile != "" {
 		// Use config file from the command line flag.
 		viper.SetConfigFile(cfgFile)
@@ -119,27 +119,26 @@ func initConfig() (*lib.AppOptions, error) {
 		viper.SetConfigName(".rejig")
 	}
 
+	var appOptions lib.AppOptions
+
 	// If a config file is found, read it in.
 	err := viper.ReadInConfig()
 	// If there is no config file, we ignore that error and assume
 	// there is no app config
 	if errors.As(err, &viper.ConfigFileNotFoundError{}) {
-		return nil, nil
+		return appOptions, nil
 	} else if err != nil {
-		return nil, errors.Wrap(err, "Failure reading options file")
+		return appOptions, errors.Wrap(err, "Failure reading options file")
 	}
 
-	// Parse the config data
-	var appOptions lib.AppOptions
-	err = viper.Unmarshal(&appOptions, viper.DecodeHook(appOptionsDecoder()))
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed parsing app options file")
+	// If we have a config file, try parsing it
+	if err = viper.Unmarshal(&appOptions, viper.DecodeHook(appOptionsDecoder())); err != nil {
+		return appOptions, errors.Wrap(err, "Failed parsing app options file")
 	}
 
 	// Then validate the results to make sure they meet the application requirements
-	err = appOptions.Validate()
-	if err != nil {
-		return nil, errors.Wrap(err, "App options file failed validation")
+	if err = appOptions.Validate(); err != nil {
+		return appOptions, errors.Wrap(err, "App options file failed validation")
 	}
-	return &appOptions, nil
+	return appOptions, nil
 }

@@ -23,7 +23,7 @@ type rootArgs struct {
 }
 
 // run Primary entry point function for our generator
-func run(cmd *cobra.Command, args *rootArgs) error {
+func run(cmd *cobra.Command, args rootArgs) error {
 	// We have to use cmd.OutOrStdout() to ensure output is redirected to Cobra
 	// stream handler, to facilitate testing (ie: it allows us to capture output
 	// during unit testing to validate results of CLI operations)
@@ -114,6 +114,13 @@ var createCmd = &cobra.Command{
 	Short: "create a new project from a template",
 	Long:  `Creates a new project in an empty folder using content defined in a template`,
 	Args: func(cmd *cobra.Command, args []string) error {
+		// TODO: Put config file parsing in base command prerun and call it from
+		// prerun in all sub-commands:
+		// cmd.Parent().PreRun(cmd, args)
+		// NOTE: context object only works within a single command and is used
+		// exclusively for passing info between pre-run, run, post-run operations
+		// TODO: Is there a benefit of using this technique and not just calling the
+		// arg parser directly
 		// Optionally run one of the validators provided by cobra
 		if err := cobra.ExactArgs(2)(cmd, args); err != nil {
 			return err
@@ -122,10 +129,10 @@ var createCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		ctx := context.WithValue(cmd.Context(), CK_OPTIONS, *appOptions)
+		ctx := context.WithValue(cmd.Context(), CK_OPTIONS, appOptions)
 		cmd.SetContext(ctx)
 
-		if err := validateArgs(*appOptions, args); err != nil {
+		if err := validateArgs(appOptions, args); err != nil {
 			return err
 		}
 		return nil
@@ -135,7 +142,7 @@ var createCmd = &cobra.Command{
 			targetPath:    args[0],
 			templateAlias: args[1],
 		}
-		err := run(cmd, &parsedArgs)
+		err := run(cmd, parsedArgs)
 		if err != nil {
 			lib.SNF(fmt.Fprintf(cmd.ErrOrStderr(), "Failed to generate project"))
 		}

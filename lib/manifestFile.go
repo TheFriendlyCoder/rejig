@@ -84,6 +84,8 @@ func (m *ManifestData) UnmarshalYAML(value *yaml.Node) error {
 	if err := value.Decode(&remaining); err != nil {
 		return errors.Wrap(err, "Failed to parse additional config options")
 	}
+
+	// Remove properties that were parsed previously
 	delete(remaining, "versions")
 	delete(remaining, "template")
 	m.MiscParams = remaining
@@ -95,19 +97,19 @@ func (m *ManifestData) UnmarshalYAML(value *yaml.Node) error {
 
 // ParseManifest parses a template manifest file and returns a reference to
 // the parsed representation of the contents of the file
-func ParseManifest(path string) (*ManifestData, error) {
+func ParseManifest(path string) (ManifestData, error) {
+	var retval ManifestData
 	buf, err := os.ReadFile(path)
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed to open manifest file")
+		return retval, errors.Wrap(err, "Failed to open manifest file")
 	}
 
-	retval := &ManifestData{}
 	// TODO: Find some way to get "Strict" mode to work properly (aka: KnownFields in v3)
 	//		https://github.com/go-yaml/yaml/issues/460
 	//		https://github.com/go-yaml/yaml/issues/642
-	err = yaml.Unmarshal(buf, retval)
+	err = yaml.Unmarshal(buf, &retval)
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed to parse YAML content from manifest file")
+		return retval, errors.Wrap(err, "Failed to parse YAML content from manifest file")
 	}
 
 	return retval, nil

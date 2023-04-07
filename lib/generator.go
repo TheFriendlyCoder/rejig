@@ -61,7 +61,8 @@ func Generate(srcPath string, targetPath string, context map[string]any) error {
 			}
 		} else {
 			// Apply template to the file contents
-			data, err := os.ReadFile(path)
+			var data []byte
+			data, err = os.ReadFile(path)
 			if err != nil {
 				return errors.Wrap(err, "Failed to read source file")
 			}
@@ -69,7 +70,9 @@ func Generate(srcPath string, targetPath string, context map[string]any) error {
 			if err != nil {
 				return errors.Wrap(err, "Failed to load template source")
 			}
-			newData, err := tpl.Execute(context)
+
+			var newData string
+			newData, err = tpl.Execute(context)
 			if err != nil {
 				return errors.Wrap(err, "Failed to apply template")
 			}

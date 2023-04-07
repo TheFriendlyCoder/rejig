@@ -6,8 +6,11 @@ import "fmt"
 type TemplateSourceType int64
 
 const (
+	// TST_UNDEFINED No template type defined in template config
 	TST_UNDEFINED TemplateSourceType = iota
+	// TST_LOCAL Template source is stored on the local file system
 	TST_LOCAL
+	// TST_GIT Template source is stored in a Git repository
 	TST_GIT
 )
 
@@ -30,7 +33,7 @@ type AppOptions struct {
 
 // Validate checks the contents of the parsed application options to make sure they
 // meet the requirements for the application
-func (a *AppOptions) Validate() error {
+func (a AppOptions) Validate() error {
 	var messages []string
 	for i, curTemplate := range a.Templates {
 		if len(curTemplate.Alias) == 0 {
