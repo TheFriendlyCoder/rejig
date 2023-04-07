@@ -11,8 +11,8 @@ func Test_successfulValidation(t *testing.T) {
 
 	// TODO: Convert this to a table test
 	allTypes := [...]TemplateSourceType{
-		TST_LOCAL,
-		TST_GIT,
+		TstLocal,
+		TstGit,
 	}
 
 	for _, t := range allTypes {
@@ -45,7 +45,7 @@ func Test_successfulValidationWithoutOptionals(t *testing.T) {
 		Templates: []TemplateOptions{{
 			Alias:  "My Template",
 			Source: "https://some/location",
-			Type:   TST_GIT,
+			Type:   TstGit,
 		}},
 	}
 
@@ -73,7 +73,7 @@ func Test_validationTemplateWithoutAlias(t *testing.T) {
 	opts := AppOptions{
 		Templates: []TemplateOptions{{
 			Source: "https://some/location",
-			Type:   TST_GIT,
+			Type:   TstGit,
 		}},
 	}
 
@@ -87,7 +87,7 @@ func Test_validationTemplateWithoutSource(t *testing.T) {
 	opts := AppOptions{
 		Templates: []TemplateOptions{{
 			Alias: "My Template",
-			Type:  TST_GIT,
+			Type:  TstGit,
 		}},
 	}
 

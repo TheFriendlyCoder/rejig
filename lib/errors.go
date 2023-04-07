@@ -11,10 +11,10 @@ import (
 type PathErrorTypes int64
 
 const (
-	PE_UNDEFINED PathErrorTypes = iota
-	PE_PATH_NOT_FOUND
-	PE_PATH_NOT_EMPTY
-	PE_FILE_NOT_FOUND
+	PeUndefined PathErrorTypes = iota
+	PePathNotFound
+	PePathNotEmpty
+	PeFileNotFound
 )
 
 type PathError struct {
@@ -25,13 +25,13 @@ type PathError struct {
 func (p PathError) Error() string {
 	var retval string
 	switch p.ErrorType {
-	case PE_PATH_NOT_FOUND:
+	case PePathNotFound:
 		retval = "Path not found: " + p.Path
-	case PE_PATH_NOT_EMPTY:
+	case PePathNotEmpty:
 		retval = "Path must be empty: " + p.Path
-	case PE_FILE_NOT_FOUND:
+	case PeFileNotFound:
 		retval = "File not found: " + p.Path
-	case PE_UNDEFINED:
+	case PeUndefined:
 		panic("Unsupported Path error")
 	}
 	return retval

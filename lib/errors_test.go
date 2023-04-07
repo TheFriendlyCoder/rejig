@@ -13,9 +13,9 @@ func Test_FilePathInErrorMessage(t *testing.T) {
 
 	// TODO: Convert to table test
 	tests := []data{
-		{errorType: PE_PATH_NOT_FOUND},
-		{errorType: PE_PATH_NOT_EMPTY},
-		{errorType: PE_FILE_NOT_FOUND},
+		{errorType: PePathNotFound},
+		{errorType: PePathNotEmpty},
+		{errorType: PeFileNotFound},
 	}
 
 	for _, tt := range tests {

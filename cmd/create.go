@@ -32,7 +32,7 @@ func run(cmd *cobra.Command, args rootArgs) error {
 	// options between commands, but it seems like the pre-run / run functions for each
 	// command are run independently from all other commands so they aren't run in a
 	// hierarchy ... so there's not much use here (To Be Confirmed)
-	appOptions, ok := cmd.Context().Value(CK_OPTIONS).(lib.AppOptions)
+	appOptions, ok := cmd.Context().Value(CkOptions).(lib.AppOptions)
 	if !ok {
 		return lib.InternalError{Message: "Failed to retrieve app options"}
 	}
@@ -90,7 +90,7 @@ func validateArgs(options lib.AppOptions, args []string) error {
 		if len(contents) != 0 {
 			return lib.PathError{
 				Path:      args[0],
-				ErrorType: lib.PE_PATH_NOT_EMPTY,
+				ErrorType: lib.PePathNotEmpty,
 			}
 		}
 	}
@@ -121,7 +121,7 @@ var createCmd = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "Initialization error")
 		}
-		appOptions, ok := cmd.Context().Value(CK_OPTIONS).(lib.AppOptions)
+		appOptions, ok := cmd.Context().Value(CkOptions).(lib.AppOptions)
 		if !ok {
 			return lib.CommandContextNotDefined
 		}

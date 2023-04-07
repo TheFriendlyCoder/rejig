@@ -39,7 +39,7 @@ func Test_ValidateArgsSuccess(t *testing.T) {
 		Templates: []lib.TemplateOptions{{
 			Alias:  templateName,
 			Source: ".",
-			Type:   lib.TST_LOCAL,
+			Type:   lib.TstLocal,
 		}},
 	}
 
@@ -94,7 +94,7 @@ func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
 		Templates: []lib.TemplateOptions{{
 			Alias:  templateName,
 			Source: ".",
-			Type:   lib.TST_LOCAL,
+			Type:   lib.TstLocal,
 		}},
 	}
 
@@ -104,7 +104,7 @@ func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
 
 	// we expect the proper error to be returned
 	r.Error(result)
-	r.ErrorAs(result, &lib.PathError{Path: destDir, ErrorType: lib.PE_PATH_NOT_EMPTY})
+	r.ErrorAs(result, &lib.PathError{Path: destDir, ErrorType: lib.PePathNotEmpty})
 }
 
 func Test_CreateCommandSucceeds(t *testing.T) {

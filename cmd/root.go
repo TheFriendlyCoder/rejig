@@ -20,7 +20,12 @@ var cfgFile string
 type ContextKey int64
 
 const (
-	CK_OPTIONS ContextKey = iota
+	// CkOptions Parsed application options loaded from the environment or app config file
+	// should be managed exclusively by the root command
+	CkOptions ContextKey = iota
+	// CkArgs Command line args, parsed into an internal struct format
+	// Type of this context object is unique for each command
+	CkArgs
 )
 
 // checkErr replacement for the cobra method of the same name, which unfortunately calls os.exit
@@ -47,7 +52,7 @@ specially formatted files stored on disk or in Git repositories`,
 		if err != nil {
 			return err
 		}
-		ctx := context.WithValue(cmd.Context(), CK_OPTIONS, appOptions)
+		ctx := context.WithValue(cmd.Context(), CkOptions, appOptions)
 		cmd.SetContext(ctx)
 		return nil
 	},
@@ -105,11 +110,11 @@ func appOptionsDecoder() mapstructure.DecodeHookFuncType {
 		var newVal lib.TemplateSourceType
 		switch templateData["type"] {
 		case "":
-			newVal = lib.TST_UNDEFINED
+			newVal = lib.TstUndefined
 		case "git":
-			newVal = lib.TST_GIT
+			newVal = lib.TstGit
 		case "local":
-			newVal = lib.TST_LOCAL
+			newVal = lib.TstLocal
 		default:
 			return nil, lib.AppOptionsInvalidSourceTypeError
 		}

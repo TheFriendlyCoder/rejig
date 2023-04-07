@@ -6,12 +6,12 @@ import "fmt"
 type TemplateSourceType int64
 
 const (
-	// TST_UNDEFINED No template type defined in template config
-	TST_UNDEFINED TemplateSourceType = iota
-	// TST_LOCAL Template source is stored on the local file system
-	TST_LOCAL
-	// TST_GIT Template source is stored in a Git repository
-	TST_GIT
+	// TstUndefined No template type defined in template config
+	TstUndefined TemplateSourceType = iota
+	// TstLocal Template source is stored on the local file system
+	TstLocal
+	// TstGit Template source is stored in a Git repository
+	TstGit
 )
 
 // TemplateOptions metadata describing the source location for a source template
@@ -39,7 +39,7 @@ func (a AppOptions) Validate() error {
 		if len(curTemplate.Alias) == 0 {
 			messages = append(messages, fmt.Sprintf("template %d alias is undefined", i))
 		}
-		if curTemplate.Type == TST_UNDEFINED {
+		if curTemplate.Type == TstUndefined {
 			messages = append(messages, fmt.Sprintf("template %d type is undefined", i))
 		}
 		if len(curTemplate.Source) == 0 {
