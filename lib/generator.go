@@ -3,6 +3,8 @@ package lib
 import (
 	"github.com/flosch/pongo2/v6"
 	"github.com/pkg/errors"
+	"github.com/spf13/afero"
+	"io/fs"
 	"os"
 	"path/filepath"
 )
@@ -10,9 +12,9 @@ import (
 // Generate applies a set of user defined options (ie: the 'context') to a set of template
 // files stored in srcPath, and produces a complete project in the targetPath with the
 // user defined parameters applied throughout
-func Generate(srcPath string, targetPath string, context map[string]any) error {
+func Generate(srcFS afero.Fs, rootDir string, targetPath string, context map[string]any) error {
 	// loop through all files
-	var err = filepath.WalkDir(srcPath, func(path string, info os.DirEntry, err error) error {
+	err := afero.Walk(srcFS, rootDir, func(path string, info fs.FileInfo, err error) error {
 		// If walk encountered an error attempting to enumerate the file system object
 		// we are processing, it tells us here. For now we just assume we can not proceed
 		// if we hit this condition.
@@ -22,7 +24,7 @@ func Generate(srcPath string, targetPath string, context map[string]any) error {
 			return err
 		}
 
-		relPath, err := filepath.Rel(srcPath, path)
+		relPath, err := filepath.Rel(rootDir, path)
 		if err != nil {
 			return errors.Wrap(err, "Failed to parse relative Path name")
 		}
@@ -46,11 +48,7 @@ func Generate(srcPath string, targetPath string, context map[string]any) error {
 		}
 		newOutputPath := filepath.Join(targetPath, newDirName)
 
-		temp, err := info.Info()
-		if err != nil {
-			return errors.Wrap(err, "Failed to load file system info for input file")
-		}
-		originalMode := temp.Mode()
+		originalMode := info.Mode()
 
 		// Generate output content
 		if info.IsDir() {

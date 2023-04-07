@@ -3,6 +3,7 @@ package lib
 import (
 	"bytes"
 	"github.com/pkg/errors"
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"os"
@@ -65,7 +66,8 @@ func Test_basicGenerator(t *testing.T) {
 		"project_name": expProj,
 		"version":      expVersion,
 	}
-	err = Generate(srcPath, tmpDir, context)
+	fs := afero.NewOsFs()
+	err = Generate(fs, srcPath, tmpDir, context)
 
 	r.NoError(err, "Failed to run generator")
 

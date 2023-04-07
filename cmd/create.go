@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	"github.com/pkg/errors"
+	"github.com/spf13/afero"
 	"log"
 	"os"
 	"path/filepath"
@@ -72,7 +73,8 @@ func run(cmd *cobra.Command, args rootArgs) error {
 	}
 	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from template %s...\n", args.targetPath, curTemplate.Alias))
 
-	return errors.Wrap(lib.Generate(curTemplate.Source, args.targetPath, context), "Failed generating project")
+	fs := afero.NewOsFs()
+	return errors.Wrap(lib.Generate(fs, curTemplate.Source, args.targetPath, context), "Failed generating project")
 	// TODO: after generating, put a manifest file in the root folder summarizing what we did so we
 	//		 can regenerate or update the project later
 	// TODO: make terminology consistent (ie: config file for the app, manifest file for the template,
