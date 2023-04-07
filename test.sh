@@ -1,7 +1,7 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env sh -e
 
 # minimum code coverage we expect from our code project
-TESTCOVERAGE_THRESHOLD=79
+TESTCOVERAGE_THRESHOLD=80
 # Red ASCII color
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -38,6 +38,6 @@ totalCoverage=$(go tool cover -func=coverage.out | grep "^total" | grep -Eo '[0-
 if (( $(echo "$totalCoverage $TESTCOVERAGE_THRESHOLD" | awk '{print ($1 > $2)}') )); then
     echo -e "${GREEN}Coverage of ${totalCoverage}% meets minimum ${TESTCOVERAGE_THRESHOLD}%.${NC}"
 else
-    echo -e"${RED}Coverage of ${totalCoverage}% doesn't meet minimum coverage of ${TESTCOVERAGE_THRESHOLD}%.${NC}"
+    echo -e "${RED}Coverage of ${totalCoverage}% doesn't meet minimum coverage of ${TESTCOVERAGE_THRESHOLD}%.${NC}"
     exit 1
 fi

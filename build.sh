@@ -1,9 +1,9 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env sh -e
 # Compile a release for the current platform
 #goreleaser build --single-target --clean --snapshot
 
-# Run linter
-golangci-lint run
-
 # Run tests
 ./test.sh
+
+# Run linter
+golangci-lint run

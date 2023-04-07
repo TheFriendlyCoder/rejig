@@ -20,4 +20,6 @@ jobs:
         with:
           version: v1.52
       - name: Test
-        run: ./test.sh
+        run: |
+          echo $SHELL
+          ./test.sh
