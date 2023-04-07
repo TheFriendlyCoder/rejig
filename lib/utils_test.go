@@ -6,12 +6,14 @@ import (
 	"testing"
 )
 
+var someerr = fmt.Errorf("Some Failure")
+
 func Test_SNFshouldPanic(t *testing.T) {
 	a := assert.New(t)
 
-	a.Panics(func() { SNF(fmt.Errorf("Some Failure")) })
-	a.Panics(func() { SNF(fmt.Errorf("Some Failure"), "hello") })
-	a.Panics(func() { SNF("hello", fmt.Errorf("Some Failure")) })
+	a.Panics(func() { SNF(someerr) })
+	a.Panics(func() { SNF(someerr, "hello") })
+	a.Panics(func() { SNF("hello", someerr) })
 }
 
 func Test_SNFshouldNotPanic(t *testing.T) {
