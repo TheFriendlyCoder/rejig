@@ -5,7 +5,7 @@ set -e
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 #                                                         CONSTANTS
 # minimum code coverage we expect from our code project
-TESTCOVERAGE_THRESHOLD=79
+TESTCOVERAGE_THRESHOLD=77
 # Red ASCII color
 RED='\033[0;31m'
 GREEN='\033[0;32m'

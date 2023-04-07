@@ -7,8 +7,8 @@ import (
 	"gopkg.in/src-d/go-git.v4/storage/memory"
 )
 
-// getTemplate loads a template source from a Git repository
-func getTemplate(gitURL string) (afero.Fs, error) {
+// GetGitTemplate loads a template source from a Git repository
+func GetGitTemplate(gitURL string) (afero.Fs, error) {
 	appFS := afero.NewMemMapFs()
 	fs := NewWraper(appFS, ".", false)
 

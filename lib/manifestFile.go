@@ -3,8 +3,8 @@ package lib
 import (
 	"github.com/hashicorp/go-version"
 	"github.com/pkg/errors"
+	"github.com/spf13/afero"
 	"gopkg.in/yaml.v3"
-	"os"
 )
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -97,9 +97,10 @@ func (m *ManifestData) UnmarshalYAML(value *yaml.Node) error {
 
 // ParseManifest parses a template manifest file and returns a reference to
 // the parsed representation of the contents of the file
-func ParseManifest(path string) (ManifestData, error) {
+func ParseManifest(fs afero.Fs, path string) (ManifestData, error) {
+	// TODO: move this module into template package
 	var retval ManifestData
-	buf, err := os.ReadFile(path)
+	buf, err := afero.ReadFile(fs, path)
 	if err != nil {
 		return retval, errors.Wrap(err, "Failed to open manifest file")
 	}

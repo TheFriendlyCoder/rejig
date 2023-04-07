@@ -3,11 +3,10 @@ package cmd
 import (
 	"fmt"
 	"github.com/TheFriendlyCoder/rejigger/lib"
+	"github.com/TheFriendlyCoder/rejigger/lib/template"
 	"github.com/pkg/errors"
-	"github.com/spf13/afero"
 	"log"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strings"
 
@@ -22,58 +21,54 @@ type rootArgs struct {
 	templateAlias string
 }
 
-// run Primary entry point function for our generator
-func run(cmd *cobra.Command, args rootArgs) error {
-	// We have to use cmd.OutOrStdout() to ensure output is redirected to Cobra
-	// stream handler, to facilitate testing (ie: it allows us to capture output
-	// during unit testing to validate results of CLI operations)
-	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Loading template %s...\n", args.templateAlias))
-	// TODO: Consider not using context objects - the main purpose of them is to share config
-	// options between commands, but it seems like the pre-run / run functions for each
-	// command are run independently from all other commands so they aren't run in a
-	// hierarchy ... so there's not much use here (To Be Confirmed)
-	appOptions, ok := cmd.Context().Value(CkOptions).(lib.AppOptions)
-	if !ok {
-		return lib.InternalError{Message: "Failed to retrieve app options"}
-	}
-
+func getTemplate(appOptions lib.AppOptions, alias string) (template.Template, error) {
 	// Lookup our template information
+	var retval template.Template
 	var curTemplate lib.TemplateOptions
 	found := false
 	for _, t := range appOptions.Templates {
-		if t.Alias == args.templateAlias {
+		if t.Alias == alias {
 			curTemplate = t
 			found = true
 			break
 		}
 	}
 	if !found {
-		return lib.UnknownTemplateError{TemplateAlias: args.templateAlias}
+		return retval, lib.UnknownTemplateError{TemplateAlias: alias}
 	}
+	retval.Options = curTemplate
+	return retval, nil
+}
 
-	manifest := filepath.Join(curTemplate.Source, ".rejig.yml")
-	_, err := os.Stat(manifest)
+// run Primary entry point function for our generator
+func run(cmd *cobra.Command, args rootArgs) error {
+	// We have to use cmd.OutOrStdout() to ensure output is redirected to Cobra
+	// stream handler, to facilitate testing (ie: it allows us to capture output
+	// during unit testing to validate results of CLI operations)
+	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Loading template %s...\n", args.templateAlias))
+
+	appOptions, ok := cmd.Context().Value(CkOptions).(lib.AppOptions)
+	if !ok {
+		return lib.CommandContextNotDefined
+	}
+	curTemplate, err := getTemplate(appOptions, args.templateAlias)
 	if err != nil {
-		// TODO: See if there's any need to check for the IsNotExist error
-		return errors.Wrap(err, "Unable to read manifest file")
+		// TODO: Audit code and see if WithStack may be preferable to Wrap in many places
+		return errors.WithStack(err)
 	}
 
-	manifestData, err := lib.ParseManifest(manifest)
+	err = errors.WithStack(curTemplate.Validate())
 	if err != nil {
-		return errors.Wrap(err, "Failed parsing manifest file")
+		return err
 	}
 
-	templateContext := map[string]any{}
-	for _, arg := range manifestData.Template.Args {
-		lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "%s(%s): ", arg.Description, arg.Name))
-		var temp string
-		lib.SNF(fmt.Fscanln(cmd.InOrStdin(), &temp))
-		templateContext[arg.Name] = temp
+	err = errors.WithStack(curTemplate.LoadManifest(cmd))
+	if err != nil {
+		return err
 	}
-	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from template %s...\n", args.targetPath, curTemplate.Alias))
+	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from template %s...\n", args.targetPath, curTemplate.Options.Alias))
 
-	fs := afero.NewOsFs()
-	return errors.Wrap(lib.Generate(fs, curTemplate.Source, args.targetPath, templateContext), "Failed generating project")
+	return errors.Wrap(curTemplate.Generate(args.targetPath), "Failed generating template")
 	// TODO: after generating, put a manifest file in the root folder summarizing what we did so we
 	//		 can regenerate or update the project later
 	// TODO: make terminology consistent (ie: config file for the app, manifest file for the template,
@@ -134,7 +129,17 @@ var createCmd = &cobra.Command{
 		}
 		err := run(cmd, parsedArgs)
 		if err != nil {
-			lib.SNF(fmt.Fprintf(cmd.ErrOrStderr(), "Failed to generate project"))
+			// TODO: In verbose mode output stack trace
+			// TODO: Test stack track without using wrap to see how it looks
+			// https://pkg.go.dev/github.com/pkg/errors#hdr-Retrieving_the_stack_trace_of_an_error_or_wrapper
+			type stackTracer interface {
+				StackTrace() errors.StackTrace
+			}
+			err2, _ := err.(stackTracer)
+			for _, f := range err2.StackTrace() {
+				fmt.Printf("%+s:%d\n", f, f)
+			}
+			lib.SNF(fmt.Fprintf(cmd.ErrOrStderr(), "Failed to generate project: \n\t%s\n", errors.Cause(err).Error()))
 		}
 	},
 }
