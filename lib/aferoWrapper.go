@@ -1,19 +1,19 @@
-package vendor
+package lib
 
 // Based on implementation found here:
 // https://github.com/Maldris/go-billy-afero
 // Updated to work with go-billy.v4
 import (
-"log"
-"os"
-"path"
-"path/filepath"
-"strings"
-"sync"
+	"log"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+	"sync"
 
-"github.com/pkg/errors"
-"github.com/spf13/afero"
-"gopkg.in/src-d/go-billy.v4"
+	"github.com/pkg/errors"
+	"github.com/spf13/afero"
+	"gopkg.in/src-d/go-billy.v4"
 )
 
 const (

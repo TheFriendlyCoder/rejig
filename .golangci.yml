@@ -32,5 +32,8 @@ linters-settings:
     check-type-assertions: true
     check-blank: true
     disable-default-exclusions: true
-#run:
+run:
   #tests: false
+  skip-files:
+    # Ignore files that are partially vendored
+    - lib/aferoWrapper.go
