@@ -1,4 +1,6 @@
-#!/usr/bin/env sh -e
+#!/usr/bin/env bash
+set -e
+
 # Compile a release for the current platform
 #goreleaser build --single-target --clean --snapshot
 

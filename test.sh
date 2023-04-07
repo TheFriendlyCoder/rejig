@@ -1,4 +1,5 @@
-#!/usr/bin/env sh -e
+#!/usr/bin/env bash
+set -e
 
 # minimum code coverage we expect from our code project
 TESTCOVERAGE_THRESHOLD=80
