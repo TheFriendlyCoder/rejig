@@ -2,6 +2,7 @@ package templateManager
 
 import (
 	"github.com/hashicorp/go-version"
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
@@ -18,7 +19,7 @@ func Test_parseManifest(t *testing.T) {
 	srcFile := sampleDataFile("simple_manifest.yml")
 
 	// When we parse it
-	manifest, err := parseManifest(srcFile)
+	manifest, err := parseManifest(afero.NewOsFs(), srcFile)
 
 	// We expect no errors
 	r.NoError(err)
@@ -58,7 +59,7 @@ func Test_parseManifestNotExist(t *testing.T) {
 	r.NoError(err)
 	defer os.RemoveAll(tmpDir)
 
-	_, err = parseManifest(path.Join(tmpDir, "fubar.yml"))
+	_, err = parseManifest(afero.NewOsFs(), path.Join(tmpDir, "fubar.yml"))
 	a.Error(err)
 }
 
@@ -80,7 +81,7 @@ func Test_parseManifestInvalidYAML(t *testing.T) {
 	r.NoError(srcfile.Close())
 
 	// when we try to parse the file
-	_, err = parseManifest(samplefile)
+	_, err = parseManifest(afero.NewOsFs(), samplefile)
 
 	// then we expect error results
 	emptyTypeErr := yaml.TypeError{}
@@ -92,7 +93,7 @@ func Test_parseManifestInvalidTemplateArgs(t *testing.T) {
 
 	srcFile := sampleDataFile("simple_manifest_with_invalid_args.yml")
 
-	_, err := parseManifest(srcFile)
+	_, err := parseManifest(afero.NewOsFs(), srcFile)
 	// TODO: Find some way to make error reporting here more user friendly
 	//		 may require a different YAML parsing library
 	// https://github.com/go-yaml/yaml/pull/901

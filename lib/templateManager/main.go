@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -29,6 +28,9 @@ type templateManager struct {
 	// parameters customize the behavior of the template and are used when
 	// generating a new instance of the template
 	templateContext map[string]any
+	// srcFilesystem virtual file system to use when interacting with source files
+	// defining the content of the template we are managing by this struct
+	srcFilesystem afero.Fs
 }
 
 // New constructs new instances of our template manager, which allows the caller
@@ -38,15 +40,16 @@ func New(options lib.TemplateOptions) (templateManager, error) {
 	retval := templateManager{}
 	retval.Options = options
 	retval.templateContext = map[string]any{}
+	retval.srcFilesystem = afero.NewOsFs()
 
 	// Parse manifest file
 	manifestPath := filepath.Join(options.Source, manifestFileName)
-	_, err := os.Stat(manifestPath)
+	_, err := retval.srcFilesystem.Stat(manifestPath)
 	if err != nil {
 		return retval, errors.Wrap(err, "Unable to read manifest file")
 	}
 
-	retval.manifestData, err = parseManifest(manifestPath)
+	retval.manifestData, err = parseManifest(retval.srcFilesystem, manifestPath)
 	if err != nil {
 		return retval, errors.Wrap(err, "Failed parsing manifest file")
 	}
@@ -78,6 +81,5 @@ func (t *templateManager) GatherParams(cmd *cobra.Command) error {
 // Generate produces a new template based on the parameters defined in this
 // object, in the specified output folder
 func (t *templateManager) Generate(targetPath string) error {
-	fs := afero.NewOsFs()
-	return errors.Wrap(generate(fs, t.Options.Source, targetPath, t.templateContext), "Failed generating project")
+	return errors.Wrap(generate(t.srcFilesystem, t.Options.Source, targetPath, t.templateContext), "Failed generating project")
 }

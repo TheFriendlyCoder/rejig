@@ -47,7 +47,7 @@ func generate(srcFS afero.Fs, rootDir string, targetPath string, context map[str
 		if info.IsDir() {
 			err = createOutputDir(newOutputPath, info.Mode())
 		} else {
-			err = createOutputFile(path, newOutputPath, info.Mode(), context)
+			err = createOutputFile(srcFS, path, newOutputPath, info.Mode(), context)
 		}
 
 		return err
@@ -82,10 +82,10 @@ func createOutputDir(newOutputPath string, mode os.FileMode) error {
 }
 
 // createOutputFile applies template processor to a file
-func createOutputFile(originalPath string, newOutputPath string, mode os.FileMode, context map[string]any) error {
+func createOutputFile(srcFS afero.Fs, originalPath string, newOutputPath string, mode os.FileMode, context map[string]any) error {
 	// Read in the original file contents
 	var data []byte
-	data, err := os.ReadFile(originalPath)
+	data, err := afero.ReadFile(srcFS, originalPath)
 	if err != nil {
 		return errors.Wrap(err, "Failed to read source file")
 	}
