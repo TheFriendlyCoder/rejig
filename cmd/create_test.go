@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/TheFriendlyCoder/rejigger/lib"
+	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"os"
@@ -35,11 +36,11 @@ func Test_ValidateArgsSuccess(t *testing.T) {
 
 	// and a mock set of app options
 	templateName := "MyTemplate"
-	options := lib.AppOptions{
-		Templates: []lib.TemplateOptions{{
+	options := ao.AppOptions{
+		Templates: []ao.TemplateOptions{{
 			Alias:  templateName,
 			Source: ".",
-			Type:   lib.TstLocal,
+			Type:   ao.TstLocal,
 		}},
 	}
 
@@ -62,8 +63,8 @@ func Test_ValidateArgsTemplateNotExists(t *testing.T) {
 
 	// and a mock set of app options
 	templateName := "MyTemplate"
-	options := lib.AppOptions{
-		Templates: []lib.TemplateOptions{},
+	options := ao.AppOptions{
+		Templates: []ao.TemplateOptions{},
 	}
 	// when we validate our input args
 	args := []string{destDir, templateName}
@@ -90,11 +91,11 @@ func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
 
 	// and a mock set of app options
 	templateName := "MyTemplate"
-	options := lib.AppOptions{
-		Templates: []lib.TemplateOptions{{
+	options := ao.AppOptions{
+		Templates: []ao.TemplateOptions{{
 			Alias:  templateName,
 			Source: ".",
-			Type:   lib.TstLocal,
+			Type:   ao.TstLocal,
 		}},
 	}
 
@@ -123,8 +124,7 @@ func Test_CreateCommandSucceeds(t *testing.T) {
 
 	// and an app options file with a template pointing to our project
 	templateName := "MyTemplate"
-	srcDir, err := sampleProj("simple")
-	r.NoError(err)
+	srcDir := getProjectDir("simple")
 	optionsText := fmt.Sprintf(`
 templates:
   - type: local
@@ -251,8 +251,7 @@ func Test_CreateCommandGenerateFailure(t *testing.T) {
 
 	// and an app options file with a template pointing to our project
 	templateName := "MyTemplate"
-	srcDir, err := sampleProj("simple")
-	r.NoError(err)
+	srcDir := getProjectDir("simple")
 	optionsText := fmt.Sprintf(`
 templates:
   - type: local

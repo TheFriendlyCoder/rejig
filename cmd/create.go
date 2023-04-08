@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/TheFriendlyCoder/rejigger/lib"
+	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	"github.com/TheFriendlyCoder/rejigger/lib/templateManager"
 	"github.com/pkg/errors"
 	"log"
@@ -22,13 +23,13 @@ type rootArgs struct {
 }
 
 // findTemplate looks up a specific template in the template inventory
-func findTemplate(appOptions lib.AppOptions, alias string) (lib.TemplateOptions, error) {
+func findTemplate(appOptions ao.AppOptions, alias string) (ao.TemplateOptions, error) {
 	for _, t := range appOptions.Templates {
 		if t.Alias == alias {
 			return t, nil
 		}
 	}
-	return lib.TemplateOptions{}, lib.UnknownTemplateError{TemplateAlias: alias}
+	return ao.TemplateOptions{}, lib.UnknownTemplateError{TemplateAlias: alias}
 }
 
 // run Primary entry point function for our generator
@@ -38,7 +39,7 @@ func run(cmd *cobra.Command, args rootArgs) error {
 	// during unit testing to validate results of CLI operations)
 	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Loading template %s...\n", args.templateAlias))
 
-	appOptions, ok := cmd.Context().Value(CkOptions).(lib.AppOptions)
+	appOptions, ok := cmd.Context().Value(CkOptions).(ao.AppOptions)
 	if !ok {
 		return lib.InternalError{Message: "Failed to retrieve app options"}
 	}
@@ -69,7 +70,7 @@ func run(cmd *cobra.Command, args rootArgs) error {
 }
 
 // validateArgs checks to see if the command line args provided to the app are valid
-func validateArgs(options lib.AppOptions, args []string) error {
+func validateArgs(options ao.AppOptions, args []string) error {
 	if lib.DirExists(args[0]) {
 		contents, err := os.ReadDir(args[0])
 		if err != nil {
@@ -109,7 +110,7 @@ var createCmd = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "Initialization error")
 		}
-		appOptions, ok := cmd.Context().Value(CkOptions).(lib.AppOptions)
+		appOptions, ok := cmd.Context().Value(CkOptions).(ao.AppOptions)
 		if !ok {
 			return lib.CommandContextNotDefined
 		}

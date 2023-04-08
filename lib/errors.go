@@ -2,7 +2,6 @@ package lib
 
 import (
 	"fmt"
-	"strings"
 )
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -35,21 +34,6 @@ func (p PathError) Error() string {
 		panic("Unsupported Path error")
 	}
 	return retval
-}
-
-// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-//										AppOptionsError
-
-type AppOptionsError struct {
-	Messages []string
-}
-
-func (e AppOptionsError) Error() string {
-	if len(e.Messages) == 1 {
-		return "Failed to parse application options: " + e.Messages[0]
-	}
-	retval := strings.Join(e.Messages, "\n\t")
-	return "Failed to parse application options:\n\t" + retval
 }
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=

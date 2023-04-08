@@ -3,7 +3,7 @@ package templateManager
 import (
 	"bytes"
 	"fmt"
-	"github.com/TheFriendlyCoder/rejigger/lib"
+	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	"github.com/hashicorp/go-version"
 	"github.com/pkg/errors"
 	"github.com/spf13/afero"
@@ -47,10 +47,10 @@ template:
 	err = os.WriteFile(configFile, []byte(templateConfigText), 0600)
 	r.NoError(err)
 
-	options := lib.TemplateOptions{
+	options := ao.TemplateOptions{
 		Source: tmpDir,
 		Alias:  "MyAlias",
-		Type:   lib.TstLocal,
+		Type:   ao.TstLocal,
 	}
 
 	// When we try constructing a new instance of our manager
@@ -84,10 +84,10 @@ func Test_templateManagerConstructor_NoManifest(t *testing.T) {
 	r.NoError(err)
 	defer os.RemoveAll(tmpDir)
 
-	options := lib.TemplateOptions{
+	options := ao.TemplateOptions{
 		Source: tmpDir,
 		Alias:  "MyAlias",
-		Type:   lib.TstLocal,
+		Type:   ao.TstLocal,
 	}
 
 	// When we try constructing a new instance of our manager
@@ -112,10 +112,10 @@ func Test_templateManagerConstructor_InvalidManifest(t *testing.T) {
 	err = os.WriteFile(configFile, []byte(templateConfigText), 0600)
 	r.NoError(err)
 
-	options := lib.TemplateOptions{
+	options := ao.TemplateOptions{
 		Source: tmpDir,
 		Alias:  "MyAlias",
-		Type:   lib.TstLocal,
+		Type:   ao.TstLocal,
 	}
 
 	// When we try constructing a new instance of our manager
@@ -170,10 +170,10 @@ template:
 			err = os.WriteFile(configFile, []byte(templateConfigText), 0600)
 			r.NoError(err)
 
-			options := lib.TemplateOptions{
+			options := ao.TemplateOptions{
 				Source: tmpDir,
 				Alias:  "MyAlias",
-				Type:   lib.TstLocal,
+				Type:   ao.TstLocal,
 			}
 
 			// and a fake command with some user input to respond to prompts from the template
@@ -215,15 +215,15 @@ func Test_templateManagerGenerate(t *testing.T) {
 
 	tests := map[string]struct {
 		sourceDir    string
-		templateType lib.TemplateSourceType
+		templateType ao.TemplateSourceType
 	}{
 		"Local file system template": {
-			sourceDir:    testProjectDir("simple"),
-			templateType: lib.TstLocal,
+			sourceDir:    getProjectDir("simple"),
+			templateType: ao.TstLocal,
 		},
 		"Git file system template": {
 			sourceDir:    "https://github.com/TheFriendlyCoder/rejiggerTestTemplate.git",
-			templateType: lib.TstGit,
+			templateType: ao.TstGit,
 		},
 	}
 
@@ -235,7 +235,7 @@ func Test_templateManagerGenerate(t *testing.T) {
 			r.NoError(err)
 			defer os.RemoveAll(tmpDir)
 
-			options := lib.TemplateOptions{
+			options := ao.TemplateOptions{
 				Source: data.sourceDir,
 				Alias:  "MyAlias",
 				Type:   data.templateType,
@@ -277,10 +277,10 @@ func Test_templateManagerFailToGenerate(t *testing.T) {
 	outputDir := path.Join(tmpDir, "output")
 	r.NoError(os.Mkdir(outputDir, 0400))
 
-	options := lib.TemplateOptions{
-		Source: testProjectDir("simple"),
+	options := ao.TemplateOptions{
+		Source: getProjectDir("simple"),
 		Alias:  "MyAlias",
-		Type:   lib.TstLocal,
+		Type:   ao.TstLocal,
 	}
 
 	// and a fake command with some user input to respond to prompts from the template

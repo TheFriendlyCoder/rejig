@@ -10,9 +10,9 @@ import (
 	"strings"
 )
 
-// testProjectDir Gets the path to a specific test project
-func testProjectDir(projectName string) string {
-	retval := path.Join("..", "..", "testProjects", projectName)
+// getProjectDir Gets the path to a specific test project
+func getProjectDir(projectName string) string {
+	retval := path.Join("..", "..", "testdata", "projects", projectName)
 	var info, err = os.Stat(retval)
 	if err != nil {
 		panic("Critical test failure: unable to access test project " + projectName)
@@ -27,22 +27,22 @@ func testProjectDir(projectName string) string {
 	return retval
 }
 
-// sampleDataFile loads the path to a sample data for from the test data folder
-func sampleDataFile(filename string) string {
-	retval := path.Join("..", "testdata", filename)
+// getManifestFile loads the path to a sample data for from the test data folder
+func getManifestFile(filename string) string {
+	retval := path.Join("..", "..", "testdata", "manifests", filename)
 	info, err := os.Stat(retval)
 	if err != nil {
-		panic("Critical test failure: unable to access test data " + filename)
+		panic("Critical test failure: unable to access test manifest " + filename)
 	}
 	if info.IsDir() {
-		panic("Critical test failure: test file " + filename + " appears to be a directory")
+		panic("Critical test failure: test manifest " + filename + " appears to be a directory")
 	}
 	return retval
 }
 
-// unmodified compares the contents of 2 files and returns true if they are
+// isUnmodified compares the contents of 2 files and returns true if they are
 // the identical
-func unmodified(fs afero.Fs, r *require.Assertions, file1 string, file2 string) bool {
+func isUnmodified(fs afero.Fs, r *require.Assertions, file1 string, file2 string) bool {
 	f1, err := afero.ReadFile(fs, file1)
 	r.NoError(err)
 
@@ -52,9 +52,9 @@ func unmodified(fs afero.Fs, r *require.Assertions, file1 string, file2 string) 
 	return bytes.Equal(f1, f2)
 }
 
-// contains checks for a certain character string in a file and returns
+// fileContains checks for a certain character string in a file and returns
 // true if it is found
-func contains(r *require.Assertions, file string, pattern string) bool {
+func fileContains(r *require.Assertions, file string, pattern string) bool {
 	contents, err := os.ReadFile(file)
 	r.NoError(err)
 

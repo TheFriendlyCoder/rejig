@@ -193,7 +193,7 @@ func (fs *Afero) Join(elem ...string) string {
 	return path.Join(elem...)
 }
 
-// RemoveAll removes a directory path and any children it contains. It
+// RemoveAll removes a directory path and any children it fileContains. It
 // does not fail if the path does not exist (return nil).
 func (fs *Afero) RemoveAll(filePath string) error {
 	if fs.Debug {
