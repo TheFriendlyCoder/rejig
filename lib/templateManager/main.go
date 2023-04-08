@@ -7,6 +7,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
+	"gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/storage/memory"
 	"path/filepath"
 	"strings"
 )
@@ -33,6 +35,35 @@ type templateManager struct {
 	srcFilesystem afero.Fs
 }
 
+// getGitTemplate loads a template source from a Git repository
+func getGitTemplate(gitURL string) (afero.Fs, error) {
+	appFS := afero.NewMemMapFs()
+	fs := NewWraper(appFS, ".", false)
+
+	_, err := git.Clone(memory.NewStorage(), fs, &git.CloneOptions{
+		URL: gitURL,
+	})
+	if err != nil {
+		return appFS, errors.Wrap(err, "Failed querying Git repo")
+	}
+	return appFS, nil
+}
+
+// rootDir gets the root folder where the template source files are stored
+// takes into account the virtual file system used by the manager
+func (t *templateManager) rootDir() string {
+	switch t.Options.Type {
+	case lib.TstGit:
+		return "."
+	case lib.TstLocal:
+		return t.Options.Source
+	case lib.TstUndefined:
+		fallthrough
+	default:
+		panic("should never happen: unsupported template type: " + t.Options.Alias)
+	}
+}
+
 // New constructs new instances of our template manager, which allows the caller
 // to interact with a template in various ways
 func New(options lib.TemplateOptions) (templateManager, error) {
@@ -40,11 +71,25 @@ func New(options lib.TemplateOptions) (templateManager, error) {
 	retval := templateManager{}
 	retval.Options = options
 	retval.templateContext = map[string]any{}
-	retval.srcFilesystem = afero.NewOsFs()
+
+	var err error
+	switch options.Type {
+	case lib.TstGit:
+		retval.srcFilesystem, err = getGitTemplate(options.Source)
+		if err != nil {
+			return retval, errors.Wrap(err, "Failed loading Git template")
+		}
+	case lib.TstLocal:
+		retval.srcFilesystem = afero.NewOsFs()
+	case lib.TstUndefined:
+		fallthrough
+	default:
+		panic("should never happen: unsupported template type: " + options.Alias)
+	}
 
 	// Parse manifest file
-	manifestPath := filepath.Join(options.Source, manifestFileName)
-	_, err := retval.srcFilesystem.Stat(manifestPath)
+	manifestPath := filepath.Join(retval.rootDir(), manifestFileName)
+	_, err = retval.srcFilesystem.Stat(manifestPath)
 	if err != nil {
 		return retval, errors.Wrap(err, "Unable to read manifest file")
 	}
@@ -81,5 +126,6 @@ func (t *templateManager) GatherParams(cmd *cobra.Command) error {
 // Generate produces a new template based on the parameters defined in this
 // object, in the specified output folder
 func (t *templateManager) Generate(targetPath string) error {
-	return errors.Wrap(generate(t.srcFilesystem, t.Options.Source, targetPath, t.templateContext), "Failed generating project")
+	// TODO: add these support methods to the manager class as private methods
+	return errors.Wrap(generate(t.srcFilesystem, t.rootDir(), targetPath, t.templateContext), "Failed generating project")
 }

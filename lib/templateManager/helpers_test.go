@@ -2,6 +2,7 @@ package templateManager
 
 import (
 	"bytes"
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/require"
 	"os"
 	"path"
@@ -41,8 +42,8 @@ func sampleDataFile(filename string) string {
 
 // unmodified compares the contents of 2 files and returns true if they are
 // the identical
-func unmodified(r *require.Assertions, file1 string, file2 string) bool {
-	f1, err := os.ReadFile(file1)
+func unmodified(fs afero.Fs, r *require.Assertions, file1 string, file2 string) bool {
+	f1, err := afero.ReadFile(fs, file1)
 	r.NoError(err)
 
 	f2, err := os.ReadFile(file2)

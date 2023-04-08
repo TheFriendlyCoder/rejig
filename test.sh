@@ -25,7 +25,7 @@ COVERAGE_FILE=coverage.out
 go test ./... -coverprofile "${COVERAGE_FILE}" -covermode set
 
 # Remove ignored files from coverage report
-declare -a ignoreFiles=("lib/aferoWrapper.go")
+declare -a ignoreFiles=("lib/templateManager/aferoWrapper.go")
 for curFile in "${ignoreFiles[@]}"; do
   # NOTE: GREP needs to store output to a temp file otherwise the bash
   #       file redirect will overwrite the original file with an empty
@@ -38,7 +38,7 @@ done
 # Display ASCII report to console
 go tool cover -func="${COVERAGE_FILE}"
 # Display HTML report in default browser
-#go tool cover -html="${COVERAGE_FILE}"
+go tool cover -html="${COVERAGE_FILE}"
 
 # Check coverage threshold
 # Extract the coverage total from the coverage report. The line being parsed should look

@@ -49,7 +49,6 @@ func generate(srcFS afero.Fs, rootDir string, targetPath string, context map[str
 		} else {
 			err = createOutputFile(srcFS, path, newOutputPath, info.Mode(), context)
 		}
-
 		return err
 	})
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	"github.com/hashicorp/go-version"
 	"github.com/pkg/errors"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -212,10 +213,69 @@ template:
 func Test_templateManagerGenerate(t *testing.T) {
 	r := require.New(t)
 
-	// Given an empty temp folder
+	tests := map[string]struct {
+		sourceDir    string
+		templateType lib.TemplateSourceType
+	}{
+		"Local file system template": {
+			sourceDir:    testProjectDir("simple"),
+			templateType: lib.TstLocal,
+		},
+		"Git file system template": {
+			sourceDir:    "https://github.com/TheFriendlyCoder/rejiggerTestTemplate.git",
+			templateType: lib.TstGit,
+		},
+	}
+
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+
+			// Given an empty temp folder
+			tmpDir, err := os.MkdirTemp("", "")
+			r.NoError(err)
+			defer os.RemoveAll(tmpDir)
+
+			options := lib.TemplateOptions{
+				Source: data.sourceDir,
+				Alias:  "MyAlias",
+				Type:   data.templateType,
+			}
+
+			// and a fake command with some user input to respond to prompts from the template
+			output := new(bytes.Buffer)
+			fakeInput := new(bytes.Buffer)
+			expectedProjName := "MyProj"
+			expectedVersion := "1.2.3"
+			_, err = fakeInput.WriteString(expectedProjName + "\n")
+			r.NoError(err)
+			_, err = fakeInput.WriteString(expectedVersion + "\n")
+			r.NoError(err)
+
+			cmd := cobra.Command{}
+			cmd.SetOut(output)
+			cmd.SetErr(output)
+			cmd.SetIn(fakeInput)
+
+			// when we process the user input
+			tm, err := New(options)
+			r.NoError(err)
+			err = tm.GatherParams(&cmd)
+			r.NoError(err)
+			err = tm.Generate(tmpDir)
+			r.NoError(err)
+		})
+	}
+}
+
+func Test_templateManagerFailToGenerate(t *testing.T) {
+	r := require.New(t)
+
+	// Given a read-only output folder
 	tmpDir, err := os.MkdirTemp("", "")
 	r.NoError(err)
 	defer os.RemoveAll(tmpDir)
+	outputDir := path.Join(tmpDir, "output")
+	r.NoError(os.Mkdir(outputDir, 0400))
 
 	options := lib.TemplateOptions{
 		Source: testProjectDir("simple"),
@@ -238,11 +298,27 @@ func Test_templateManagerGenerate(t *testing.T) {
 	cmd.SetErr(output)
 	cmd.SetIn(fakeInput)
 
-	// when we process the user input
 	tm, err := New(options)
 	r.NoError(err)
 	err = tm.GatherParams(&cmd)
 	r.NoError(err)
-	err = tm.Generate(tmpDir)
+
+	// When we try generating in a path that doesn't exist
+	//err = tm.Generate(path.Join(tmpDir, "DoesNotExist"))
+	err = tm.Generate(outputDir)
+
+	// The operation should fail
+	r.Error(err)
+
+}
+
+func Test_getGitTemplate(t *testing.T) {
+	r := require.New(t)
+
+	tmp, err := getGitTemplate("https://github.com/TheFriendlyCoder/rejiggerTestTemplate.git")
 	r.NoError(err)
+
+	res, err := afero.ReadDir(tmp, ".")
+	r.NoError(err)
+	r.True(len(res) > 0)
 }
