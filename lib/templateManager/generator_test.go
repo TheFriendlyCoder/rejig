@@ -23,7 +23,7 @@ func Test_basicGenerator(t *testing.T) {
 	}{
 		"Local file system template": {
 			fileSystem: afero.NewOsFs(),
-			sourceDir:  testProjectDir("simple"),
+			sourceDir:  getProjectDir("simple"),
 		},
 		"Git file system template": {
 			fileSystem: gitFS,
@@ -60,17 +60,17 @@ func Test_basicGenerator(t *testing.T) {
 			act := filepath.Join(tmpDir, ".gitignore")
 			fmt.Println(act)
 			a.FileExists(act)
-			a.True(unmodified(fs, r, exp, act))
+			a.True(isUnmodified(fs, r, exp, act))
 
 			act = filepath.Join(tmpDir, "version.txt")
 			a.FileExists(act)
-			a.True(contains(r, act, expVersion))
-			a.False(contains(r, act, "{{version}}"))
+			a.True(fileContains(r, act, expVersion))
+			a.False(fileContains(r, act, "{{version}}"))
 
 			act = filepath.Join(tmpDir, "MyProj", "main.txt")
 			a.FileExists(act)
-			a.True(contains(r, act, expProj))
-			a.False(contains(r, act, "{{project_name}}"))
+			a.True(fileContains(r, act, expProj))
+			a.False(fileContains(r, act, "{{project_name}}"))
 		})
 	}
 }

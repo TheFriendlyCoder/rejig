@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/TheFriendlyCoder/rejigger/lib"
+	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	"github.com/pkg/errors"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -20,7 +21,7 @@ const manifestFileName = ".rejig.yml"
 type templateManager struct {
 	// Options parsed configuration options that describe the template
 	// these values are typically provided by the template inventory
-	Options lib.TemplateOptions
+	Options ao.TemplateOptions
 	// manifestData data parsed from the template manifest file provided
 	// by the template itself. This info describes the content and behavior
 	// of the template, user configurable options, and other such information
@@ -53,11 +54,13 @@ func getGitTemplate(gitURL string) (afero.Fs, error) {
 // takes into account the virtual file system used by the manager
 func (t *templateManager) rootDir() string {
 	switch t.Options.Type {
-	case lib.TstGit:
+	case ao.TstGit:
 		return "."
-	case lib.TstLocal:
+	case ao.TstLocal:
 		return t.Options.Source
-	case lib.TstUndefined:
+	case ao.TstUndefined:
+		fallthrough
+	case ao.TstUnknown:
 		fallthrough
 	default:
 		panic("should never happen: unsupported template type: " + t.Options.Alias)
@@ -66,7 +69,7 @@ func (t *templateManager) rootDir() string {
 
 // New constructs new instances of our template manager, which allows the caller
 // to interact with a template in various ways
-func New(options lib.TemplateOptions) (templateManager, error) {
+func New(options ao.TemplateOptions) (templateManager, error) {
 	// Initialize empty options
 	retval := templateManager{}
 	retval.Options = options
@@ -74,14 +77,16 @@ func New(options lib.TemplateOptions) (templateManager, error) {
 
 	var err error
 	switch options.Type {
-	case lib.TstGit:
+	case ao.TstGit:
 		retval.srcFilesystem, err = getGitTemplate(options.Source)
 		if err != nil {
 			return retval, errors.Wrap(err, "Failed loading Git template")
 		}
-	case lib.TstLocal:
+	case ao.TstLocal:
 		retval.srcFilesystem = afero.NewOsFs()
-	case lib.TstUndefined:
+	case ao.TstUndefined:
+		fallthrough
+	case ao.TstUnknown:
 		fallthrough
 	default:
 		panic("should never happen: unsupported template type: " + options.Alias)

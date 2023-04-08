@@ -2,14 +2,12 @@ package cmd
 
 import (
 	"context"
-	"github.com/TheFriendlyCoder/rejigger/lib"
+	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	cc "github.com/ivanpirog/coloredcobra"
-	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
-	"reflect"
 )
 
 // cfgFile path to the file containing config options for the app
@@ -85,46 +83,8 @@ func init() {
 
 }
 
-// appOptionsDecoder custom hook method used to translate raw config data into a structure
-// that is easier to leverage in the application code
-func appOptionsDecoder() mapstructure.DecodeHookFuncType {
-	// Based on example found here:
-	//		https://sagikazarmark.hu/blog/decoding-custom-formats-with-viper/
-	return func(
-		src reflect.Type,
-		target reflect.Type,
-		raw interface{},
-	) (interface{}, error) {
-
-		// For now we only need to customize the "type" field of the TemplateOptions
-		if (target != reflect.TypeOf(lib.TemplateOptions{})) {
-			return raw, nil
-		}
-
-		// Map the "type" field from a character string format to an enumerated type
-		templateData, ok := raw.(map[string]interface{})
-		if !ok {
-			return nil, lib.AppOptionsDecodeError
-		}
-
-		var newVal lib.TemplateSourceType
-		switch templateData["type"] {
-		case "":
-			newVal = lib.TstUndefined
-		case "git":
-			newVal = lib.TstGit
-		case "local":
-			newVal = lib.TstLocal
-		default:
-			return nil, lib.AppOptionsInvalidSourceTypeError
-		}
-		templateData["type"] = newVal
-		return templateData, nil
-	}
-}
-
 // initConfig reads app config info from a config file if provided
-func initConfig() (lib.AppOptions, error) {
+func initConfig() (ao.AppOptions, error) {
 	if cfgFile != "" {
 		// Use config file from the command line flag.
 		viper.SetConfigFile(cfgFile)
@@ -139,10 +99,13 @@ func initConfig() (lib.AppOptions, error) {
 		viper.SetConfigName(".rejig")
 	}
 
-	var appOptions lib.AppOptions
+	appOptions, err := ao.New()
+	if err != nil {
+		return appOptions, errors.Wrap(err, "Failed to create default set of application options")
+	}
 
 	// If a config file is found, read it in.
-	err := viper.ReadInConfig()
+	err = viper.ReadInConfig()
 	// If there is no config file, we ignore that error and assume
 	// there is no app config
 	if errors.As(err, &viper.ConfigFileNotFoundError{}) {
@@ -151,14 +114,12 @@ func initConfig() (lib.AppOptions, error) {
 		return appOptions, errors.Wrap(err, "Failure reading options file")
 	}
 
-	// If we have a config file, try parsing it
-	if err = viper.Unmarshal(&appOptions, viper.DecodeHook(appOptionsDecoder())); err != nil {
-		return appOptions, errors.Wrap(err, "Failed parsing app options file")
+	appOptions, err = ao.FromViper(viper.GetViper())
+	if err != nil {
+		return appOptions, errors.Wrap(err, "Failed to parse options file")
 	}
 
 	// Then validate the results to make sure they meet the application requirements
-	if err = appOptions.Validate(); err != nil {
-		return appOptions, errors.Wrap(err, "App options file failed validation")
-	}
-	return appOptions, nil
+	err = errors.Wrap(appOptions.Validate(), "App options file failed validation")
+	return appOptions, err
 }

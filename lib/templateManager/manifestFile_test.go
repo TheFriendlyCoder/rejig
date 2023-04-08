@@ -16,7 +16,7 @@ func Test_parseManifest(t *testing.T) {
 	a := assert.New(t)
 
 	// Given a sample manifest file
-	srcFile := sampleDataFile("simple_manifest.yml")
+	srcFile := getManifestFile("simple_manifest.yml")
 
 	// When we parse it
 	manifest, err := parseManifest(afero.NewOsFs(), srcFile)
@@ -72,7 +72,7 @@ func Test_parseManifestInvalidYAML(t *testing.T) {
 	r.NoError(err)
 	defer os.RemoveAll(tmpDir)
 
-	// and a sample config file that contains non-yaml data
+	// and a sample config file that fileContains non-yaml data
 	samplefile := path.Join(tmpDir, "fubar.yml")
 	srcfile, err := os.Create(samplefile)
 	r.NoError(err)
@@ -91,7 +91,7 @@ func Test_parseManifestInvalidYAML(t *testing.T) {
 func Test_parseManifestInvalidTemplateArgs(t *testing.T) {
 	a := assert.New(t)
 
-	srcFile := sampleDataFile("simple_manifest_with_invalid_args.yml")
+	srcFile := getManifestFile("simple_manifest_with_invalid_args.yml")
 
 	_, err := parseManifest(afero.NewOsFs(), srcFile)
 	// TODO: Find some way to make error reporting here more user friendly
