@@ -111,7 +111,7 @@ var createCmd = &cobra.Command{
 		}
 		return validateArgs(appOptions, args)
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		parsedArgs := rootArgs{
 			targetPath:    args[0],
 			templateAlias: args[1],
@@ -122,12 +122,15 @@ var createCmd = &cobra.Command{
 			type stackTracer interface {
 				StackTrace() errors.StackTrace
 			}
-			err2, _ := err.(stackTracer)
-			for _, f := range err2.StackTrace() {
-				fmt.Printf("%+s:%d\n", f, f)
+			if temp, ok := interface{}(err).(stackTracer); ok {
+				for _, f := range temp.StackTrace() {
+					lib.SNF(fmt.Fprintf(cmd.ErrOrStderr(), "%+s:%d\n", f, f))
+				}
 			}
-			lib.SNF(fmt.Fprintf(cmd.ErrOrStderr(), "Failed to generate project"))
+			lib.SNF(fmt.Fprintln(cmd.ErrOrStderr(), "Failed to generate project"))
+			lib.SNF(fmt.Fprintln(cmd.ErrOrStderr(), err.Error()))
 		}
+		return err
 	},
 }
 

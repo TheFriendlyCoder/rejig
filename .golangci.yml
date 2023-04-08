@@ -35,4 +35,4 @@ run:
   #tests: false
   skip-files:
     # Ignore files that are partially vendored
-    - lib/aferoWrapper.go
+    - lib/templateManager/aferoWrapper.go

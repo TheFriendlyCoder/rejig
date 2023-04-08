@@ -1,4 +1,4 @@
-package lib
+package templateManager
 
 // Based on implementation found here:
 // https://github.com/Maldris/go-billy-afero

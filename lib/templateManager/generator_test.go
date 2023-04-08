@@ -1,6 +1,7 @@
 package templateManager
 
 import (
+	"fmt"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -13,40 +14,63 @@ func Test_basicGenerator(t *testing.T) {
 	r := require.New(t)
 	a := assert.New(t)
 
-	srcPath := testProjectDir("simple")
-
-	// Given an empty temp folder
-	tmpDir, err := os.MkdirTemp("", "")
+	gitFS, err := getGitTemplate("https://github.com/TheFriendlyCoder/rejiggerTestTemplate.git")
 	r.NoError(err)
-	defer os.RemoveAll(tmpDir)
 
-	// We attempt to run the generator
-	expVersion := "1.6.9"
-	expProj := "MyProj"
-	context := map[string]any{
-		"project_name": expProj,
-		"version":      expVersion,
+	tests := map[string]struct {
+		fileSystem afero.Fs
+		sourceDir  string
+	}{
+		"Local file system template": {
+			fileSystem: afero.NewOsFs(),
+			sourceDir:  testProjectDir("simple"),
+		},
+		"Git file system template": {
+			fileSystem: gitFS,
+			sourceDir:  ".",
+		},
 	}
-	fs := afero.NewOsFs()
-	err = generate(fs, srcPath, tmpDir, context)
 
-	r.NoError(err, "Failed to run generator")
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
 
-	a.DirExists(filepath.Join(tmpDir, "MyProj"))
-	a.NoFileExists(filepath.Join(tmpDir, ".rejig.yml"))
+			srcPath := data.sourceDir
 
-	exp := filepath.Join(srcPath, ".gitignore")
-	act := filepath.Join(tmpDir, ".gitignore")
-	a.FileExists(act)
-	a.True(unmodified(r, exp, act))
+			// Given an empty temp folder
+			tmpDir, err := os.MkdirTemp("", "")
+			r.NoError(err)
+			defer os.RemoveAll(tmpDir)
 
-	act = filepath.Join(tmpDir, "version.txt")
-	a.FileExists(act)
-	a.True(contains(r, act, expVersion))
-	a.False(contains(r, act, "{{version}}"))
+			// We attempt to run the generator
+			expVersion := "1.6.9"
+			expProj := "MyProj"
+			context := map[string]any{
+				"project_name": expProj,
+				"version":      expVersion,
+			}
+			fs := data.fileSystem
+			err = generate(fs, srcPath, tmpDir, context)
 
-	act = filepath.Join(tmpDir, "MyProj", "main.txt")
-	a.FileExists(act)
-	a.True(contains(r, act, expProj))
-	a.False(contains(r, act, "{{project_name}}"))
+			r.NoError(err, "Failed to run generator")
+
+			a.DirExists(filepath.Join(tmpDir, "MyProj"))
+			a.NoFileExists(filepath.Join(tmpDir, ".rejig.yml"))
+
+			exp := filepath.Join(srcPath, ".gitignore")
+			act := filepath.Join(tmpDir, ".gitignore")
+			fmt.Println(act)
+			a.FileExists(act)
+			a.True(unmodified(fs, r, exp, act))
+
+			act = filepath.Join(tmpDir, "version.txt")
+			a.FileExists(act)
+			a.True(contains(r, act, expVersion))
+			a.False(contains(r, act, "{{version}}"))
+
+			act = filepath.Join(tmpDir, "MyProj", "main.txt")
+			a.FileExists(act)
+			a.True(contains(r, act, expProj))
+			a.False(contains(r, act, "{{project_name}}"))
+		})
+	}
 }

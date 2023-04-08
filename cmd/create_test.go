@@ -237,3 +237,50 @@ templates:
 	// And some status info to be reported
 	r.Contains(actual.String(), "DoesNotExist")
 }
+
+func Test_CreateCommandGenerateFailure(t *testing.T) {
+	r := require.New(t)
+	a := assert.New(t)
+
+	// Given a read-only output folder
+	tmpDir, err := os.MkdirTemp("", "")
+	r.NoError(err)
+	defer os.RemoveAll(tmpDir)
+	outputDir := path.Join(tmpDir, "output")
+	r.NoError(os.Mkdir(outputDir, 0400))
+
+	// and an app options file with a template pointing to our project
+	templateName := "MyTemplate"
+	srcDir, err := sampleProj("simple")
+	r.NoError(err)
+	optionsText := fmt.Sprintf(`
+templates:
+  - type: local
+    source: %s
+    alias: %s`, srcDir, templateName)
+	configFile := path.Join(tmpDir, "options.yml")
+	err = os.WriteFile(configFile, []byte(optionsText), 0600)
+	r.NoError(err)
+
+	// and some fake user input to respond to prompts from the template
+	output := new(bytes.Buffer)
+	fakeInput := new(bytes.Buffer)
+	_, err = fakeInput.WriteString("MyProj\n")
+	r.NoError(err)
+	_, err = fakeInput.WriteString("1.2.3\n")
+	r.NoError(err)
+
+	// When we trigger the create command
+	rootCmd.SetOut(output)
+	rootCmd.SetErr(output)
+	rootCmd.SetIn(fakeInput)
+	rootCmd.SetArgs([]string{"--config=" + configFile, "create", outputDir, templateName})
+	err = rootCmd.Execute()
+
+	// The operation should fail
+	r.Error(err)
+
+	// And there should be a stack trace in the output
+	a.Contains(output.String(), "permission denied")
+	a.Contains(output.String(), "create.go")
+}
