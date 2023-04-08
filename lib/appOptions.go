@@ -25,10 +25,33 @@ type TemplateOptions struct {
 	Alias string
 }
 
+// InventorySourceType enum for all supported source locations for template inventories
+type InventorySourceType int64
+
+const (
+	// IstUndefined No inventory type defined
+	IstUndefined InventorySourceType = iota
+	// IstLocal Inventory source is stored on the local file system
+	IstLocal
+	// IstGit Inventory source is stored in a Git repository
+	IstGit
+)
+
+// InventoryOptions configuration parameters for an inventory
+type InventoryOptions struct {
+	// Type identifier describing the protocol to use when retrieving template inventories
+	Type InventorySourceType
+	// Source path or URL to the inventory
+	Source string
+	// Namespace prefix to add to all templates contained in this inventory
+	Namespace string
+}
+
 // AppOptions parsed config options supported by the app
 type AppOptions struct {
 	// Templates 0 or more sources where template projects are to be found
-	Templates []TemplateOptions
+	Templates   []TemplateOptions
+	Inventories []InventoryOptions
 }
 
 // Validate checks the contents of the parsed application options to make sure they
@@ -44,6 +67,17 @@ func (a AppOptions) Validate() error {
 		}
 		if len(curTemplate.Source) == 0 {
 			messages = append(messages, fmt.Sprintf("template %d source is undefined", i))
+		}
+	}
+	for i, curInventory := range a.Inventories {
+		if len(curInventory.Namespace) == 0 {
+			messages = append(messages, fmt.Sprintf("inventory %d namespace is undefined", i))
+		}
+		if curInventory.Type == IstUndefined {
+			messages = append(messages, fmt.Sprintf("inventory %d type is undefined", i))
+		}
+		if len(curInventory.Source) == 0 {
+			messages = append(messages, fmt.Sprintf("inventory %d source is undefined", i))
 		}
 	}
 	if len(messages) == 0 {

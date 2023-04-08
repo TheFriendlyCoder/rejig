@@ -30,7 +30,6 @@ type Afero struct {
 
 // New returns a new OS filesystem.
 func NewWraper(fs afero.Fs, root string, debug bool) billy.Filesystem {
-	// TODO: rewrite this
 	return &Afero{fs: fs, root: root, Debug: debug}
 }
 

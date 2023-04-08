@@ -58,10 +58,14 @@ func run(cmd *cobra.Command, args rootArgs) error {
 	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from template %s...\n", args.targetPath, curTemplate.Alias))
 
 	return errors.Wrap(tm.Generate(args.targetPath), "Failed generating project")
-	// TODO: after generating, put a manifest file in the root folder summarizing what we did so we
+	// TODO: after generating, put an archive file in the root folder summarizing what we did so we
 	//		 can regenerate or update the project later
 	// TODO: make terminology consistent (ie: config file for the app, manifest file for the template,
 	//		 and something else for storing status of generated project - maybe audit file?
+	//	file in home folder with user options: app options file / user options file
+	//  file in root folder of template: manifest file / template manifest file
+	//  file in the root folder of a template inventory: inventory file
+	//  file generated in a project folder linking it to the original template: archive file
 }
 
 // validateArgs checks to see if the command line args provided to the app are valid
