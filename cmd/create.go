@@ -3,11 +3,10 @@ package cmd
 import (
 	"fmt"
 	"github.com/TheFriendlyCoder/rejigger/lib"
+	"github.com/TheFriendlyCoder/rejigger/lib/templateManager"
 	"github.com/pkg/errors"
-	"github.com/spf13/afero"
 	"log"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strings"
 
@@ -22,58 +21,43 @@ type rootArgs struct {
 	templateAlias string
 }
 
+// findTemplate looks up a specific template in the template inventory
+func findTemplate(appOptions lib.AppOptions, alias string) (lib.TemplateOptions, error) {
+	for _, t := range appOptions.Templates {
+		if t.Alias == alias {
+			return t, nil
+		}
+	}
+	return lib.TemplateOptions{}, lib.UnknownTemplateError{TemplateAlias: alias}
+}
+
 // run Primary entry point function for our generator
 func run(cmd *cobra.Command, args rootArgs) error {
 	// We have to use cmd.OutOrStdout() to ensure output is redirected to Cobra
 	// stream handler, to facilitate testing (ie: it allows us to capture output
 	// during unit testing to validate results of CLI operations)
 	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Loading template %s...\n", args.templateAlias))
-	// TODO: Consider not using context objects - the main purpose of them is to share config
-	// options between commands, but it seems like the pre-run / run functions for each
-	// command are run independently from all other commands so they aren't run in a
-	// hierarchy ... so there's not much use here (To Be Confirmed)
+
 	appOptions, ok := cmd.Context().Value(CkOptions).(lib.AppOptions)
 	if !ok {
 		return lib.InternalError{Message: "Failed to retrieve app options"}
 	}
 
-	// Lookup our template information
-	var curTemplate lib.TemplateOptions
-	found := false
-	for _, t := range appOptions.Templates {
-		if t.Alias == args.templateAlias {
-			curTemplate = t
-			found = true
-			break
-		}
-	}
-	if !found {
-		return lib.UnknownTemplateError{TemplateAlias: args.templateAlias}
-	}
-
-	manifest := filepath.Join(curTemplate.Source, ".rejig.yml")
-	_, err := os.Stat(manifest)
+	curTemplate, err := findTemplate(appOptions, args.templateAlias)
 	if err != nil {
-		// TODO: See if there's any need to check for the IsNotExist error
-		return errors.Wrap(err, "Unable to read manifest file")
+		return errors.WithStack(err)
 	}
-
-	manifestData, err := lib.ParseManifest(manifest)
+	tm, err := templateManager.New(curTemplate)
 	if err != nil {
-		return errors.Wrap(err, "Failed parsing manifest file")
+		return errors.Wrap(err, "Error initializing template manager")
 	}
 
-	templateContext := map[string]any{}
-	for _, arg := range manifestData.Template.Args {
-		lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "%s(%s): ", arg.Description, arg.Name))
-		var temp string
-		lib.SNF(fmt.Fscanln(cmd.InOrStdin(), &temp))
-		templateContext[arg.Name] = temp
+	if err = tm.GatherParams(cmd); err != nil {
+		return errors.Wrap(err, "Error gathering template parameters")
 	}
 	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from template %s...\n", args.targetPath, curTemplate.Alias))
 
-	fs := afero.NewOsFs()
-	return errors.Wrap(lib.Generate(fs, curTemplate.Source, args.targetPath, templateContext), "Failed generating project")
+	return errors.Wrap(tm.Generate(args.targetPath), "Failed generating project")
 	// TODO: after generating, put a manifest file in the root folder summarizing what we did so we
 	//		 can regenerate or update the project later
 	// TODO: make terminology consistent (ie: config file for the app, manifest file for the template,
