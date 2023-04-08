@@ -35,7 +35,6 @@ for curFile in "${ignoreFiles[@]}"; do
   #       apparently the -i option is not supported cross platform
   #  sed -i '' "/${curFile//\//\\/}/d" "${COVERAGE_FILE}"
 done
-echo "Displaying coverage"
 # Display ASCII report to console
 go tool cover -func="${COVERAGE_FILE}"
 # Display HTML report in default browser
