@@ -118,6 +118,14 @@ var createCmd = &cobra.Command{
 		}
 		err := run(cmd, parsedArgs)
 		if err != nil {
+			// https://pkg.go.dev/github.com/pkg/errors#hdr-Retrieving_the_stack_trace_of_an_error_or_wrapper
+			type stackTracer interface {
+				StackTrace() errors.StackTrace
+			}
+			err2, _ := err.(stackTracer)
+			for _, f := range err2.StackTrace() {
+				fmt.Printf("%+s:%d\n", f, f)
+			}
 			lib.SNF(fmt.Fprintf(cmd.ErrOrStderr(), "Failed to generate project"))
 		}
 	},
