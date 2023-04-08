@@ -1,4 +1,0 @@
-templates:
-  - type: git
-    source: https://github.com/TheFriendlyCoder/rejigger
-    alias: simple1
