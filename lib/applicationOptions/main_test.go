@@ -147,7 +147,7 @@ func Test_validationTemplateCompoundError(t *testing.T) {
 	a.Contains(err.Error(), "inventory 0 namespace is undefined")
 }
 
-func Test_fromViper(t *testing.T) {
+func Test_fromViperParseTemplate(t *testing.T) {
 	r := require.New(t)
 	a := assert.New(t)
 
@@ -211,6 +211,74 @@ templates:
 			a.Equal(data.Alias, options.Templates[0].Alias)
 			a.Equal(data.Source, options.Templates[0].Source)
 			a.Equal(data.TypeEnum, options.Templates[0].Type)
+		})
+	}
+}
+
+func Test_fromViperParseInventory(t *testing.T) {
+	r := require.New(t)
+	a := assert.New(t)
+
+	tests := map[string]struct {
+		TypeStr   string
+		TypeEnum  InventorySourceType
+		Source    string
+		Namespace string
+	}{
+		"Default local template": {
+			TypeStr:   "local",
+			TypeEnum:  IstLocal,
+			Source:    "/path/to/template",
+			Namespace: "test",
+		},
+		"Default Git template": {
+			TypeStr:   "git",
+			TypeEnum:  IstGit,
+			Source:    "https://some/url",
+			Namespace: "test",
+		},
+		"Default Unsupported template": {
+			TypeStr:   "other",
+			TypeEnum:  IstUnknown,
+			Source:    "https://some/url",
+			Namespace: "test",
+		},
+	}
+
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			// Given an empty temp folder
+			tmpDir, err := os.MkdirTemp("", "")
+			r.NoError(err)
+			defer os.RemoveAll(tmpDir)
+
+			// And a sample application options file
+			cfgFilePath := path.Join(tmpDir, "sample.yml")
+			fh, err := os.Create(cfgFilePath)
+			r.NoError(err)
+			cfgData := fmt.Sprintf(`
+inventories:
+  - type: %s
+    source: %s
+    namespace: %s
+`, data.TypeStr, data.Source, data.Namespace)
+			_, err = fh.WriteString(cfgData)
+			r.NoError(err)
+
+			// Point viper to our config file
+			v := viper.New()
+			v.SetConfigFile(cfgFilePath)
+			r.NoError(v.ReadInConfig())
+
+			// When we try instantiating our app options from Viper
+			options, err := FromViper(v)
+
+			// We expect the operation to succeed
+			r.NoError(err)
+			a.Equal(1, len(options.Inventories))
+			a.Equal(data.Namespace, options.Inventories[0].Namespace)
+			a.Equal(data.Source, options.Inventories[0].Source)
+			a.Equal(data.TypeEnum, options.Inventories[0].Type)
 		})
 	}
 }

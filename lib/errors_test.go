@@ -7,29 +7,35 @@ import (
 )
 
 func Test_FilePathInErrorMessage(t *testing.T) {
-	type data struct {
+	r := require.New(t)
+
+	tests := map[string]struct {
 		errorType PathErrorTypes
+	}{
+		"Path not found": {
+			errorType: PePathNotFound,
+		},
+		"Path not empty": {
+			errorType: PePathNotEmpty,
+		},
+		"Path ": {
+			errorType: PeFileNotFound,
+		},
 	}
 
-	// TODO: Convert to table test
-	tests := []data{
-		{errorType: PePathNotFound},
-		{errorType: PePathNotEmpty},
-		{errorType: PeFileNotFound},
-	}
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
 
-	for _, tt := range tests {
-		r := require.New(t)
+			expectedPath, err := os.Getwd()
+			r.NoError(err)
 
-		expectedPath, err := os.Getwd()
-		r.NoError(err)
+			val := PathError{
+				Path:      expectedPath,
+				ErrorType: data.errorType,
+			}
 
-		val := PathError{
-			Path:      expectedPath,
-			ErrorType: tt.errorType,
-		}
-
-		r.Contains(val.Error(), expectedPath)
+			r.Contains(val.Error(), expectedPath)
+		})
 	}
 }
 
@@ -44,4 +50,28 @@ func Test_UnknownPathError(t *testing.T) {
 	}
 
 	r.Panics(func() { _ = val.Error() })
+}
+
+func Test_ExceptionErrors(t *testing.T) {
+	r := require.New(t)
+
+	tests := map[string]struct {
+		curErr     error
+		expMessage string
+	}{
+		"UnknownTemplateError": {
+			curErr:     UnknownTemplateError{TemplateAlias: "MyAlias"},
+			expMessage: "Template not found in application inventory: MyAlias",
+		},
+		"InternalError": {
+			curErr:     InternalError{Message: "Cool Error"},
+			expMessage: "Internal implementation error: Cool Error",
+		},
+	}
+
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			r.Equal(data.expMessage, data.curErr.Error())
+		})
+	}
 }

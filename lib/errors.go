@@ -63,5 +63,6 @@ var CommandContextNotDefined = InternalError{"Command context not properly initi
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //										Misc Errors
 
-var AppOptionsInvalidSourceTypeError = fmt.Errorf("unsupported template source type")
-var AppOptionsDecodeError = fmt.Errorf("unable to decode template options")
+var AOInvalidSourceTypeError = fmt.Errorf("unsupported template source type")
+var AOTemplateOptionsDecodeError = fmt.Errorf("unable to decode template options")
+var AOInventoryOptionsDecodeError = fmt.Errorf("unable to decode inventory options")

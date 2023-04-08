@@ -124,6 +124,52 @@ func (a AppOptions) Validate() error {
 	return AppOptionsError{Messages: messages}
 }
 
+// decodeTemplateOptions decodes raw YAMl data into proper parsed template options
+func decodeTemplateOptions(raw interface{}) (map[string]interface{}, error) {
+	// Map the "type" field from a character string format to an enumerated type
+	templateData, ok := raw.(map[string]interface{})
+	if !ok {
+		return nil, lib.AOTemplateOptionsDecodeError
+	}
+
+	var newVal TemplateSourceType
+	switch templateData["type"] {
+	case nil:
+		return nil, lib.AOInvalidSourceTypeError
+	case "git":
+		newVal = TstGit
+	case "local":
+		newVal = TstLocal
+	default:
+		newVal = TstUnknown
+	}
+	templateData["type"] = newVal
+	return templateData, nil
+}
+
+// decodeInventoryOptions decodes raw YAMl data into proper parsed inventory options
+func decodeInventoryOptions(raw interface{}) (map[string]interface{}, error) {
+	// Map the "type" field from a character string format to an enumerated type
+	inventoryData, ok := raw.(map[string]interface{})
+	if !ok {
+		return nil, lib.AOTemplateOptionsDecodeError
+	}
+
+	var newVal InventorySourceType
+	switch inventoryData["type"] {
+	case nil:
+		return nil, lib.AOInventoryOptionsDecodeError
+	case "git":
+		newVal = IstGit
+	case "local":
+		newVal = IstLocal
+	default:
+		newVal = IstUnknown
+	}
+	inventoryData["type"] = newVal
+	return inventoryData, nil
+}
+
 // appOptionsDecoder custom hook method used to translate raw config data into a structure
 // that is easier to leverage in the application code
 func appOptionsDecoder() mapstructure.DecodeHookFuncType {
@@ -135,29 +181,21 @@ func appOptionsDecoder() mapstructure.DecodeHookFuncType {
 		raw interface{},
 	) (interface{}, error) {
 
-		// For now we only need to customize the "type" field of the TemplateOptions
-		if (target != reflect.TypeOf(TemplateOptions{})) {
-			return raw, nil
+		// TODO: Find a way to detect partial / incomplete parse matches
+		// ie: if a template option is missing one field, viper won't map
+		//		it to the correct type and it just gets ignored
+		// TODO: Find a way to enable strict mode decoding here
+		//		 that might work better
+		if (target == reflect.TypeOf(TemplateOptions{})) {
+			newData, err := decodeTemplateOptions(raw)
+			return newData, errors.Wrap(err, "Error decoding template options")
 		}
 
-		// Map the "type" field from a character string format to an enumerated type
-		templateData, ok := raw.(map[string]interface{})
-		if !ok {
-			return nil, lib.AppOptionsDecodeError
+		if (target == reflect.TypeOf(InventoryOptions{})) {
+			newData, err := decodeInventoryOptions(raw)
+			return newData, errors.Wrap(err, "Error decoding inventory options")
 		}
+		return raw, nil
 
-		var newVal TemplateSourceType
-		switch templateData["type"] {
-		case nil:
-			return nil, lib.AppOptionsInvalidSourceTypeError
-		case "git":
-			newVal = TstGit
-		case "local":
-			newVal = TstLocal
-		default:
-			newVal = TstUnknown
-		}
-		templateData["type"] = newVal
-		return templateData, nil
 	}
 }
