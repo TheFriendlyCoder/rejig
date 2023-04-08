@@ -1,4 +1,4 @@
-package lib
+package templateManager
 
 import (
 	"github.com/hashicorp/go-version"
@@ -97,7 +97,7 @@ func (m *ManifestData) UnmarshalYAML(value *yaml.Node) error {
 
 // ParseManifest parses a template manifest file and returns a reference to
 // the parsed representation of the contents of the file
-func ParseManifest(path string) (ManifestData, error) {
+func parseManifest(path string) (ManifestData, error) {
 	var retval ManifestData
 	buf, err := os.ReadFile(path)
 	if err != nil {

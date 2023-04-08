@@ -1,4 +1,4 @@
-package lib
+package templateManager
 
 import (
 	"github.com/flosch/pongo2/v6"
@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 )
 
-// Generate applies a set of user defined options (ie: the 'context') to a set of template
+// generate applies a set of user defined options (ie: the 'context') to a set of template
 // files stored in srcPath, and produces a complete project in the targetPath with the
 // user defined parameters applied throughout
-func Generate(srcFS afero.Fs, rootDir string, targetPath string, context map[string]any) error {
+func generate(srcFS afero.Fs, rootDir string, targetPath string, context map[string]any) error {
 	// loop through all files
 	err := afero.Walk(srcFS, rootDir, func(path string, info fs.FileInfo, err error) error {
 		// If walk encountered an error attempting to enumerate the file system object

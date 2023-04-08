@@ -11,26 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"os"
 	"path"
-	"path/filepath"
 	"testing"
 )
-
-// testProjectDir Gets the path to a specific test project
-func testProjectDir(projectName string) string {
-	retval := path.Join("..", "..", "testProjects", projectName)
-	var info, err = os.Stat(retval)
-	if err != nil {
-		panic("Critical test failure: unable to access test project " + projectName)
-	}
-	if !info.IsDir() {
-		panic("Critical test failure: test project " + projectName + " appears to be a file")
-	}
-	retval, err = filepath.Abs(retval)
-	if err != nil {
-		panic("Critical test failure: unable to generate absolute path for test project " + projectName)
-	}
-	return retval
-}
 
 func Test_templateManagerConstructor(t *testing.T) {
 	r := require.New(t)

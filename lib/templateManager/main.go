@@ -23,7 +23,7 @@ type templateManager struct {
 	// manifestData data parsed from the template manifest file provided
 	// by the template itself. This info describes the content and behavior
 	// of the template, user configurable options, and other such information
-	manifestData lib.ManifestData
+	manifestData ManifestData
 	// templateContext this is a mapping of user configurable options supported
 	// by this template, with the values that are provided by the user. These
 	// parameters customize the behavior of the template and are used when
@@ -46,7 +46,7 @@ func New(options lib.TemplateOptions) (templateManager, error) {
 		return retval, errors.Wrap(err, "Unable to read manifest file")
 	}
 
-	retval.manifestData, err = lib.ParseManifest(manifestPath)
+	retval.manifestData, err = parseManifest(manifestPath)
 	if err != nil {
 		return retval, errors.Wrap(err, "Failed parsing manifest file")
 	}
@@ -79,5 +79,5 @@ func (t *templateManager) GatherParams(cmd *cobra.Command) error {
 // object, in the specified output folder
 func (t *templateManager) Generate(targetPath string) error {
 	fs := afero.NewOsFs()
-	return errors.Wrap(lib.Generate(fs, t.Options.Source, targetPath, t.templateContext), "Failed generating project")
+	return errors.Wrap(generate(fs, t.Options.Source, targetPath, t.templateContext), "Failed generating project")
 }

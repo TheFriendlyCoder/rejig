@@ -1,8 +1,7 @@
-package lib
+package templateManager
 
 import (
 	"github.com/hashicorp/go-version"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
@@ -11,23 +10,15 @@ import (
 	"testing"
 )
 
-// sampleData loads sample data for a test from the test data folder
-func sampleData(filename string) (string, error) {
-	retval := path.Join("testdata", filename)
-	var _, err = os.Stat(retval)
-	return retval, errors.Wrap(err, "checking existence of test data file")
-}
-
 func Test_parseManifest(t *testing.T) {
 	r := require.New(t)
 	a := assert.New(t)
 
 	// Given a sample manifest file
-	srcFile, err := sampleData("simple_manifest.yml")
-	r.NoError(err)
+	srcFile := sampleDataFile("simple_manifest.yml")
 
 	// When we parse it
-	manifest, err := ParseManifest(srcFile)
+	manifest, err := parseManifest(srcFile)
 
 	// We expect no errors
 	r.NoError(err)
@@ -67,7 +58,7 @@ func Test_parseManifestNotExist(t *testing.T) {
 	r.NoError(err)
 	defer os.RemoveAll(tmpDir)
 
-	_, err = ParseManifest(path.Join(tmpDir, "fubar.yml"))
+	_, err = parseManifest(path.Join(tmpDir, "fubar.yml"))
 	a.Error(err)
 }
 
@@ -89,7 +80,7 @@ func Test_parseManifestInvalidYAML(t *testing.T) {
 	r.NoError(srcfile.Close())
 
 	// when we try to parse the file
-	_, err = ParseManifest(samplefile)
+	_, err = parseManifest(samplefile)
 
 	// then we expect error results
 	emptyTypeErr := yaml.TypeError{}
@@ -97,13 +88,11 @@ func Test_parseManifestInvalidYAML(t *testing.T) {
 }
 
 func Test_parseManifestInvalidTemplateArgs(t *testing.T) {
-	r := require.New(t)
 	a := assert.New(t)
 
-	srcFile, err := sampleData("simple_manifest_with_invalid_args.yml")
-	r.NoError(err)
+	srcFile := sampleDataFile("simple_manifest_with_invalid_args.yml")
 
-	_, err = ParseManifest(srcFile)
+	_, err := parseManifest(srcFile)
 	// TODO: Find some way to make error reporting here more user friendly
 	//		 may require a different YAML parsing library
 	// https://github.com/go-yaml/yaml/pull/901
