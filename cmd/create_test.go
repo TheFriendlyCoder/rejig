@@ -281,3 +281,57 @@ templates:
 	a.Contains(output.String(), "permission denied")
 	a.Contains(output.String(), "create.go")
 }
+
+func Test_FindTemplate(t *testing.T) {
+	r := require.New(t)
+
+	expAlias := "Fubar"
+	expTempl := ao.TemplateOptions{
+		Alias:  expAlias,
+		Source: "/tmp",
+		Type:   ao.TstLocal,
+	}
+	appOptions := ao.AppOptions{
+		Templates: []ao.TemplateOptions{expTempl},
+	}
+
+	result, err := findTemplate(appOptions, expAlias)
+	r.NoError(err)
+	r.Equal(expTempl, result)
+}
+
+func Test_FindTemplateInvalidName(t *testing.T) {
+	r := require.New(t)
+
+	expAlias := "Fubar.Was.Here"
+	appOptions := ao.AppOptions{
+		Templates: []ao.TemplateOptions{},
+	}
+
+	_, err := findTemplate(appOptions, expAlias)
+	r.ErrorIs(err, e.AOInvalidTemplateNameError())
+}
+
+func Test_FindTemplateFromInventory(t *testing.T) {
+	r := require.New(t)
+
+	expAlias := "Fubar"
+	//expNamespace := "MyNS"
+
+	expTempl := ao.TemplateOptions{
+		Alias:  expAlias,
+		Source: "/tmp",
+		Type:   ao.TstLocal,
+	}
+
+	// TODO: Use dependency injection to add a fake inventory here
+	//		 for searching
+	appOptions := ao.AppOptions{
+		Templates:   []ao.TemplateOptions{},
+		Inventories: []ao.InventoryOptions{},
+	}
+
+	result, err := findTemplate(appOptions, expAlias)
+	r.NoError(err)
+	r.Equal(expTempl, result)
+}

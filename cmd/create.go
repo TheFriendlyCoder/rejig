@@ -24,12 +24,43 @@ type rootArgs struct {
 }
 
 // findTemplate looks up a specific template in the template inventory
+// Alias names must be of one of the forms:
+// <template_alias>
+// <inventory_namespace>.<template_alias>
 func findTemplate(appOptions ao.AppOptions, alias string) (ao.TemplateOptions, error) {
-	for _, t := range appOptions.Templates {
-		if t.Alias == alias {
+	parts := strings.Split(alias, ".")
+	if len(parts) > 2 {
+		return ao.TemplateOptions{}, e.AOInvalidTemplateNameError()
+	}
+	var templates []ao.TemplateOptions
+	var newAlias string
+	if len(parts) == 1 {
+		templates = appOptions.Templates
+		newAlias = alias
+	} else {
+		inv := appOptions.FindInventory(parts[0])
+		if inv == nil {
+			return ao.TemplateOptions{}, e.NewUnknownTemplateError(alias)
+		}
+		// iterate through all inventory templates
+		var err error
+		templates, err = inv.GetTemplateDefinitions()
+		if err != nil {
+			// TODO: keep record of all failed inventory queries and report them
+			//		 as an aggregate
+			// TODO: ignore errors from template definitions if a match for the
+			//		 template can be found elsewhere
+			return ao.TemplateOptions{}, err
+		}
+		newAlias = parts[1]
+	}
+
+	for _, t := range templates {
+		if t.Alias == newAlias {
 			return t, nil
 		}
 	}
+
 	return ao.TemplateOptions{}, e.NewUnknownTemplateError(alias)
 }
 

@@ -180,3 +180,7 @@ func AOTemplateOptionsDecodeError() error {
 func AOInventoryOptionsDecodeError() error {
 	return NewSimpleError("unable to decode inventory options")
 }
+
+func AOInvalidTemplateNameError() error {
+	return NewSimpleError("invalid template name")
+}
