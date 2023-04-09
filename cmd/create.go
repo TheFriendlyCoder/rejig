@@ -46,19 +46,19 @@ func run(cmd *cobra.Command, args rootArgs) error {
 
 	curTemplate, err := findTemplate(appOptions, args.templateAlias)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	tm, err := templateManager.New(curTemplate)
 	if err != nil {
-		return errors.Wrap(err, "Error initializing template manager")
+		return err
 	}
 
 	if err = tm.GatherParams(cmd); err != nil {
-		return errors.Wrap(err, "Error gathering template parameters")
+		return err
 	}
 	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from template %s...\n", args.targetPath, curTemplate.Alias))
 
-	return errors.Wrap(tm.Generate(args.targetPath), "Failed generating project")
+	return tm.Generate(args.targetPath)
 	// TODO: after generating, put an archive file in the root folder summarizing what we did so we
 	//		 can regenerate or update the project later
 	// TODO: make terminology consistent (ie: config file for the app, manifest file for the template,
@@ -108,7 +108,7 @@ var createCmd = &cobra.Command{
 		// Initialize our command context from the root command
 		err := cmd.Parent().PreRunE(cmd, args)
 		if err != nil {
-			return errors.Wrap(err, "Initialization error")
+			return errors.WithStack(err)
 		}
 		appOptions, ok := cmd.Context().Value(CkOptions).(ao.AppOptions)
 		if !ok {
