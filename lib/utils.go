@@ -35,7 +35,7 @@ func GetGitFilesystem(gitURL string) (afero.Fs, error) {
 		URL: gitURL,
 	})
 	if err != nil {
-		return appFS, errors.Wrap(err, "Failed querying Git repo")
+		return appFS, errors.Wrap(err, "Failed to load remote Git repository: "+gitURL)
 	}
 	return appFS, nil
 }

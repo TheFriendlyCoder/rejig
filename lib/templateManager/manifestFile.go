@@ -63,7 +63,7 @@ func (m *ManifestData) UnmarshalYAML(value *yaml.Node) error {
 		Versions VersionData `yaml:"versions"`
 	}
 	if err := value.Decode(&versionFields); err != nil {
-		return errors.Wrap(err, "Failed to parse version information")
+		return errors.WithStack(err)
 	}
 	m.Versions = versionFields.Versions
 
@@ -75,14 +75,14 @@ func (m *ManifestData) UnmarshalYAML(value *yaml.Node) error {
 		Template TemplateData `yaml:"template"`
 	}
 	if err := value.Decode(&templateFields); err != nil {
-		return errors.Wrap(err, "Failed to parse template metadata")
+		return errors.WithStack(err)
 	}
 	m.Template = templateFields.Template
 
 	// Dump all remaining content into a simple map
 	var remaining map[string]interface{}
 	if err := value.Decode(&remaining); err != nil {
-		return errors.Wrap(err, "Failed to parse additional config options")
+		return errors.WithStack(err)
 	}
 
 	// Remove properties that were parsed previously
@@ -101,7 +101,7 @@ func parseManifest(srcFS afero.Fs, path string) (ManifestData, error) {
 	var retval ManifestData
 	buf, err := afero.ReadFile(srcFS, path)
 	if err != nil {
-		return retval, errors.Wrap(err, "Failed to open manifest file")
+		return retval, errors.WithStack(err)
 	}
 
 	// TODO: Find some way to get "Strict" mode to work properly (aka: KnownFields in v3)
@@ -109,7 +109,7 @@ func parseManifest(srcFS afero.Fs, path string) (ManifestData, error) {
 	//		https://github.com/go-yaml/yaml/issues/642
 	err = yaml.Unmarshal(buf, &retval)
 	if err != nil {
-		return retval, errors.Wrap(err, "Failed to parse YAML content from manifest file")
+		return retval, errors.Wrap(err, "Error parsing template manifest: "+path)
 	}
 
 	return retval, nil

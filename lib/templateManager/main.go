@@ -65,7 +65,7 @@ func New(options ao.TemplateOptions) (templateManager, error) {
 	case ao.TstGit:
 		retval.srcFilesystem, err = lib.GetGitFilesystem(options.Source)
 		if err != nil {
-			return retval, errors.Wrap(err, "Failed loading Git template")
+			return retval, err
 		}
 	case ao.TstLocal:
 		retval.srcFilesystem = afero.NewOsFs()
@@ -81,12 +81,12 @@ func New(options ao.TemplateOptions) (templateManager, error) {
 	manifestPath := filepath.Join(retval.rootDir(), manifestFileName)
 	_, err = retval.srcFilesystem.Stat(manifestPath)
 	if err != nil {
-		return retval, errors.Wrap(err, "Unable to read manifest file")
+		return retval, errors.WithStack(err)
 	}
 
 	retval.manifestData, err = parseManifest(retval.srcFilesystem, manifestPath)
 	if err != nil {
-		return retval, errors.Wrap(err, "Failed parsing manifest file")
+		return retval, err
 	}
 	return retval, nil
 }
@@ -104,7 +104,7 @@ func (t *templateManager) GatherParams(cmd *cobra.Command) error {
 		// spaces in them, so we use a read buffer here instead
 		value, err := reader.ReadString('\n')
 		if err != nil {
-			return errors.Wrap(err, "Failed reading user input")
+			return errors.WithStack(err)
 		}
 		// Here we need to trim white space from our input value to get rid
 		// of the trailing newline characters which are included in the read buffer
@@ -117,5 +117,5 @@ func (t *templateManager) GatherParams(cmd *cobra.Command) error {
 // object, in the specified output folder
 func (t *templateManager) Generate(targetPath string) error {
 	// TODO: add these support methods to the manager class as private methods
-	return errors.Wrap(generate(t.srcFilesystem, t.rootDir(), targetPath, t.templateContext), "Failed generating project")
+	return generate(t.srcFilesystem, t.rootDir(), targetPath, t.templateContext)
 }

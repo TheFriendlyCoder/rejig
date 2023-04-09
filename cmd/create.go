@@ -9,6 +9,7 @@ import (
 
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
+	e "github.com/TheFriendlyCoder/rejigger/lib/errors"
 	"github.com/TheFriendlyCoder/rejigger/lib/templateManager"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -29,7 +30,7 @@ func findTemplate(appOptions ao.AppOptions, alias string) (ao.TemplateOptions, e
 			return t, nil
 		}
 	}
-	return ao.TemplateOptions{}, lib.UnknownTemplateError{TemplateAlias: alias}
+	return ao.TemplateOptions{}, e.NewUnknownTemplateError(alias)
 }
 
 // run Primary entry point function for our generator
@@ -41,24 +42,24 @@ func run(cmd *cobra.Command, args rootArgs) error {
 
 	appOptions, ok := cmd.Context().Value(CkOptions).(ao.AppOptions)
 	if !ok {
-		return lib.InternalError{Message: "Failed to retrieve app options"}
+		return e.NewInternalError("Failed to retrieve app options")
 	}
 
 	curTemplate, err := findTemplate(appOptions, args.templateAlias)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	tm, err := templateManager.New(curTemplate)
 	if err != nil {
-		return errors.Wrap(err, "Error initializing template manager")
+		return err
 	}
 
 	if err = tm.GatherParams(cmd); err != nil {
-		return errors.Wrap(err, "Error gathering template parameters")
+		return err
 	}
 	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from template %s...\n", args.targetPath, curTemplate.Alias))
 
-	return errors.Wrap(tm.Generate(args.targetPath), "Failed generating project")
+	return tm.Generate(args.targetPath)
 	// TODO: after generating, put an archive file in the root folder summarizing what we did so we
 	//		 can regenerate or update the project later
 	// TODO: make terminology consistent (ie: config file for the app, manifest file for the template,
@@ -77,10 +78,7 @@ func validateArgs(options ao.AppOptions, args []string) error {
 			log.Panic(err)
 		}
 		if len(contents) != 0 {
-			return lib.PathError{
-				Path:      args[0],
-				ErrorType: lib.PePathNotEmpty,
-			}
+			return e.NewPathError(args[0], e.PePathNotEmpty)
 		}
 	}
 
@@ -93,7 +91,7 @@ func validateArgs(options ao.AppOptions, args []string) error {
 		}
 	}
 	if !found {
-		return lib.UnknownTemplateError{TemplateAlias: args[1]}
+		return e.NewUnknownTemplateError(args[1])
 	}
 	return nil
 }
@@ -108,11 +106,11 @@ var createCmd = &cobra.Command{
 		// Initialize our command context from the root command
 		err := cmd.Parent().PreRunE(cmd, args)
 		if err != nil {
-			return errors.Wrap(err, "Initialization error")
+			return errors.WithStack(err)
 		}
 		appOptions, ok := cmd.Context().Value(CkOptions).(ao.AppOptions)
 		if !ok {
-			return lib.CommandContextNotDefined
+			return e.CommandContextNotDefined()
 		}
 		return validateArgs(appOptions, args)
 	},

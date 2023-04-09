@@ -1,9 +1,10 @@
 name: Build
 on:
   push:
+    # TODO: See if we shouldn't run certain build operations on MRs only
+    #       vs running them on forks and branches
     branches:
       - "**"
-  pull_request:
 
 jobs:
   Build:

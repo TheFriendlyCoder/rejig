@@ -26,6 +26,10 @@ linters-settings:
       # Force the linter to detect unhandled errors from every package, including fmt
       - name: unhandled-error
         arguments: []
+  wrapcheck:
+    # Ignore wrapping errors that are internal to the application
+    ignorePackageGlobs:
+      - github.com/TheFriendlyCoder/rejigger/*
 run:
   #tests: false
   skip-files:
