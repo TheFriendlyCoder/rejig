@@ -5,8 +5,12 @@ import (
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
+	"github.com/spf13/afero"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
+	"path"
 	"reflect"
+	"strconv"
 )
 
 // TemplateSourceType enum for all supported source locations for loading templates
@@ -56,6 +60,69 @@ type InventoryOptions struct {
 	Source string
 	// Namespace prefix to add to all templates contained in this inventory
 	Namespace string
+}
+
+const inventoryFileName = ".rejig.inv.yml"
+
+type InventoryData struct {
+	Templates []TemplateOptions
+}
+
+func (i *InventoryOptions) GetTemplateDefinitions() ([]TemplateOptions, error) {
+	var fileSystem afero.Fs
+	var rootDir string
+	var err error
+	switch i.Type {
+	case IstLocal:
+		fileSystem = afero.NewOsFs()
+		rootDir = i.Source
+	case IstGit:
+		fileSystem, err = lib.GetGitFilesystem(i.Source)
+		if err != nil {
+			return nil, err
+		}
+		rootDir = "."
+	case IstUnknown:
+		fallthrough
+	case IstUndefined:
+		fallthrough
+	default:
+		panic("should never happen: unsupported inventory type: " + strconv.FormatInt(int64(i.Type), 10))
+	}
+
+	// Read in the inventory file
+	inventoryPath := path.Join(rootDir, inventoryFileName)
+	_, err = fileSystem.Stat(inventoryPath)
+	if err != nil {
+		return nil, err
+	}
+
+	inventory, err := parseInventory(fileSystem, inventoryPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return inventory.Templates, nil
+}
+
+// parseInventory parses a template manifest file and returns a reference to
+// the parsed representation of the contents of the file
+func parseInventory(srcFS afero.Fs, path string) (InventoryData, error) {
+	var retval InventoryData
+	buf, err := afero.ReadFile(srcFS, path)
+	if err != nil {
+		return retval, errors.Wrap(err, "Failed to open inventory file")
+	}
+
+	// TODO: Find some way to get "Strict" mode to work properly (aka: KnownFields in v3)
+	//		https://github.com/go-yaml/yaml/issues/460
+	//		https://github.com/go-yaml/yaml/issues/642
+	err = yaml.Unmarshal(buf, &retval)
+	if err != nil {
+		return retval, errors.Wrap(err, "Failed to parse YAML content from inventory file")
+	}
+
+	return retval, nil
 }
 
 // AppOptions parsed config options supported by the app

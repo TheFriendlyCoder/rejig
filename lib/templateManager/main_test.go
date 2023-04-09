@@ -3,6 +3,7 @@ package templateManager
 import (
 	"bytes"
 	"fmt"
+	"github.com/TheFriendlyCoder/rejigger/lib"
 	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	"github.com/hashicorp/go-version"
 	"github.com/pkg/errors"
@@ -315,7 +316,7 @@ func Test_templateManagerFailToGenerate(t *testing.T) {
 func Test_getGitTemplate(t *testing.T) {
 	r := require.New(t)
 
-	tmp, err := getGitTemplate("https://github.com/TheFriendlyCoder/rejiggerTestTemplate.git")
+	tmp, err := lib.GetGitFilesystem("https://github.com/TheFriendlyCoder/rejiggerTestTemplate.git")
 	r.NoError(err)
 
 	res, err := afero.ReadDir(tmp, ".")

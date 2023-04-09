@@ -24,9 +24,26 @@ type rootArgs struct {
 
 // findTemplate looks up a specific template in the template inventory
 func findTemplate(appOptions ao.AppOptions, alias string) (ao.TemplateOptions, error) {
+	// TODO: figure out how to match duplicates
+	// TODO: figure out how to do namespacing properly
 	for _, t := range appOptions.Templates {
 		if t.Alias == alias {
 			return t, nil
+		}
+	}
+	for _, i := range appOptions.Inventories {
+		temp, err := i.GetTemplateDefinitions()
+		if err != nil {
+			// TODO: keep record of all failed inventory queries and report them
+			//		 as an aggregate
+			// TODO: ignore errors from template definitions if a match for the
+			//		 template can be found elsewhere
+			return ao.TemplateOptions{}, err
+		}
+		for _, t := range temp {
+			if t.Alias == alias {
+				return t, nil
+			}
 		}
 	}
 	return ao.TemplateOptions{}, lib.UnknownTemplateError{TemplateAlias: alias}

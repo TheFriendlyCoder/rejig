@@ -92,10 +92,7 @@ func (m *ManifestData) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
-// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-//									PUBLIC INTERFACE
-
-// ParseManifest parses a template manifest file and returns a reference to
+// parseManifest parses a template manifest file and returns a reference to
 // the parsed representation of the contents of the file
 func parseManifest(srcFS afero.Fs, path string) (ManifestData, error) {
 	var retval ManifestData
