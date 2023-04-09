@@ -3,16 +3,16 @@ package templateManager
 import (
 	"bytes"
 	"fmt"
-	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
-	"github.com/hashicorp/go-version"
-	"github.com/pkg/errors"
-	"github.com/spf13/afero"
-	"github.com/spf13/cobra"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"os"
 	"path"
 	"testing"
+
+	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
+	"github.com/hashicorp/go-version"
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_templateManagerConstructor(t *testing.T) {
@@ -304,21 +304,9 @@ func Test_templateManagerFailToGenerate(t *testing.T) {
 	r.NoError(err)
 
 	// When we try generating in a path that doesn't exist
-	//err = tm.Generate(path.Join(tmpDir, "DoesNotExist"))
 	err = tm.Generate(outputDir)
 
 	// The operation should fail
 	r.Error(err)
 
-}
-
-func Test_getGitTemplate(t *testing.T) {
-	r := require.New(t)
-
-	tmp, err := getGitTemplate("https://github.com/TheFriendlyCoder/rejiggerTestTemplate.git")
-	r.NoError(err)
-
-	res, err := afero.ReadDir(tmp, ".")
-	r.NoError(err)
-	r.True(len(res) > 0)
 }

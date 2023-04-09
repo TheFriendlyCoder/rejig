@@ -1,10 +1,11 @@
 package lib
 
 import (
-	"github.com/stretchr/testify/require"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func Test_DirExists(t *testing.T) {

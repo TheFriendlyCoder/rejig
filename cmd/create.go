@@ -2,15 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/TheFriendlyCoder/rejigger/lib"
-	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
-	"github.com/TheFriendlyCoder/rejigger/lib/templateManager"
-	"github.com/pkg/errors"
 	"log"
 	"os"
 	"reflect"
 	"strings"
 
+	"github.com/TheFriendlyCoder/rejigger/lib"
+	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
+	"github.com/TheFriendlyCoder/rejigger/lib/templateManager"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -84,7 +84,7 @@ func validateArgs(options ao.AppOptions, args []string) error {
 		}
 	}
 
-	//Validate template name
+	// Validate template name
 	found := false
 	for _, t := range options.Templates {
 		if t.Alias == args[1] {

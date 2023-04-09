@@ -3,15 +3,14 @@ package templateManager
 import (
 	"bufio"
 	"fmt"
+	"path/filepath"
+	"strings"
+
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	"github.com/pkg/errors"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/storage/memory"
-	"path/filepath"
-	"strings"
 )
 
 const manifestFileName = ".rejig.yml"
@@ -34,20 +33,6 @@ type templateManager struct {
 	// srcFilesystem virtual file system to use when interacting with source files
 	// defining the content of the template we are managing by this struct
 	srcFilesystem afero.Fs
-}
-
-// getGitTemplate loads a template source from a Git repository
-func getGitTemplate(gitURL string) (afero.Fs, error) {
-	appFS := afero.NewMemMapFs()
-	fs := NewWraper(appFS, ".", false)
-
-	_, err := git.Clone(memory.NewStorage(), fs, &git.CloneOptions{
-		URL: gitURL,
-	})
-	if err != nil {
-		return appFS, errors.Wrap(err, "Failed querying Git repo")
-	}
-	return appFS, nil
 }
 
 // rootDir gets the root folder where the template source files are stored
@@ -78,7 +63,7 @@ func New(options ao.TemplateOptions) (templateManager, error) {
 	var err error
 	switch options.Type {
 	case ao.TstGit:
-		retval.srcFilesystem, err = getGitTemplate(options.Source)
+		retval.srcFilesystem, err = lib.GetGitFilesystem(options.Source)
 		if err != nil {
 			return retval, errors.Wrap(err, "Failed loading Git template")
 		}

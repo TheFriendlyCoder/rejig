@@ -2,19 +2,21 @@ package templateManager
 
 import (
 	"fmt"
-	"github.com/spf13/afero"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/TheFriendlyCoder/rejigger/lib"
+	"github.com/spf13/afero"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_basicGenerator(t *testing.T) {
 	r := require.New(t)
 	a := assert.New(t)
 
-	gitFS, err := getGitTemplate("https://github.com/TheFriendlyCoder/rejiggerTestTemplate.git")
+	gitFS, err := lib.GetGitFilesystem("https://github.com/TheFriendlyCoder/rejiggerTestTemplate.git")
 	r.NoError(err)
 
 	tests := map[string]struct {

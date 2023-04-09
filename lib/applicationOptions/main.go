@@ -2,11 +2,12 @@ package applicationOptions
 
 import (
 	"fmt"
+	"reflect"
+
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
-	"reflect"
 )
 
 // TemplateSourceType enum for all supported source locations for loading templates

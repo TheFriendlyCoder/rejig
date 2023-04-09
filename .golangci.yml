@@ -1,38 +1,33 @@
 linters:
   enable:
-    # default
-    - errcheck
     - gosimple
-    - govet
-    - ineffassign
-    - staticcheck
-    - typecheck
-    - unused
-    # custom
-    - cyclop
-    - goerr113
   presets:
     - bugs
-#    - complexity
+    - complexity
     - error
-#    - format
-#    - import
-#    - metalinter
+    - import
+    - metalinter
     - module
     - performance
-#    - sql
-#    - style
-#    - test
-#    - unused
+    - unused
 linters-settings:
+  # TIP: to fix linter complaints for any linter that supports auto-fixing, run:
+  #       golangci-lint run --fix
+  funlen:
+    lines: 100
   cyclop:
     max-complexity: 10
   errcheck:
     check-type-assertions: true
     check-blank: true
     disable-default-exclusions: true
+  revive:
+    rules:
+      # Force the linter to detect unhandled errors from every package, including fmt
+      - name: unhandled-error
+        arguments: []
 run:
   #tests: false
   skip-files:
     # Ignore files that are partially vendored
-    - lib/templateManager/aferoWrapper.go
+    - lib/thirdparty/aferoWrapper.go
