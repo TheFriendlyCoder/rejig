@@ -3,6 +3,10 @@ package templateManager
 import (
 	"bytes"
 	"fmt"
+	"os"
+	"path"
+	"testing"
+
 	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	"github.com/hashicorp/go-version"
 	"github.com/pkg/errors"
@@ -10,9 +14,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"os"
-	"path"
-	"testing"
 )
 
 func Test_templateManagerConstructor(t *testing.T) {
@@ -304,7 +305,6 @@ func Test_templateManagerFailToGenerate(t *testing.T) {
 	r.NoError(err)
 
 	// When we try generating in a path that doesn't exist
-	//err = tm.Generate(path.Join(tmpDir, "DoesNotExist"))
 	err = tm.Generate(outputDir)
 
 	// The operation should fail

@@ -2,12 +2,13 @@ package templateManager
 
 import (
 	"bytes"
-	"github.com/spf13/afero"
-	"github.com/stretchr/testify/require"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/afero"
+	"github.com/stretchr/testify/require"
 )
 
 // getProjectDir Gets the path to a specific test project

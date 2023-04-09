@@ -1,14 +1,15 @@
 package templateManager
 
 import (
+	"os"
+	"path"
+	"testing"
+
 	"github.com/hashicorp/go-version"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
-	"os"
-	"path"
-	"testing"
 )
 
 func Test_parseManifest(t *testing.T) {

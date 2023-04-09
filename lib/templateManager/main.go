@@ -3,6 +3,9 @@ package templateManager
 import (
 	"bufio"
 	"fmt"
+	"path/filepath"
+	"strings"
+
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	"github.com/pkg/errors"
@@ -10,8 +13,6 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/storage/memory"
-	"path/filepath"
-	"strings"
 )
 
 const manifestFileName = ".rejig.yml"

@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func Test_helpCommand(t *testing.T) {

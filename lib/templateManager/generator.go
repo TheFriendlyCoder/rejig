@@ -1,12 +1,13 @@
 package templateManager
 
 import (
-	"github.com/flosch/pongo2/v6"
-	"github.com/pkg/errors"
-	"github.com/spf13/afero"
 	"io/fs"
 	"os"
 	"path/filepath"
+
+	"github.com/flosch/pongo2/v6"
+	"github.com/pkg/errors"
+	"github.com/spf13/afero"
 )
 
 // generate applies a set of user defined options (ie: the 'context') to a set of template

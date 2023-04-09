@@ -3,14 +3,15 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/TheFriendlyCoder/rejigger/lib"
-	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"os"
 	"path"
 	"path/filepath"
 	"testing"
+
+	"github.com/TheFriendlyCoder/rejigger/lib"
+	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_generateUsageLine(t *testing.T) {
@@ -150,26 +151,20 @@ templates:
 	err = rootCmd.Execute()
 	r.NoError(err, "CLI command should have succeeded")
 
-	// r.Contains(output.String(), *srcDir)
+	r.Contains(output.String(), templateName)
 	r.Contains(output.String(), outputDir)
 
 	a.DirExists(filepath.Join(outputDir, "MyProj"))
 	a.NoFileExists(filepath.Join(outputDir, ".rejig.yml"))
 
-	//exp := filepath.Join(*srcDir, ".gitignore")
 	act := filepath.Join(outputDir, ".gitignore")
 	a.FileExists(act)
-	//a.True(unmodified(r, exp, act))
 
 	act = filepath.Join(outputDir, "version.txt")
 	a.FileExists(act)
-	//a.True(contains(r, act, expVersion))
-	//a.False(contains(r, act, "{{version}}"))
 
 	act = filepath.Join(outputDir, "MyProj", "main.txt")
 	a.FileExists(act)
-	//a.True(contains(r, act, expProj))
-	//a.False(contains(r, act, "{{project_name}}"))
 }
 
 func Test_CreateCommandTooFewArgs(t *testing.T) {

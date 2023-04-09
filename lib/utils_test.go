@@ -2,8 +2,9 @@ package lib
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var someerr = fmt.Errorf("Some Failure")
