@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/TheFriendlyCoder/rejigger/lib"
+	e "github.com/TheFriendlyCoder/rejigger/lib/errors"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -122,7 +122,7 @@ func (a AppOptions) Validate() error {
 	if len(messages) == 0 {
 		return nil
 	}
-	return AppOptionsError{Messages: messages}
+	return e.NewAppOptionsError(messages)
 }
 
 // decodeTemplateOptions decodes raw YAMl data into proper parsed template options
@@ -130,13 +130,13 @@ func decodeTemplateOptions(raw interface{}) (map[string]interface{}, error) {
 	// Map the "type" field from a character string format to an enumerated type
 	templateData, ok := raw.(map[string]interface{})
 	if !ok {
-		return nil, lib.AOTemplateOptionsDecodeError
+		return nil, e.AOTemplateOptionsDecodeError()
 	}
 
 	var newVal TemplateSourceType
 	switch templateData["type"] {
 	case nil:
-		return nil, lib.AOInvalidSourceTypeError
+		return nil, e.AOInvalidSourceTypeError()
 	case "git":
 		newVal = TstGit
 	case "local":
@@ -153,13 +153,13 @@ func decodeInventoryOptions(raw interface{}) (map[string]interface{}, error) {
 	// Map the "type" field from a character string format to an enumerated type
 	inventoryData, ok := raw.(map[string]interface{})
 	if !ok {
-		return nil, lib.AOTemplateOptionsDecodeError
+		return nil, e.AOTemplateOptionsDecodeError()
 	}
 
 	var newVal InventorySourceType
 	switch inventoryData["type"] {
 	case nil:
-		return nil, lib.AOInventoryOptionsDecodeError
+		return nil, e.AOInventoryOptionsDecodeError()
 	case "git":
 		newVal = IstGit
 	case "local":

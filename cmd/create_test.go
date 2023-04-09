@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/TheFriendlyCoder/rejigger/lib"
 	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
+	e "github.com/TheFriendlyCoder/rejigger/lib/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -73,7 +73,7 @@ func Test_ValidateArgsTemplateNotExists(t *testing.T) {
 
 	// we expect the proper error to be returned
 	r.Error(result)
-	r.ErrorAs(result, &lib.UnknownTemplateError{TemplateAlias: templateName})
+	r.ErrorIs(result, e.NewUnknownTemplateError(templateName))
 }
 
 func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
@@ -106,7 +106,7 @@ func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
 
 	// we expect the proper error to be returned
 	r.Error(result)
-	r.ErrorAs(result, &lib.PathError{Path: destDir, ErrorType: lib.PePathNotEmpty})
+	r.ErrorIs(result, e.NewPathError(destDir, e.PePathNotEmpty))
 }
 
 func Test_CreateCommandSucceeds(t *testing.T) {
