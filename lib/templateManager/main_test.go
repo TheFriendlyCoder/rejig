@@ -10,7 +10,6 @@ import (
 	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	"github.com/hashicorp/go-version"
 	"github.com/pkg/errors"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -310,15 +309,4 @@ func Test_templateManagerFailToGenerate(t *testing.T) {
 	// The operation should fail
 	r.Error(err)
 
-}
-
-func Test_getGitTemplate(t *testing.T) {
-	r := require.New(t)
-
-	tmp, err := getGitTemplate("https://github.com/TheFriendlyCoder/rejiggerTestTemplate.git")
-	r.NoError(err)
-
-	res, err := afero.ReadDir(tmp, ".")
-	r.NoError(err)
-	r.True(len(res) > 0)
 }

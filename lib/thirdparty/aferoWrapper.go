@@ -1,4 +1,4 @@
-package templateManager
+package thirdparty
 
 // Based on implementation found here:
 // https://github.com/Maldris/go-billy-afero
@@ -29,7 +29,7 @@ type Afero struct {
 }
 
 // New returns a new OS filesystem.
-func NewWraper(fs afero.Fs, root string, debug bool) billy.Filesystem {
+func NewBillyWraper(fs afero.Fs, root string, debug bool) billy.Filesystem {
 	return &Afero{fs: fs, root: root, Debug: debug}
 }
 

@@ -25,16 +25,16 @@ COVERAGE_FILE=coverage.out
 go test ./... -coverprofile "${COVERAGE_FILE}" -covermode set
 
 # Remove ignored files from coverage report
-declare -a ignoreFiles=("lib/templateManager/aferoWrapper.go")
-for curFile in "${ignoreFiles[@]}"; do
-  # NOTE: GREP needs to store output to a temp file otherwise the bash
-  #       file redirect will overwrite the original file with an empty
-  #       one before GREP even runs
-  grep -F -v "${curFile}" "${COVERAGE_FILE}" > "${COVERAGE_FILE}.tmp" && mv "${COVERAGE_FILE}.tmp" "${COVERAGE_FILE}"
-  # NOTE: Would be easier to do with SED but this doesn't work on Github
-  #       apparently the -i option is not supported cross platform
-  #  sed -i '' "/${curFile//\//\\/}/d" "${COVERAGE_FILE}"
-done
+#declare -a ignoreFiles=("lib/templateManager/aferoWrapper.go")
+#for curFile in "${ignoreFiles[@]}"; do
+#  # NOTE: GREP needs to store output to a temp file otherwise the bash
+#  #       file redirect will overwrite the original file with an empty
+#  #       one before GREP even runs
+#  grep -F -v "${curFile}" "${COVERAGE_FILE}" > "${COVERAGE_FILE}.tmp" && mv "${COVERAGE_FILE}.tmp" "${COVERAGE_FILE}"
+#  # NOTE: Would be easier to do with SED but this doesn't work on Github
+#  #       apparently the -i option is not supported cross platform
+#  #  sed -i '' "/${curFile//\//\\/}/d" "${COVERAGE_FILE}"
+#done
 # Display ASCII report to console
 go tool cover -func="${COVERAGE_FILE}"
 # Display HTML report in default browser
