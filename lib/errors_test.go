@@ -1,9 +1,10 @@
 package lib
 
 import (
-	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func Test_FilePathInErrorMessage(t *testing.T) {

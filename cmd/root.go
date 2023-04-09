@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"context"
+	"os"
+
 	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 )
 
 // cfgFile path to the file containing config options for the app
