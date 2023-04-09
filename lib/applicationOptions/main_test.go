@@ -11,6 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TODO: Split some tests out of here for testing inventory and template options
+
 func Test_successfulValidation(t *testing.T) {
 	a := assert.New(t)
 

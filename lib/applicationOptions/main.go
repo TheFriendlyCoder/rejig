@@ -56,6 +56,9 @@ func appOptionsDecoder() mapstructure.DecodeHookFuncType {
 		//		it to the correct type and it just gets ignored
 		// TODO: Find a way to enable strict mode decoding here
 		//		 that might work better
+		// TODO: Replace application config parser with simple YAML parsing
+		//		 because it seems simpler
+		//		https://github.com/spf13/viper/issues/338
 		if (target == reflect.TypeOf(TemplateOptions{})) {
 			newData, err := decodeTemplateOptions(raw)
 			return newData, err
