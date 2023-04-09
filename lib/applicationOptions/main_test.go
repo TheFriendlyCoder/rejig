@@ -329,3 +329,24 @@ templates:
 		})
 	}
 }
+
+func Test_findInventoryByNameNoMatch(t *testing.T) {
+	appoptions := AppOptions{}
+	result := appoptions.FindInventory("fubar")
+	require.Nil(t, result)
+}
+
+func Test_findInventoryByName(t *testing.T) {
+	expectedNamespace := "FuBar"
+	expectedInv := InventoryOptions{
+		Namespace: expectedNamespace,
+		Source:    "http://fubar/repo",
+		Type:      IstGit,
+	}
+	appoptions := AppOptions{
+		Inventories: []InventoryOptions{expectedInv},
+	}
+
+	result := appoptions.FindInventory(expectedNamespace)
+	require.Equal(t, expectedInv, *result)
+}

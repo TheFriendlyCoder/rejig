@@ -40,6 +40,16 @@ func (a AppOptions) Validate() error {
 	return e.NewAppOptionsError(messages)
 }
 
+// FindInventory locates a template inventory given the namespace name
+func (a AppOptions) FindInventory(namespace string) *InventoryOptions {
+	for _, curInventory := range a.Inventories {
+		if curInventory.Namespace == namespace {
+			return &curInventory
+		}
+	}
+	return nil
+}
+
 // appOptionsDecoder custom hook method used to translate raw config data into a structure
 // that is easier to leverage in the application code
 func appOptionsDecoder() mapstructure.DecodeHookFuncType {
