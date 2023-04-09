@@ -94,7 +94,8 @@ func Test_templateManagerConstructor_NoManifest(t *testing.T) {
 	_, err = New(options)
 	r.Error(err)
 	a.True(os.IsNotExist(errors.Cause(err)))
-	a.Contains(err.Error(), "manifest file")
+	// Make sure the error message includes some type of reference to our manifest file
+	a.Contains(err.Error(), ".rejig.yml")
 }
 
 func Test_templateManagerConstructor_InvalidManifest(t *testing.T) {
@@ -120,8 +121,12 @@ func Test_templateManagerConstructor_InvalidManifest(t *testing.T) {
 
 	// When we try constructing a new instance of our manager
 	_, err = New(options)
+
+	// Operation should succeed
 	r.Error(err)
-	a.Contains(err.Error(), "Failed parsing manifest file")
+
+	// Make sure the error mentions that we were parsing a template manifest
+	a.Contains(err.Error(), "Error parsing template manifest")
 }
 
 func Test_templateManagerGatherParams(t *testing.T) {

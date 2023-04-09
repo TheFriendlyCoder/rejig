@@ -69,8 +69,8 @@ type AppOptions struct {
 // FromViper constructs a new set of application options from a Viper config file
 func FromViper(v *viper.Viper) (AppOptions, error) {
 	var retval AppOptions
-	err := errors.Wrap(v.Unmarshal(&retval, viper.DecodeHook(appOptionsDecoder())), "Failed parsing app options file")
-	return retval, err
+	err := v.Unmarshal(&retval, viper.DecodeHook(appOptionsDecoder()))
+	return retval, errors.Wrap(err, "Failed decoding application options")
 }
 
 // New constructor for a new set of application options
@@ -189,12 +189,12 @@ func appOptionsDecoder() mapstructure.DecodeHookFuncType {
 		//		 that might work better
 		if (target == reflect.TypeOf(TemplateOptions{})) {
 			newData, err := decodeTemplateOptions(raw)
-			return newData, errors.Wrap(err, "Error decoding template options")
+			return newData, err
 		}
 
 		if (target == reflect.TypeOf(InventoryOptions{})) {
 			newData, err := decodeInventoryOptions(raw)
-			return newData, errors.Wrap(err, "Error decoding inventory options")
+			return newData, err
 		}
 		return raw, nil
 

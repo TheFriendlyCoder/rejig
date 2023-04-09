@@ -102,7 +102,7 @@ func initConfig() (ao.AppOptions, error) {
 
 	appOptions, err := ao.New()
 	if err != nil {
-		return appOptions, errors.Wrap(err, "Failed to create default set of application options")
+		return appOptions, err
 	}
 
 	// If a config file is found, read it in.
@@ -112,15 +112,15 @@ func initConfig() (ao.AppOptions, error) {
 	if errors.As(err, &viper.ConfigFileNotFoundError{}) {
 		return appOptions, nil
 	} else if err != nil {
-		return appOptions, errors.Wrap(err, "Failure reading options file")
+		return appOptions, errors.WithStack(err)
 	}
 
 	appOptions, err = ao.FromViper(viper.GetViper())
 	if err != nil {
-		return appOptions, errors.Wrap(err, "Failed to parse options file")
+		return appOptions, err
 	}
 
 	// Then validate the results to make sure they meet the application requirements
-	err = errors.Wrap(appOptions.Validate(), "App options file failed validation")
+	err = appOptions.Validate()
 	return appOptions, err
 }

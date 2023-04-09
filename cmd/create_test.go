@@ -165,6 +165,9 @@ templates:
 
 	act = filepath.Join(outputDir, "MyProj", "main.txt")
 	a.FileExists(act)
+	// TODO: add stack-trace support throughout error handlers
+	// TODO: add error helpers to unit tests to make sure all errors have a stack trace
+	// TODO: add helper to generate stack trace without duplicate frames
 }
 
 func Test_CreateCommandTooFewArgs(t *testing.T) {
