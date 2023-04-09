@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	e "github.com/TheFriendlyCoder/rejigger/lib/errors"
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v3"
 )
 
 // TemplateSourceType enum for all supported source locations for loading templates
@@ -19,6 +21,47 @@ const (
 	// TstGit Template source is stored in a Git repository
 	TstGit
 )
+
+// toString Converts the value from our enumeration to a string representation
+func (t *TemplateSourceType) toString() string {
+	switch *t {
+	case TstGit:
+		return "git"
+	case TstLocal:
+		return "local"
+	case TstUndefined:
+		// TODO: See if I should handle these values differently
+		fallthrough
+	case TstUnknown:
+		fallthrough
+	default:
+		return ""
+	}
+}
+
+// fromString populates our enumeration from an arbitrary character string
+func (t *TemplateSourceType) fromString(value string) {
+	switch value {
+	case "git":
+		*t = TstGit
+	case "local":
+		*t = TstLocal
+	case "":
+		*t = TstUndefined
+	default:
+		*t = TstUnknown
+	}
+}
+
+// UnmarshalYAML decodes values for our enumeration from YAML content
+func (t *TemplateSourceType) UnmarshalYAML(value *yaml.Node) error {
+	var temp string
+	if err := value.Decode(&temp); err != nil {
+		return errors.Wrap(err, "Unable to parse template source type: "+value.Value)
+	}
+	t.fromString(temp)
+	return nil
+}
 
 // TemplateOptions metadata describing the source location for a source template
 type TemplateOptions struct {
@@ -54,6 +97,8 @@ func decodeTemplateOptions(raw interface{}) (map[string]interface{}, error) {
 	return templateData, nil
 }
 
+// validateTemplates checks to make sure the template options in our application
+// options meets the application requirements
 func (a AppOptions) validateTemplates() []string {
 	var retval []string
 	for i, curTemplate := range a.Templates {

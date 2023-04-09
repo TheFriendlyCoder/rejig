@@ -4,6 +4,9 @@ import (
 	"fmt"
 
 	e "github.com/TheFriendlyCoder/rejigger/lib/errors"
+	"github.com/pkg/errors"
+	"github.com/spf13/afero"
+	"gopkg.in/yaml.v3"
 )
 
 // InventorySourceType enum for all supported source locations for template inventories
@@ -28,6 +31,12 @@ type InventoryOptions struct {
 	Source string
 	// Namespace prefix to add to all templates contained in this inventory
 	Namespace string
+}
+
+// InventoryData stores data parsed from a template inventory definition file
+type InventoryData struct {
+	// Templates list of templates defined in the inventory
+	Templates []TemplateOptions `yaml:"templates"`
 }
 
 // decodeInventoryOptions decodes raw YAMl data into proper parsed inventory options
@@ -69,4 +78,26 @@ func (a AppOptions) validateInventory() []string {
 		}
 	}
 	return retval
+}
+
+// parseInventory parses a template manifest file and returns a reference to
+// the parsed representation of the contents of the file
+func parseInventory(srcFS afero.Fs, path string) (InventoryData, error) {
+	// TODO: Write validator for inventory, and probably should not allow "local" type for
+	//		 templates defined in a Git inventory
+	var retval InventoryData
+	buf, err := afero.ReadFile(srcFS, path)
+	if err != nil {
+		return retval, errors.Wrap(err, "Failed to open inventory file")
+	}
+
+	// TODO: Find some way to get "Strict" mode to work properly (aka: KnownFields in v3)
+	//		https://github.com/go-yaml/yaml/issues/460
+	//		https://github.com/go-yaml/yaml/issues/642
+	err = yaml.Unmarshal(buf, &retval)
+	if err != nil {
+		return retval, errors.Wrap(err, "Failed to parse YAML content from inventory file")
+	}
+
+	return retval, nil
 }
