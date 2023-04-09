@@ -1,38 +1,53 @@
 linters:
+  disable-all: true
   enable:
     # default
     - errcheck
-    - gosimple
-    - govet
-    - ineffassign
-    - staticcheck
-    - typecheck
-    - unused
+#    - gosimple
+#    - govet
+#    - ineffassign
+#    - staticcheck
+#    - typecheck
+#    - unused
+
     # custom
-    - cyclop
-    - goerr113
+#    - cyclop
+#    - goerr113
+    - revive
   presets:
-    - bugs
+    #- bugs
 #    - complexity
-    - error
+    #- error
 #    - format
 #    - import
 #    - metalinter
-    - module
-    - performance
+    #- module
+    #- performance
 #    - sql
 #    - style
 #    - test
 #    - unused
 linters-settings:
+  revive:
+
+    rules:
+#      - name: error-naming
+#        disabled: true
+      # Force the linter to detect unhandled errors from every package, including fmt
+      - name: unhandled-error
+        arguments: []
   cyclop:
     max-complexity: 10
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
-    disable-default-exclusions: true
+#  errcheck:
+#    check-type-assertions: true
+#    check-blank: true
+#    disable-default-exclusions: true
+#    ignore: "fmt:a^"
+  wrapcheck:
+    ignorePackageGlobs:
+      - github.com/TheFriendlyCoder/rejigger/*
 run:
-  #tests: false
+  tests: true
   skip-files:
     # Ignore files that are partially vendored
-    - lib/templateManager/aferoWrapper.go
+    - lib/aferoWrapper.go

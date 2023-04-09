@@ -25,7 +25,7 @@ COVERAGE_FILE=coverage.out
 go test ./... -coverprofile "${COVERAGE_FILE}" -covermode set
 
 # Remove ignored files from coverage report
-declare -a ignoreFiles=("lib/templateManager/aferoWrapper.go")
+declare -a ignoreFiles=("lib/aferoWrapper.go")
 for curFile in "${ignoreFiles[@]}"; do
   # NOTE: GREP needs to store output to a temp file otherwise the bash
   #       file redirect will overwrite the original file with an empty

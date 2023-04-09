@@ -54,7 +54,7 @@ func run(cmd *cobra.Command, args rootArgs) error {
 	// We have to use cmd.OutOrStdout() to ensure output is redirected to Cobra
 	// stream handler, to facilitate testing (ie: it allows us to capture output
 	// during unit testing to validate results of CLI operations)
-	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Loading template %s...\n", args.templateAlias))
+	fmt.Fprintf(cmd.OutOrStdout(), "Loading template %s...\n", args.templateAlias)
 
 	appOptions, ok := cmd.Context().Value(CkOptions).(ao.AppOptions)
 	if !ok {
