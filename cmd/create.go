@@ -64,8 +64,9 @@ func findTemplate(appOptions ao.AppOptions, alias string) (ao.TemplateOptions, e
 	return ao.TemplateOptions{}, e.NewUnknownTemplateError(alias)
 }
 
-// run Primary entry point function for our generator
-func run(cmd *cobra.Command, args rootArgs) error {
+// TODO: Move every sub-command into separate package folder to help isolate runtime code
+// runCreate Primary entry point function for our generator
+func runCreate(cmd *cobra.Command, args rootArgs) error {
 	// We have to use cmd.OutOrStdout() to ensure output is redirected to Cobra
 	// stream handler, to facilitate testing (ie: it allows us to capture output
 	// during unit testing to validate results of CLI operations)
@@ -135,6 +136,7 @@ var createCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(2),
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		// Initialize our command context from the root command
+		
 		err := cmd.Parent().PreRunE(cmd, args)
 		if err != nil {
 			return errors.WithStack(err)
@@ -150,7 +152,7 @@ var createCmd = &cobra.Command{
 			targetPath:    args[0],
 			templateAlias: args[1],
 		}
-		err := run(cmd, parsedArgs)
+		err := runCreate(cmd, parsedArgs)
 		if err != nil {
 			// https://pkg.go.dev/github.com/pkg/errors#hdr-Retrieving_the_stack_trace_of_an_error_or_wrapper
 			type stackTracer interface {

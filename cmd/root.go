@@ -42,11 +42,6 @@ var rootCmd = &cobra.Command{
 	Long: `The rejigger app allows you to generate source code projects from
 specially formatted files stored on disk or in Git repositories`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		// Parse options file, if it exists, and register the results
-		// in our command context
-		if err := cobra.ExactArgs(2)(cmd, args); err != nil {
-			return err
-		}
 		appOptions, err := initConfig()
 		if err != nil {
 			return err

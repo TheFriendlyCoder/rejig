@@ -22,6 +22,21 @@ const (
 	TstGit
 )
 
+func (t TemplateSourceType) ToString() string {
+	switch t {
+	case TstUndefined:
+		return "Undefined"
+	case TstLocal:
+		return "Local"
+	case TstGit:
+		return "Git"
+	case TstUnknown:
+		fallthrough
+	default:
+		return "Unknown"
+	}
+}
+
 // toString Converts the value from our enumeration to a string representation
 func (t *TemplateSourceType) toString() string {
 	switch *t {

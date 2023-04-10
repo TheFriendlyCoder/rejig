@@ -10,7 +10,7 @@ import (
 func Test_helpCommand(t *testing.T) {
 	r := require.New(t)
 
-	// When we run the root command with a custom config file
+	// When we runCreate the root command with a custom config file
 	actual := new(bytes.Buffer)
 	rootCmd.SetOut(actual)
 	rootCmd.SetErr(actual)
