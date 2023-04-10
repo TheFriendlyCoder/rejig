@@ -1,10 +1,15 @@
 package lib
 
 import (
+	"fmt"
+	"os"
+	"strings"
+
 	"github.com/TheFriendlyCoder/rejigger/lib/thirdparty"
 	"github.com/pkg/errors"
 	"github.com/spf13/afero"
 	"gopkg.in/src-d/go-git.v4"
+	ssh2 "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 	"gopkg.in/src-d/go-git.v4/storage/memory"
 )
 
@@ -31,9 +36,30 @@ func GetGitFilesystem(gitURL string) (afero.Fs, error) {
 	appFS := afero.NewMemMapFs()
 	fs := thirdparty.NewBillyWraper(appFS, ".", false)
 
-	_, err := git.Clone(memory.NewStorage(), fs, &git.CloneOptions{
+	opts := git.CloneOptions{
 		URL: gitURL,
-	})
+	}
+
+	if !strings.HasPrefix(gitURL, "http") {
+		// TODO: Figure out some way to unit test this block
+		sshFile := fmt.Sprintf("%s/.ssh/id_rsa", os.Getenv("HOME"))
+		_, err := os.Stat(sshFile)
+		if os.IsNotExist(err) {
+			return appFS, errors.Wrap(err, fmt.Sprintf("Can not find SSH key %s. Run ssh-keygen first.", sshFile))
+		} else if err != nil {
+			return appFS, errors.WithStack(err)
+		}
+
+		// TODO: add support for encrypted SSH key
+		authKey, err := ssh2.NewPublicKeysFromFile("git", sshFile, "")
+		if err != nil {
+			return appFS, errors.WithStack(err)
+		}
+
+		opts.Auth = authKey
+	}
+
+	_, err := git.Clone(memory.NewStorage(), fs, &opts)
 	if err != nil {
 		return appFS, errors.Wrap(err, "Failed to load remote Git repository: "+gitURL)
 	}
