@@ -128,6 +128,10 @@ func Test_CheckErrorMessages(t *testing.T) {
 			srcType:    AOInventoryOptionsDecodeError(),
 			expMessage: "unable to decode inventory options",
 		},
+		"Check AOInvalidTemplateNameError": {
+			srcType:    AOInvalidTemplateNameError(),
+			expMessage: "invalid template name",
+		},
 	}
 
 	for name, data := range tests {
@@ -192,6 +196,10 @@ func Test_CheckNotErrorIsWorking(t *testing.T) {
 		},
 		"Compare aoInventoryOptionsDecodeError to fake error": {
 			srcType:  AOInventoryOptionsDecodeError(),
+			destType: fakeErr,
+		},
+		"Compare AOInvalidTemplateNameError to fake error": {
+			srcType:  AOInvalidTemplateNameError(),
 			destType: fakeErr,
 		},
 	}

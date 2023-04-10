@@ -281,3 +281,88 @@ templates:
 	a.Contains(output.String(), "permission denied")
 	a.Contains(output.String(), "create.go")
 }
+
+func Test_FindTemplate(t *testing.T) {
+	r := require.New(t)
+
+	expAlias := "Fubar"
+	expTempl := ao.TemplateOptions{
+		Alias:  expAlias,
+		Source: "/tmp",
+		Type:   ao.TstLocal,
+	}
+	appOptions := ao.AppOptions{
+		Templates: []ao.TemplateOptions{expTempl},
+	}
+
+	result, err := findTemplate(appOptions, expAlias)
+	r.NoError(err)
+	r.Equal(expTempl, result)
+}
+
+func Test_FindTemplateInvalidName(t *testing.T) {
+	r := require.New(t)
+
+	expAlias := "Fubar.Was.Here"
+	appOptions := ao.AppOptions{
+		Templates: []ao.TemplateOptions{},
+	}
+
+	_, err := findTemplate(appOptions, expAlias)
+	r.ErrorIs(err, e.AOInvalidTemplateNameError())
+}
+
+func Test_FindTemplateFromInventory(t *testing.T) {
+	r := require.New(t)
+
+	// Given a couple of working folders
+	tmpDir, err := os.MkdirTemp("", "")
+	r.NoError(err)
+	defer os.RemoveAll(tmpDir)
+
+	invDirName := path.Join(tmpDir, "inventory")
+	err = os.Mkdir(invDirName, 0700)
+	r.NoError(err)
+
+	workDirName := path.Join(tmpDir, "working")
+	err = os.Mkdir(workDirName, 0700)
+	r.NoError(err)
+
+	// And a sample inventory file
+	outputFile := path.Join(invDirName, ".rejig.inv.yml")
+	expAlias := "test1"
+	invData := fmt.Sprintf(`
+templates:
+  - alias: %s
+    source: %s
+    type: local
+`, expAlias, workDirName)
+	fh, err := os.Create(outputFile)
+	r.NoError(err)
+	_, err = fh.WriteString(invData)
+	r.NoError(err)
+	r.NoError(fh.Close())
+
+	expTempl := ao.TemplateOptions{
+		Alias:  expAlias,
+		Source: workDirName,
+		Type:   ao.TstLocal,
+	}
+	expNamespace := "MyNS"
+	tempInvOpts := ao.InventoryOptions{
+		Type:      ao.IstLocal,
+		Source:    invDirName,
+		Namespace: expNamespace,
+	}
+
+	// TODO: Use dependency injection to add a fake inventory here
+	//		 for searching, so we don't have to construct all the test data
+	appOptions := ao.AppOptions{
+		Templates:   []ao.TemplateOptions{},
+		Inventories: []ao.InventoryOptions{tempInvOpts},
+	}
+
+	result, err := findTemplate(appOptions, expNamespace+"."+expAlias)
+	r.NoError(err)
+	r.Equal(expTempl, result)
+}
