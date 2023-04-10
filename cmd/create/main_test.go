@@ -1,13 +1,16 @@
-package cmd
+package create
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 	"testing"
 
+	"github.com/TheFriendlyCoder/rejigger/cmd/internal"
+	"github.com/TheFriendlyCoder/rejigger/cmd/shared"
 	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	e "github.com/TheFriendlyCoder/rejigger/lib/errors"
 	"github.com/stretchr/testify/assert"
@@ -119,21 +122,17 @@ func Test_CreateCommandSucceeds(t *testing.T) {
 	r.NoError(err)
 	defer os.RemoveAll(tmpDir)
 
-	// an empty output folder
-	outputDir := path.Join(tmpDir, "output")
-	r.NoError(os.Mkdir(outputDir, 0700))
-
 	// and an app options file with a template pointing to our project
 	templateName := "MyTemplate"
-	srcDir := getProjectDir("simple")
-	optionsText := fmt.Sprintf(`
-templates:
-  - type: local
-    source: %s
-    alias: %s`, srcDir, templateName)
-	configFile := path.Join(tmpDir, "options.yml")
-	err = os.WriteFile(configFile, []byte(optionsText), 0600)
-	r.NoError(err)
+	srcDir := internal.GetProjectDir("simple")
+
+	appOptions := ao.AppOptions{
+		Templates: []ao.TemplateOptions{{
+			Type:   ao.TstLocal,
+			Source: srcDir,
+			Alias:  templateName,
+		}},
+	}
 
 	// and some fake user input to respond to prompts from the template
 	output := new(bytes.Buffer)
@@ -144,26 +143,29 @@ templates:
 	r.NoError(err)
 
 	// When we trigger the create command
-	rootCmd.SetOut(output)
-	rootCmd.SetErr(output)
-	rootCmd.SetIn(fakeInput)
-	rootCmd.SetArgs([]string{"--config=" + configFile, "create", outputDir, templateName})
-	err = rootCmd.Execute()
+	createCmd := CreateCmd()
+	createCmd.SetOut(output)
+	createCmd.SetErr(output)
+	createCmd.SetIn(fakeInput)
+	ctx := context.TODO()
+	ctx = context.WithValue(ctx, shared.CkOptions, appOptions)
+	createCmd.SetArgs([]string{tmpDir, templateName})
+	err = createCmd.ExecuteContext(ctx)
 	r.NoError(err, "CLI command should have succeeded")
 
 	r.Contains(output.String(), templateName)
-	r.Contains(output.String(), outputDir)
+	r.Contains(output.String(), tmpDir)
 
-	a.DirExists(filepath.Join(outputDir, "MyProj"))
-	a.NoFileExists(filepath.Join(outputDir, ".rejig.yml"))
+	a.DirExists(filepath.Join(tmpDir, "MyProj"))
+	a.NoFileExists(filepath.Join(tmpDir, ".rejig.yml"))
 
-	act := filepath.Join(outputDir, ".gitignore")
+	act := filepath.Join(tmpDir, ".gitignore")
 	a.FileExists(act)
 
-	act = filepath.Join(outputDir, "version.txt")
+	act = filepath.Join(tmpDir, "version.txt")
 	a.FileExists(act)
 
-	act = filepath.Join(outputDir, "MyProj", "main.txt")
+	act = filepath.Join(tmpDir, "MyProj", "main.txt")
 	a.FileExists(act)
 	// TODO: add stack-trace support throughout error handlers
 	// TODO: add error helpers to unit tests to make sure all errors have a stack trace
@@ -179,16 +181,15 @@ func Test_CreateCommandTooFewArgs(t *testing.T) {
 	r.NoError(err)
 	defer os.RemoveAll(tmpDir)
 
-	// with 1 empty subfolder
-	srcDir := path.Join(tmpDir, "src")
-	r.NoError(os.Mkdir(srcDir, 0700))
-
 	// When we execute our root command with a missing positional arg
+	ctx := context.TODO()
+	ctx = context.WithValue(ctx, shared.CkOptions, ao.AppOptions{})
 	actual := new(bytes.Buffer)
-	rootCmd.SetOut(actual)
-	rootCmd.SetErr(actual)
-	rootCmd.SetArgs([]string{"create", srcDir})
-	err = rootCmd.Execute()
+	createCmd := CreateCmd()
+	createCmd.SetOut(actual)
+	createCmd.SetErr(actual)
+	createCmd.SetArgs([]string{tmpDir})
+	err = createCmd.ExecuteContext(ctx)
 
 	// We expect an error to be returned
 	r.Error(err)
@@ -206,28 +207,17 @@ func Test_CreateCommandInvalidTemplateName(t *testing.T) {
 	r.NoError(err)
 	defer os.RemoveAll(tmpDir)
 
-	// with an absent source folder
-	templateName := "MyTemplate"
-	srcDir := path.Join(tmpDir, "src")
-	optionsText := fmt.Sprintf(`
-templates:
-  - type: local
-    source: %s
-    alias: %s`, srcDir, templateName)
-	configFile := path.Join(tmpDir, "options.yml")
-	err = os.WriteFile(configFile, []byte(optionsText), 0600)
-	r.NoError(err)
+	// And a config with no template defined in it
+	ctx := context.TODO()
+	ctx = context.WithValue(ctx, shared.CkOptions, ao.AppOptions{})
 
-	// and an empty output folder
-	destDir := path.Join(tmpDir, "dest")
-	r.NoError(os.Mkdir(destDir, 0700))
-
-	// when we attempt to execute our create command
+	// when we attempt to create a project using a template name that doesn't exit
 	actual := new(bytes.Buffer)
-	rootCmd.SetOut(actual)
-	rootCmd.SetErr(actual)
-	rootCmd.SetArgs([]string{"--config=" + configFile, "create", destDir, "DoesNotExist"})
-	err = rootCmd.Execute()
+	createCmd := CreateCmd()
+	createCmd.SetOut(actual)
+	createCmd.SetErr(actual)
+	createCmd.SetArgs([]string{tmpDir, "DoesNotExist"})
+	err = createCmd.ExecuteContext(ctx)
 
 	// We expect an error to be returned
 	r.Error(err)
@@ -249,15 +239,16 @@ func Test_CreateCommandGenerateFailure(t *testing.T) {
 
 	// and an app options file with a template pointing to our project
 	templateName := "MyTemplate"
-	srcDir := getProjectDir("simple")
-	optionsText := fmt.Sprintf(`
-templates:
-  - type: local
-    source: %s
-    alias: %s`, srcDir, templateName)
-	configFile := path.Join(tmpDir, "options.yml")
-	err = os.WriteFile(configFile, []byte(optionsText), 0600)
-	r.NoError(err)
+	srcDir := internal.GetProjectDir("simple")
+	appOptions := ao.AppOptions{
+		Templates: []ao.TemplateOptions{{
+			Type:   ao.TstLocal,
+			Source: srcDir,
+			Alias:  templateName,
+		}},
+	}
+	ctx := context.TODO()
+	ctx = context.WithValue(ctx, shared.CkOptions, appOptions)
 
 	// and some fake user input to respond to prompts from the template
 	output := new(bytes.Buffer)
@@ -268,18 +259,19 @@ templates:
 	r.NoError(err)
 
 	// When we trigger the create command
-	rootCmd.SetOut(output)
-	rootCmd.SetErr(output)
-	rootCmd.SetIn(fakeInput)
-	rootCmd.SetArgs([]string{"--config=" + configFile, "create", outputDir, templateName})
-	err = rootCmd.Execute()
+	createCmd := CreateCmd()
+	createCmd.SetOut(output)
+	createCmd.SetErr(output)
+	createCmd.SetIn(fakeInput)
+	createCmd.SetArgs([]string{outputDir, templateName})
+	err = createCmd.ExecuteContext(ctx)
 
 	// The operation should fail
 	r.Error(err)
 
 	// And there should be a stack trace in the output
 	a.Contains(output.String(), "permission denied")
-	a.Contains(output.String(), "create.go")
+	a.Contains(output.String(), "main.go")
 }
 
 func Test_FindTemplate(t *testing.T) {
