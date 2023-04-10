@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+// TODO: replace this exported symbol with an interface of the same name
+
 // AppOptions parsed config options supported by the app
 type AppOptions struct {
 	// Templates 0 or more sources where template projects are to be found

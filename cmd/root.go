@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 
+	"github.com/TheFriendlyCoder/rejigger/cmd/create"
+	"github.com/TheFriendlyCoder/rejigger/cmd/shared"
 	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/pkg/errors"
@@ -13,19 +15,6 @@ import (
 
 // cfgFile path to the file containing config options for the app
 var cfgFile string
-
-// ContextKey enumerated type defining keys in the Cobra context manager used to store
-// and retrieve common command properties
-type ContextKey int64
-
-const (
-	// CkOptions Parsed application options loaded from the environment or app config file
-	// should be managed exclusively by the root command
-	CkOptions ContextKey = iota
-	// CkArgs Command line args, parsed into an internal struct format
-	// Type of this context object is unique for each command
-	CkArgs
-)
 
 // checkErr replacement for the cobra method of the same name, which unfortunately calls os.exit
 // under the hood, making it impossible to write unit tests for it. This helper calls out to panic()
@@ -38,20 +27,18 @@ func checkErr(err error) {
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
+	Use:   "rejig",
 	Short: "Project templating tool",
 	Long: `The rejigger app allows you to generate source code projects from
 specially formatted files stored on disk or in Git repositories`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// Parse options file, if it exists, and register the results
 		// in our command context
-		if err := cobra.ExactArgs(2)(cmd, args); err != nil {
-			return err
-		}
 		appOptions, err := initConfig()
 		if err != nil {
 			return err
 		}
-		ctx := context.WithValue(cmd.Context(), CkOptions, appOptions)
+		ctx := context.WithValue(cmd.Context(), shared.CkOptions, appOptions)
 		cmd.SetContext(ctx)
 		return nil
 	},
@@ -69,7 +56,6 @@ func Execute() {
 		Flags:           cc.Bold,
 		NoExtraNewlines: true,
 	})
-	rootCmd.Use = "rejig"
 
 	err := rootCmd.Execute()
 	if err != nil {
@@ -81,7 +67,7 @@ func Execute() {
 func init() {
 	// Global application flags
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.rejig.yaml)")
-
+	rootCmd.AddCommand(create.CreateCmd())
 }
 
 // initConfig reads app config info from a config file if provided

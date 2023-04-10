@@ -1,4 +1,4 @@
-package cmd
+package create
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/TheFriendlyCoder/rejigger/cmd/shared"
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	e "github.com/TheFriendlyCoder/rejigger/lib/errors"
@@ -71,7 +72,7 @@ func run(cmd *cobra.Command, args rootArgs) error {
 	// during unit testing to validate results of CLI operations)
 	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Loading template %s...\n", args.templateAlias))
 
-	appOptions, ok := cmd.Context().Value(CkOptions).(ao.AppOptions)
+	appOptions, ok := cmd.Context().Value(shared.CkOptions).(ao.AppOptions)
 	if !ok {
 		return e.NewInternalError("Failed to retrieve app options")
 	}
@@ -127,45 +128,43 @@ func validateArgs(options ao.AppOptions, args []string) error {
 	return nil
 }
 
-// createCmd defines the structure for the "create" subcommand
-var createCmd = &cobra.Command{
-	Use:   "create",
-	Short: "create a new project from a template",
-	Long:  `Creates a new project in an empty folder using content defined in a template`,
-	Args:  cobra.MinimumNArgs(2),
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		// Initialize our command context from the root command
-		err := cmd.Parent().PreRunE(cmd, args)
-		if err != nil {
-			return errors.WithStack(err)
-		}
-		appOptions, ok := cmd.Context().Value(CkOptions).(ao.AppOptions)
-		if !ok {
-			return e.CommandContextNotDefined()
-		}
-		return validateArgs(appOptions, args)
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		parsedArgs := rootArgs{
-			targetPath:    args[0],
-			templateAlias: args[1],
-		}
-		err := run(cmd, parsedArgs)
-		if err != nil {
-			// https://pkg.go.dev/github.com/pkg/errors#hdr-Retrieving_the_stack_trace_of_an_error_or_wrapper
-			type stackTracer interface {
-				StackTrace() errors.StackTrace
+// CreateCmd instantiates the "create" subcommand
+func CreateCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   generateUsageLine(),
+		Short: "create a new project from a template",
+		Long:  `Creates a new project in an empty folder using content defined in a template`,
+		Args:  cobra.MinimumNArgs(2),
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			// Initialize our command context from the root command
+			appOptions, ok := cmd.Context().Value(shared.CkOptions).(ao.AppOptions)
+			if !ok {
+				return e.CommandContextNotDefined()
 			}
-			if temp, ok := interface{}(err).(stackTracer); ok {
-				for _, f := range temp.StackTrace() {
-					lib.SNF(fmt.Fprintf(cmd.ErrOrStderr(), "%+s:%d\n", f, f))
+			return validateArgs(appOptions, args)
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			parsedArgs := rootArgs{
+				targetPath:    args[0],
+				templateAlias: args[1],
+			}
+			err := run(cmd, parsedArgs)
+			if err != nil {
+				// https://pkg.go.dev/github.com/pkg/errors#hdr-Retrieving_the_stack_trace_of_an_error_or_wrapper
+				type stackTracer interface {
+					StackTrace() errors.StackTrace
 				}
+				if temp, ok := interface{}(err).(stackTracer); ok {
+					for _, f := range temp.StackTrace() {
+						lib.SNF(fmt.Fprintf(cmd.ErrOrStderr(), "%+s:%d\n", f, f))
+					}
+				}
+				lib.SNF(fmt.Fprintln(cmd.ErrOrStderr(), "Failed to generate project"))
+				lib.SNF(fmt.Fprintln(cmd.ErrOrStderr(), err.Error()))
 			}
-			lib.SNF(fmt.Fprintln(cmd.ErrOrStderr(), "Failed to generate project"))
-			lib.SNF(fmt.Fprintln(cmd.ErrOrStderr(), err.Error()))
-		}
-		return err
-	},
+			return err
+		},
+	}
 }
 
 // generateUsageLine dynamically generates a usage line for the app based on the contents
@@ -180,9 +179,4 @@ func generateUsageLine() string {
 		retval += varName + " "
 	}
 	return strings.TrimSpace(retval)
-}
-
-func init() {
-	createCmd.Use = generateUsageLine()
-	rootCmd.AddCommand(createCmd)
 }

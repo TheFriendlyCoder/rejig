@@ -1,4 +1,4 @@
-package cmd
+package internal
 
 import (
 	"os"
@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 )
 
-// getProjectDir Gets the path to a specific test project
-func getProjectDir(projectName string) string {
-	retval := path.Join("..", "testdata", "projects", projectName)
+// GetProjectDir Gets the path to a specific test project
+func GetProjectDir(projectName string) string {
+	retval := path.Join("..", "..", "testdata", "projects", projectName)
 	var info, err = os.Stat(retval)
 	if err != nil {
 		panic("Critical test failure: unable to access test project " + projectName)
