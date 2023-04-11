@@ -1,0 +1,7 @@
+baseURL = 'https://thefriendlycoder.github.io/rejigger/'
+languageCode = 'en-us'
+title = 'Rejigger templating tool'
+
+[module]
+[[module.imports]]
+path = 'github.com/McShelby/hugo-theme-relearn'
