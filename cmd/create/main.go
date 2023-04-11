@@ -115,16 +115,11 @@ func validateArgs(options ao.AppOptions, args []string) error {
 	}
 
 	// Validate template name
-	found := false
-	for _, t := range options.Templates {
-		if t.Alias == args[1] {
-			found = true
-			break
-		}
+	_, err := findTemplate(options, args[1])
+	if err != nil {
+		return err
 	}
-	if !found {
-		return e.NewUnknownTemplateError(args[1])
-	}
+
 	return nil
 }
 
