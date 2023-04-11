@@ -22,7 +22,7 @@ COVERAGE_FILE=coverage.out
 #go test --cover ./...
 
 # Run tests and store coverage report to disk
-go test ./... -coverprofile "${COVERAGE_FILE}" -covermode set
+go test ./... -race -coverprofile "${COVERAGE_FILE}" -covermode atomic
 
 # Remove ignored files from coverage report
 #declare -a ignoreFiles=("lib/templateManager/aferoWrapper.go")
