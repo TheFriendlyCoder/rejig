@@ -47,7 +47,7 @@ templates:
 	r.Equal(1, len(result.Templates))
 	a.Equal(expType, result.Templates[0].Type)
 	a.Equal(expSource, result.Templates[0].Source)
-	a.Equal(expAlias, result.Templates[0].Alias)
+	a.Equal(expAlias, result.Templates[0].GetName())
 }
 
 func Test_getLocalTemplateDefinitions(t *testing.T) {
@@ -87,5 +87,5 @@ templates:
 	a.Equal(1, len(opts))
 	a.Equal(expType, opts[0].Type)
 	a.Equal(expSource, opts[0].Source)
-	a.Equal(expAlias, opts[0].Alias)
+	a.Equal(expAlias, opts[0].GetName())
 }
