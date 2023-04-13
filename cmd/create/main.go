@@ -57,7 +57,7 @@ func findTemplate(appOptions ao.AppOptions, alias string) (ao.TemplateOptions, e
 	}
 
 	for _, t := range templates {
-		if t.Alias == newAlias {
+		if t.GetName() == newAlias {
 			return t, nil
 		}
 	}
@@ -89,7 +89,7 @@ func run(cmd *cobra.Command, args rootArgs) error {
 	if err = tm.GatherParams(cmd); err != nil {
 		return err
 	}
-	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from template %s...\n", args.targetPath, curTemplate.Alias))
+	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from template %s...\n", args.targetPath, curTemplate.GetName()))
 
 	return tm.Generate(args.targetPath)
 	// TODO: after generating, put an archive file in the root folder summarizing what we did so we

@@ -211,7 +211,7 @@ templates:
 			// We expect the operation to succeed
 			r.NoError(err)
 			a.Equal(1, len(options.Templates))
-			a.Equal(data.Alias, options.Templates[0].Alias)
+			a.Equal(data.Alias, options.Templates[0].GetName())
 			a.Equal(data.Source, options.Templates[0].Source)
 			a.Equal(data.TypeEnum, options.Templates[0].Type)
 		})

@@ -3,7 +3,6 @@ package templateManager
 import (
 	"bufio"
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/TheFriendlyCoder/rejigger/lib"
@@ -35,23 +34,6 @@ type templateManager struct {
 	srcFilesystem afero.Fs
 }
 
-// rootDir gets the root folder where the template source files are stored
-// takes into account the virtual file system used by the manager
-func (t *templateManager) rootDir() string {
-	switch t.Options.Type {
-	case ao.TstGit:
-		return "."
-	case ao.TstLocal:
-		return t.Options.Source
-	case ao.TstUndefined:
-		fallthrough
-	case ao.TstUnknown:
-		fallthrough
-	default:
-		panic("should never happen: unsupported template type: " + t.Options.Alias)
-	}
-}
-
 // New constructs new instances of our template manager, which allows the caller
 // to interact with a template in various ways
 func New(options ao.TemplateOptions) (templateManager, error) {
@@ -61,24 +43,13 @@ func New(options ao.TemplateOptions) (templateManager, error) {
 	retval.templateContext = map[string]any{}
 
 	var err error
-	switch options.Type {
-	case ao.TstGit:
-		retval.srcFilesystem, err = lib.GetGitFilesystem(options.Source)
-		if err != nil {
-			return retval, err
-		}
-	case ao.TstLocal:
-		retval.srcFilesystem = afero.NewOsFs()
-	case ao.TstUndefined:
-		fallthrough
-	case ao.TstUnknown:
-		fallthrough
-	default:
-		panic("should never happen: unsupported template type: " + options.Alias)
+	retval.srcFilesystem, err = options.GetFilesystem()
+	if err != nil {
+		return retval, err
 	}
 
 	// Parse manifest file
-	manifestPath := filepath.Join(retval.rootDir(), manifestFileName)
+	manifestPath := options.GetManifestPath()
 	_, err = retval.srcFilesystem.Stat(manifestPath)
 	if err != nil {
 		return retval, errors.WithStack(err)
@@ -116,6 +87,10 @@ func (t *templateManager) GatherParams(cmd *cobra.Command) error {
 // Generate produces a new template based on the parameters defined in this
 // object, in the specified output folder
 func (t *templateManager) Generate(targetPath string) error {
+	fs, err := t.Options.GetFilesystem()
+	if err != nil {
+		return err
+	}
 	// TODO: add these support methods to the manager class as private methods
-	return generate(t.srcFilesystem, t.rootDir(), targetPath, t.templateContext)
+	return generate(fs, t.Options.GetRoot(), targetPath, t.templateContext)
 }
