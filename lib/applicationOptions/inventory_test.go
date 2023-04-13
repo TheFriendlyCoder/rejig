@@ -22,16 +22,16 @@ func Test_parseInventoryFile(t *testing.T) {
 
 	// And a sample config file
 	outputFile := path.Join(tmpDir, ".rejig.inv.yml")
-	expAlias := "test1"
+	expName := "test1"
 	expType := TstGit
 	expTypeStr := "git"
 	expSource := "http://some/repo"
 	invData := fmt.Sprintf(`
 templates:
-  - alias: %s
+  - name: %s
     source: %s
     type: %s
-`, expAlias, expSource, expTypeStr)
+`, expName, expSource, expTypeStr)
 	fh, err := os.Create(outputFile)
 	r.NoError(err)
 	_, err = fh.WriteString(invData)
@@ -47,7 +47,7 @@ templates:
 	r.Equal(1, len(result.Templates))
 	a.Equal(expType, result.Templates[0].Type)
 	a.Equal(expSource, result.Templates[0].Source)
-	a.Equal(expAlias, result.Templates[0].GetName())
+	a.Equal(expName, result.Templates[0].GetName())
 }
 
 func Test_getLocalTemplateDefinitions(t *testing.T) {
@@ -61,16 +61,16 @@ func Test_getLocalTemplateDefinitions(t *testing.T) {
 
 	// And a sample config file
 	outputFile := path.Join(tmpDir, inventoryFileName)
-	expAlias := "test1"
+	expName := "test1"
 	expType := TstGit
 	expTypeStr := "git"
 	expSource := "http://some/repo"
 	invData := fmt.Sprintf(`
 templates:
-  - alias: %s
+  - name: %s
     source: %s
     type: %s
-`, expAlias, expSource, expTypeStr)
+`, expName, expSource, expTypeStr)
 	fh, err := os.Create(outputFile)
 	r.NoError(err)
 	_, err = fh.WriteString(invData)
@@ -87,5 +87,5 @@ templates:
 	a.Equal(1, len(opts))
 	a.Equal(expType, opts[0].Type)
 	a.Equal(expSource, opts[0].Source)
-	a.Equal(expAlias, opts[0].GetName())
+	a.Equal(expName, opts[0].GetName())
 }

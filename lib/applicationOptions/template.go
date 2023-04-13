@@ -30,7 +30,7 @@ func (a AppOptions) validateTemplates() []string {
 	var retval []string
 	for i, curTemplate := range a.Templates {
 		if len(curTemplate.GetName()) == 0 {
-			retval = append(retval, fmt.Sprintf("template %d alias is undefined", i))
+			retval = append(retval, fmt.Sprintf("template %d name is undefined", i))
 		}
 		if curTemplate.Type == TstUndefined {
 			retval = append(retval, fmt.Sprintf("template %d type is undefined", i))

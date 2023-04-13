@@ -22,14 +22,14 @@ func Test_successfulValidation(t *testing.T) {
 	}{
 		"Local template file system type": {
 			templateOptions: []TemplateOptions{{
-				Alias:  "My Template",
+				Name:   "My Template",
 				Source: "https://some/location",
 				Type:   TstLocal,
 			}},
 		},
 		"Git template file system type": {
 			templateOptions: []TemplateOptions{{
-				Alias:  "My Template",
+				Name:   "My Template",
 				Source: "https://some/location",
 				Type:   TstGit,
 			}},
@@ -81,11 +81,11 @@ func Test_validationFailures(t *testing.T) {
 	}{
 		"Template missing type": {
 			templateOptions: []TemplateOptions{{
-				Alias:  "My Template",
+				Name:   "My Template",
 				Source: "https://some/location",
 			}},
 		},
-		"Template missing alias": {
+		"Template missing name": {
 			templateOptions: []TemplateOptions{{
 				Source: "https://some/location",
 				Type:   TstLocal,
@@ -93,8 +93,8 @@ func Test_validationFailures(t *testing.T) {
 		},
 		"Template missing source": {
 			templateOptions: []TemplateOptions{{
-				Alias: "My Template",
-				Type:  TstGit,
+				Name: "My Template",
+				Type: TstGit,
 			}},
 		},
 		"Inventory missing type": {
@@ -143,7 +143,7 @@ func Test_validationTemplateCompoundError(t *testing.T) {
 
 	a.Contains(err.Error(), "template 0 source is undefined")
 	a.Contains(err.Error(), "template 0 type is undefined")
-	a.Contains(err.Error(), "template 0 alias is undefined")
+	a.Contains(err.Error(), "template 0 name is undefined")
 
 	a.Contains(err.Error(), "inventory 0 source is undefined")
 	a.Contains(err.Error(), "inventory 0 type is undefined")
@@ -158,25 +158,25 @@ func Test_fromViperParseTemplate(t *testing.T) {
 		TypeStr  string
 		TypeEnum TemplateSourceType
 		Source   string
-		Alias    string
+		Name     string
 	}{
 		"Default local template": {
 			TypeStr:  "local",
 			TypeEnum: TstLocal,
 			Source:   "/path/to/template",
-			Alias:    "test1",
+			Name:     "test1",
 		},
 		"Default Git template": {
 			TypeStr:  "git",
 			TypeEnum: TstGit,
 			Source:   "https://some/url",
-			Alias:    "test1",
+			Name:     "test1",
 		},
 		"Default Unsupported template": {
 			TypeStr:  "other",
 			TypeEnum: TstUnknown,
 			Source:   "https://some/url",
-			Alias:    "test1",
+			Name:     "test1",
 		},
 	}
 
@@ -195,8 +195,8 @@ func Test_fromViperParseTemplate(t *testing.T) {
 templates:
   - type: %s
     source: %s
-    alias: %s
-`, data.TypeStr, data.Source, data.Alias)
+    name: %s
+`, data.TypeStr, data.Source, data.Name)
 			_, err = fh.WriteString(cfgData)
 			r.NoError(err)
 
@@ -211,7 +211,7 @@ templates:
 			// We expect the operation to succeed
 			r.NoError(err)
 			a.Equal(1, len(options.Templates))
-			a.Equal(data.Alias, options.Templates[0].GetName())
+			a.Equal(data.Name, options.Templates[0].GetName())
 			a.Equal(data.Source, options.Templates[0].Source)
 			a.Equal(data.TypeEnum, options.Templates[0].Type)
 		})
@@ -296,7 +296,7 @@ func Test_fromViperParseFail(t *testing.T) {
 			config: `
 templates:
   - source: /some/path2
-    alias: test2
+    name: test2
 `,
 		},
 	}

@@ -98,23 +98,23 @@ func NewPathError(path string, errType PathErrorTypes) error {
 //										UnknownTemplateError
 
 type unknownTemplateError struct {
-	TemplateAlias string
+	TemplateName string
 }
 
 func (e unknownTemplateError) Error() string {
-	return "Template not found in application inventory: " + e.TemplateAlias
+	return "Template not found in application inventory: " + e.TemplateName
 }
 
 func (e unknownTemplateError) Is(other error) bool {
 	var newVal unknownTemplateError
 	if errors.As(other, &newVal) {
-		return e.TemplateAlias == newVal.TemplateAlias
+		return e.TemplateName == newVal.TemplateName
 	}
 	return false
 }
 
-func NewUnknownTemplateError(alias string) error {
-	return errors.WithStack(unknownTemplateError{alias})
+func NewUnknownTemplateError(name string) error {
+	return errors.WithStack(unknownTemplateError{name})
 }
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=

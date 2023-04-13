@@ -83,16 +83,16 @@ func Test_TemplateOptionsBasicGetters(t *testing.T) {
 
 	expSource := "/path/to/template"
 	expType := TstLocal
-	expAlias := "MyTemplate"
+	expName := "MyName"
 	opts := TemplateOptions{
 		Source: expSource,
 		Type:   expType,
-		Alias:  expAlias,
+		Name:   expName,
 	}
 
 	a.Equal(expType, opts.GetType())
 	a.Equal(expSource, opts.GetSource())
-	a.Equal(expAlias, opts.GetName())
+	a.Equal(expName, opts.GetName())
 }
 
 func Test_TemplateOptionsGetFilesystem(t *testing.T) {
@@ -121,7 +121,7 @@ func Test_TemplateOptionsGetFilesystem(t *testing.T) {
 			opts := TemplateOptions{
 				Source: data.expSource,
 				Type:   data.expType,
-				Alias:  "MyTemplate",
+				Name:   "MyTemplate",
 			}
 
 			fs, err := opts.GetFilesystem()
@@ -157,7 +157,7 @@ func Test_TemplateOptionsGetManifestPath(t *testing.T) {
 			opts := TemplateOptions{
 				Source: data.expSource,
 				Type:   data.expType,
-				Alias:  "MyTemplate",
+				Name:   "MyTemplate",
 			}
 
 			a.Equal(data.expPath, opts.GetManifestPath())
@@ -185,7 +185,7 @@ func Test_TemplateOptionsGettersPanic(t *testing.T) {
 			opts := TemplateOptions{
 				Source: "/some/path",
 				Type:   data.expType,
-				Alias:  "MyTemplate",
+				Name:   "MyTemplate",
 			}
 			a.Panics(func() { opts.GetRoot() })
 			a.Panics(func() {
