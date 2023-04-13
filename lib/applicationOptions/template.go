@@ -52,6 +52,9 @@ func (t *TemplateSourceType) fromString(value string) {
 		*t = TstUnknown
 	}
 }
+func (t *TemplateOptions2) UnmarshalYAML(value *yaml.Node) error {
+	return nil
+}
 
 // UnmarshalYAML decodes values for our enumeration from YAML content
 func (t *TemplateSourceType) UnmarshalYAML(value *yaml.Node) error {
@@ -63,8 +66,14 @@ func (t *TemplateSourceType) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
+type TemplateOptions interface {
+	GetAlias() string
+	GetSource() string
+	GetType() TemplateSourceType
+}
+
 // TemplateOptions metadata describing the source location for a source template
-type TemplateOptions struct {
+type TemplateOptions2 struct {
 	// Type identifier describing the protocol to use when retrieving template content
 	Type TemplateSourceType
 	// Source Path or URL where the source template can be found
@@ -72,6 +81,16 @@ type TemplateOptions struct {
 	// Alias friendly name associated with the template. Used when referring to the template
 	// from the command line
 	Alias string
+}
+
+func (t *TemplateOptions2) GetAlias() string {
+	return t.Alias
+}
+func (t *TemplateOptions2) GetSource() string {
+	return t.Source
+}
+func (t *TemplateOptions2) GetType() TemplateSourceType {
+	return t.Type
 }
 
 // decodeTemplateOptions decodes raw YAMl data into proper parsed template options
@@ -102,15 +121,15 @@ func decodeTemplateOptions(raw interface{}) (map[string]interface{}, error) {
 func (a AppOptions) validateTemplates() []string {
 	var retval []string
 	for i, curTemplate := range a.Templates {
-		if len(curTemplate.Alias) == 0 {
+		if len(curTemplate.GetAlias()) == 0 {
 			retval = append(retval, fmt.Sprintf("template %d alias is undefined", i))
 		}
-		if curTemplate.Type == TstUndefined {
+		if curTemplate.GetType() == TstUndefined {
 			retval = append(retval, fmt.Sprintf("template %d type is undefined", i))
-		} else if curTemplate.Type == TstUnknown {
+		} else if curTemplate.GetType() == TstUnknown {
 			retval = append(retval, fmt.Sprintf("template %d type is not supported", i))
 		}
-		if len(curTemplate.Source) == 0 {
+		if len(curTemplate.GetSource()) == 0 {
 			retval = append(retval, fmt.Sprintf("template %d source is undefined", i))
 		}
 	}

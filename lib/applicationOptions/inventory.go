@@ -46,6 +46,41 @@ type InventoryData struct {
 	//		 would have to watch out for circular imports
 }
 
+func (t *InventoryData) UnmarshalYAML(value *yaml.Node) error {
+	var a map[string][]map[string]string
+	err := value.Decode(&a)
+	for _, v := range a["templates"] {
+		alias := v["alias"]
+		ttype := v["type"]
+		src := v["source"]
+		//fmt.Println(alias)
+		//fmt.Println(ttype)
+		//fmt.Println(src)
+		if ttype == "git" {
+			curt := TemplateOptions2{
+				Type:   TstGit,
+				Source: src,
+				Alias:  alias,
+			}
+			t.Templates = append(t.Templates, &curt)
+		}
+		if ttype == "local" {
+			curt := TemplateOptions2{
+				Type:   TstLocal,
+				Source: src,
+				Alias:  alias,
+			}
+			t.Templates = append(t.Templates, &curt)
+		}
+		//for nk, nv := range v {
+		//	fmt.Println(nk)
+		//	fmt.Println(nv)
+		//}
+
+	}
+	return err
+}
+
 // decodeInventoryOptions decodes raw YAMl data into proper parsed inventory options
 func decodeInventoryOptions(raw interface{}) (map[string]interface{}, error) {
 	// Map the "type" field from a character string format to an enumerated type

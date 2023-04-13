@@ -47,18 +47,18 @@ template:
 	err = os.WriteFile(configFile, []byte(templateConfigText), 0600)
 	r.NoError(err)
 
-	options := ao.TemplateOptions{
+	options := ao.TemplateOptions2{
 		Source: tmpDir,
 		Alias:  "MyAlias",
 		Type:   ao.TstLocal,
 	}
 
 	// When we try constructing a new instance of our manager
-	template, err := New(options)
+	template, err := New(&options)
 
 	// We expect the new object to be created and initialized properly
 	r.NoError(err)
-	a.Equal(options, template.Options)
+	a.Equal(&options, template.Options)
 	a.Equal(2, len(template.manifestData.Template.Args))
 	a.Equal(template.manifestData.Template.Args[0].Name, expectedParam1)
 	a.Equal(template.manifestData.Template.Args[0].Description, expectedDesc1)
@@ -84,14 +84,14 @@ func Test_templateManagerConstructor_NoManifest(t *testing.T) {
 	r.NoError(err)
 	defer os.RemoveAll(tmpDir)
 
-	options := ao.TemplateOptions{
+	options := ao.TemplateOptions2{
 		Source: tmpDir,
 		Alias:  "MyAlias",
 		Type:   ao.TstLocal,
 	}
 
 	// When we try constructing a new instance of our manager
-	_, err = New(options)
+	_, err = New(&options)
 	r.Error(err)
 	a.True(os.IsNotExist(errors.Cause(err)))
 	// Make sure the error message includes some type of reference to our manifest file
@@ -113,14 +113,14 @@ func Test_templateManagerConstructor_InvalidManifest(t *testing.T) {
 	err = os.WriteFile(configFile, []byte(templateConfigText), 0600)
 	r.NoError(err)
 
-	options := ao.TemplateOptions{
+	options := ao.TemplateOptions2{
 		Source: tmpDir,
 		Alias:  "MyAlias",
 		Type:   ao.TstLocal,
 	}
 
 	// When we try constructing a new instance of our manager
-	_, err = New(options)
+	_, err = New(&options)
 
 	// Operation should succeed
 	r.Error(err)
@@ -175,7 +175,7 @@ template:
 			err = os.WriteFile(configFile, []byte(templateConfigText), 0600)
 			r.NoError(err)
 
-			options := ao.TemplateOptions{
+			options := ao.TemplateOptions2{
 				Source: tmpDir,
 				Alias:  "MyAlias",
 				Type:   ao.TstLocal,
@@ -197,7 +197,7 @@ template:
 			cmd.SetIn(fakeInput)
 
 			// when we process the user input
-			tm, err := New(options)
+			tm, err := New(&options)
 			r.NoError(err)
 			err = tm.GatherParams(&cmd)
 			r.NoError(err)
@@ -240,7 +240,7 @@ func Test_templateManagerGenerate(t *testing.T) {
 			r.NoError(err)
 			defer os.RemoveAll(tmpDir)
 
-			options := ao.TemplateOptions{
+			options := ao.TemplateOptions2{
 				Source: data.sourceDir,
 				Alias:  "MyAlias",
 				Type:   data.templateType,
@@ -262,7 +262,7 @@ func Test_templateManagerGenerate(t *testing.T) {
 			cmd.SetIn(fakeInput)
 
 			// when we process the user input
-			tm, err := New(options)
+			tm, err := New(&options)
 			r.NoError(err)
 			err = tm.GatherParams(&cmd)
 			r.NoError(err)
@@ -282,7 +282,7 @@ func Test_templateManagerFailToGenerate(t *testing.T) {
 	outputDir := path.Join(tmpDir, "output")
 	r.NoError(os.Mkdir(outputDir, 0400))
 
-	options := ao.TemplateOptions{
+	options := ao.TemplateOptions2{
 		Source: getProjectDir("simple"),
 		Alias:  "MyAlias",
 		Type:   ao.TstLocal,
@@ -303,7 +303,7 @@ func Test_templateManagerFailToGenerate(t *testing.T) {
 	cmd.SetErr(output)
 	cmd.SetIn(fakeInput)
 
-	tm, err := New(options)
+	tm, err := New(&options)
 	r.NoError(err)
 	err = tm.GatherParams(&cmd)
 	r.NoError(err)

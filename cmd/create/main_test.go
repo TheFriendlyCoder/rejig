@@ -41,7 +41,7 @@ func Test_ValidateArgsSuccess(t *testing.T) {
 	// and a mock set of app options
 	templateName := "MyTemplate"
 	options := ao.AppOptions{
-		Templates: []ao.TemplateOptions{{
+		Templates: []ao.TemplateOptions{&ao.TemplateOptions2{
 			Alias:  templateName,
 			Source: ".",
 			Type:   ao.TstLocal,
@@ -96,7 +96,7 @@ func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
 	// and a mock set of app options
 	templateName := "MyTemplate"
 	options := ao.AppOptions{
-		Templates: []ao.TemplateOptions{{
+		Templates: []ao.TemplateOptions{&ao.TemplateOptions2{
 			Alias:  templateName,
 			Source: ".",
 			Type:   ao.TstLocal,
@@ -127,7 +127,7 @@ func Test_CreateCommandSucceeds(t *testing.T) {
 	srcDir := internal.GetProjectDir("simple")
 
 	appOptions := ao.AppOptions{
-		Templates: []ao.TemplateOptions{{
+		Templates: []ao.TemplateOptions{&ao.TemplateOptions2{
 			Type:   ao.TstLocal,
 			Source: srcDir,
 			Alias:  templateName,
@@ -241,7 +241,7 @@ func Test_CreateCommandGenerateFailure(t *testing.T) {
 	templateName := "MyTemplate"
 	srcDir := internal.GetProjectDir("simple")
 	appOptions := ao.AppOptions{
-		Templates: []ao.TemplateOptions{{
+		Templates: []ao.TemplateOptions{&ao.TemplateOptions2{
 			Type:   ao.TstLocal,
 			Source: srcDir,
 			Alias:  templateName,
@@ -278,18 +278,18 @@ func Test_FindTemplate(t *testing.T) {
 	r := require.New(t)
 
 	expAlias := "Fubar"
-	expTempl := ao.TemplateOptions{
+	expTempl := ao.TemplateOptions2{
 		Alias:  expAlias,
 		Source: "/tmp",
 		Type:   ao.TstLocal,
 	}
 	appOptions := ao.AppOptions{
-		Templates: []ao.TemplateOptions{expTempl},
+		Templates: []ao.TemplateOptions{&expTempl},
 	}
 
 	result, err := findTemplate(appOptions, expAlias)
 	r.NoError(err)
-	r.Equal(expTempl, result)
+	r.Equal(&expTempl, result)
 }
 
 func Test_FindTemplateInvalidName(t *testing.T) {
@@ -335,7 +335,7 @@ templates:
 	r.NoError(err)
 	r.NoError(fh.Close())
 
-	expTempl := ao.TemplateOptions{
+	expTempl := ao.TemplateOptions2{
 		Alias:  expAlias,
 		Source: workDirName,
 		Type:   ao.TstLocal,
@@ -356,5 +356,5 @@ templates:
 
 	result, err := findTemplate(appOptions, expNamespace+"."+expAlias)
 	r.NoError(err)
-	r.Equal(expTempl, result)
+	r.Equal(&expTempl, result)
 }

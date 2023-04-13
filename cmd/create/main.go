@@ -31,7 +31,7 @@ type rootArgs struct {
 func findTemplate(appOptions ao.AppOptions, alias string) (ao.TemplateOptions, error) {
 	parts := strings.Split(alias, ".")
 	if len(parts) > 2 {
-		return ao.TemplateOptions{}, e.AOInvalidTemplateNameError()
+		return &ao.TemplateOptions2{}, e.AOInvalidTemplateNameError()
 	}
 	var templates []ao.TemplateOptions
 	var newAlias string
@@ -41,7 +41,7 @@ func findTemplate(appOptions ao.AppOptions, alias string) (ao.TemplateOptions, e
 	} else {
 		inv := appOptions.FindInventory(parts[0])
 		if inv == nil {
-			return ao.TemplateOptions{}, e.NewUnknownTemplateError(alias)
+			return &ao.TemplateOptions2{}, e.NewUnknownTemplateError(alias)
 		}
 		// iterate through all inventory templates
 		var err error
@@ -51,18 +51,18 @@ func findTemplate(appOptions ao.AppOptions, alias string) (ao.TemplateOptions, e
 			//		 as an aggregate
 			// TODO: ignore errors from template definitions if a match for the
 			//		 template can be found elsewhere
-			return ao.TemplateOptions{}, err
+			return &ao.TemplateOptions2{}, err
 		}
 		newAlias = parts[1]
 	}
 
 	for _, t := range templates {
-		if t.Alias == newAlias {
+		if t.GetAlias() == newAlias {
 			return t, nil
 		}
 	}
 
-	return ao.TemplateOptions{}, e.NewUnknownTemplateError(alias)
+	return &ao.TemplateOptions2{}, e.NewUnknownTemplateError(alias)
 }
 
 // run Primary entry point function for our generator
@@ -89,7 +89,7 @@ func run(cmd *cobra.Command, args rootArgs) error {
 	if err = tm.GatherParams(cmd); err != nil {
 		return err
 	}
-	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from template %s...\n", args.targetPath, curTemplate.Alias))
+	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from template %s...\n", args.targetPath, curTemplate.GetAlias()))
 
 	return tm.Generate(args.targetPath)
 	// TODO: after generating, put an archive file in the root folder summarizing what we did so we

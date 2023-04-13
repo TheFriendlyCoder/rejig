@@ -45,9 +45,9 @@ templates:
 	// The inventory should be successfully parsed
 	r.NoError(err)
 	r.Equal(1, len(result.Templates))
-	a.Equal(expType, result.Templates[0].Type)
-	a.Equal(expSource, result.Templates[0].Source)
-	a.Equal(expAlias, result.Templates[0].Alias)
+	a.Equal(expType, result.Templates[0].GetType())
+	a.Equal(expSource, result.Templates[0].GetSource())
+	a.Equal(expAlias, result.Templates[0].GetAlias())
 }
 
 func Test_getLocalTemplateDefinitions(t *testing.T) {
@@ -85,7 +85,7 @@ templates:
 	opts, err := inv.GetTemplateDefinitions()
 	r.NoError(err)
 	a.Equal(1, len(opts))
-	a.Equal(expType, opts[0].Type)
-	a.Equal(expSource, opts[0].Source)
-	a.Equal(expAlias, opts[0].Alias)
+	a.Equal(expType, opts[0].GetType())
+	a.Equal(expSource, opts[0].GetSource())
+	a.Equal(expAlias, opts[0].GetAlias())
 }

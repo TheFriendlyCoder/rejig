@@ -14,7 +14,7 @@ import (
 // AppOptions parsed config options supported by the app
 type AppOptions struct {
 	// Templates 0 or more sources where template projects are to be found
-	Templates   []TemplateOptions
+	Templates   []TemplateOptions `yaml:"templates"`
 	Inventories []InventoryOptions
 }
 
@@ -71,9 +71,19 @@ func appOptionsDecoder() mapstructure.DecodeHookFuncType {
 		// TODO: Replace application config parser with simple YAML parsing
 		//		 because it seems simpler
 		//		https://github.com/spf13/viper/issues/338
-		if (target == reflect.TypeOf(TemplateOptions{})) {
+		inter := reflect.TypeOf((*TemplateOptions)(nil)).Elem()
+
+		if target.Implements(inter) {
 			newData, err := decodeTemplateOptions(raw)
-			return newData, err
+			tsrc, _ := newData["source"].(string)
+			talias, _ := newData["alias"].(string)
+			ttype, _ := newData["type"].(TemplateSourceType)
+			retval := TemplateOptions2{
+				Source: tsrc,
+				Alias:  talias,
+				Type:   ttype,
+			}
+			return TemplateOptions(&retval), err
 		}
 
 		if (target == reflect.TypeOf(InventoryOptions{})) {

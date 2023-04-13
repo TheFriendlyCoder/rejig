@@ -38,17 +38,17 @@ type templateManager struct {
 // rootDir gets the root folder where the template source files are stored
 // takes into account the virtual file system used by the manager
 func (t *templateManager) rootDir() string {
-	switch t.Options.Type {
+	switch t.Options.GetType() {
 	case ao.TstGit:
 		return "."
 	case ao.TstLocal:
-		return t.Options.Source
+		return t.Options.GetSource()
 	case ao.TstUndefined:
 		fallthrough
 	case ao.TstUnknown:
 		fallthrough
 	default:
-		panic("should never happen: unsupported template type: " + t.Options.Alias)
+		panic("should never happen: unsupported template type: " + t.Options.GetAlias())
 	}
 }
 
@@ -61,9 +61,9 @@ func New(options ao.TemplateOptions) (templateManager, error) {
 	retval.templateContext = map[string]any{}
 
 	var err error
-	switch options.Type {
+	switch options.GetType() {
 	case ao.TstGit:
-		retval.srcFilesystem, err = lib.GetGitFilesystem(options.Source)
+		retval.srcFilesystem, err = lib.GetGitFilesystem(options.GetSource())
 		if err != nil {
 			return retval, err
 		}
@@ -74,7 +74,7 @@ func New(options ao.TemplateOptions) (templateManager, error) {
 	case ao.TstUnknown:
 		fallthrough
 	default:
-		panic("should never happen: unsupported template type: " + options.Alias)
+		panic("should never happen: unsupported template type: " + options.GetAlias())
 	}
 
 	// Parse manifest file
