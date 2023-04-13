@@ -220,14 +220,17 @@ func Test_templateManagerGenerate(t *testing.T) {
 
 	tests := map[string]struct {
 		sourceDir    string
+		subDir       string
 		templateType ao.TemplateSourceType
 	}{
 		"Local file system template": {
 			sourceDir:    getProjectDir("simple"),
+			subDir:       "",
 			templateType: ao.TstLocal,
 		},
 		"Git file system template": {
-			sourceDir:    "https://github.com/TheFriendlyCoder/rejiggerTestTemplate.git",
+			sourceDir:    "https://github.com/TheFriendlyCoder/rejigger.git",
+			subDir:       "testdata/projects/simple",
 			templateType: ao.TstGit,
 		},
 	}
@@ -244,6 +247,7 @@ func Test_templateManagerGenerate(t *testing.T) {
 				Source: data.sourceDir,
 				Name:   "MyName",
 				Type:   data.templateType,
+				Root:   data.subDir,
 			}
 
 			// and a fake command with some user input to respond to prompts from the template

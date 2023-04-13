@@ -39,7 +39,6 @@ func (t *TemplateSourceType) toString() string {
 	case TstLocal:
 		return "local"
 	case TstUndefined:
-		// TODO: See if I should handle these values differently
 		fallthrough
 	case TstUnknown:
 		fallthrough
@@ -84,6 +83,10 @@ type TemplateOptions struct {
 	// Name friendly name associated with the template. Used when referring to the template
 	// from the command line
 	Name string
+	// Root optional sub-folder from the source root where the inventory resides
+	// If not provided, the template root is assumed to be the root of the source folder
+	// Typically used by Git type templates that are stored in a subfolder of a remote repo
+	Root string
 }
 
 // GetName friendly name associated with the template. Used when referring to the template
@@ -123,9 +126,18 @@ func (t *TemplateOptions) GetFilesystem() (afero.Fs, error) {
 func (t *TemplateOptions) GetRoot() string {
 	switch t.Type {
 	case TstLocal:
-		return t.Source
+		if t.Root == "" {
+			return t.Source
+		} else {
+			return path.Join(t.Source, t.Root)
+		}
+
 	case TstGit:
-		return "."
+		if t.Root == "" {
+			return "."
+		} else {
+			return t.Root
+		}
 	case TstUnknown:
 		fallthrough
 	case TstUndefined:

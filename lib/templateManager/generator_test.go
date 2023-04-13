@@ -16,7 +16,7 @@ func Test_basicGenerator(t *testing.T) {
 	r := require.New(t)
 	a := assert.New(t)
 
-	gitFS, err := lib.GetGitFilesystem("https://github.com/TheFriendlyCoder/rejiggerTestTemplate.git")
+	gitFS, err := lib.GetGitFilesystem("https://github.com/TheFriendlyCoder/rejigger.git")
 	r.NoError(err)
 
 	tests := map[string]struct {
@@ -29,7 +29,7 @@ func Test_basicGenerator(t *testing.T) {
 		},
 		"Git file system template": {
 			fileSystem: gitFS,
-			sourceDir:  ".",
+			sourceDir:  "testdata/projects/simple",
 		},
 	}
 

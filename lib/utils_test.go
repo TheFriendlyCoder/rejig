@@ -28,7 +28,7 @@ func Test_SNFshouldNotPanic(t *testing.T) {
 func Test_getGitFilesystem(t *testing.T) {
 	r := require.New(t)
 
-	tmp, err := GetGitFilesystem("https://github.com/TheFriendlyCoder/rejiggerTestTemplate.git")
+	tmp, err := GetGitFilesystem("https://github.com/TheFriendlyCoder/rejigger.git")
 	r.NoError(err)
 
 	res, err := afero.ReadDir(tmp, ".")
