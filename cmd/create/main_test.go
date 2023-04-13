@@ -23,7 +23,7 @@ func Test_generateUsageLine(t *testing.T) {
 
 	a.Contains(result, "create")
 	a.Contains(result, "targetPath")
-	a.Contains(result, "templateAlias")
+	a.Contains(result, "templateName")
 }
 
 func Test_ValidateArgsSuccess(t *testing.T) {
@@ -42,7 +42,7 @@ func Test_ValidateArgsSuccess(t *testing.T) {
 	templateName := "MyTemplate"
 	options := ao.AppOptions{
 		Templates: []ao.TemplateOptions{{
-			Alias:  templateName,
+			Name:   templateName,
 			Source: ".",
 			Type:   ao.TstLocal,
 		}},
@@ -97,7 +97,7 @@ func Test_ValidateArgsTargetDirNotEmpty(t *testing.T) {
 	templateName := "MyTemplate"
 	options := ao.AppOptions{
 		Templates: []ao.TemplateOptions{{
-			Alias:  templateName,
+			Name:   templateName,
 			Source: ".",
 			Type:   ao.TstLocal,
 		}},
@@ -130,7 +130,7 @@ func Test_CreateCommandSucceeds(t *testing.T) {
 		Templates: []ao.TemplateOptions{{
 			Type:   ao.TstLocal,
 			Source: srcDir,
-			Alias:  templateName,
+			Name:   templateName,
 		}},
 	}
 
@@ -244,7 +244,7 @@ func Test_CreateCommandGenerateFailure(t *testing.T) {
 		Templates: []ao.TemplateOptions{{
 			Type:   ao.TstLocal,
 			Source: srcDir,
-			Alias:  templateName,
+			Name:   templateName,
 		}},
 	}
 	ctx := context.TODO()
@@ -277,9 +277,9 @@ func Test_CreateCommandGenerateFailure(t *testing.T) {
 func Test_FindTemplate(t *testing.T) {
 	r := require.New(t)
 
-	expAlias := "Fubar"
+	expName := "Fubar"
 	expTempl := ao.TemplateOptions{
-		Alias:  expAlias,
+		Name:   expName,
 		Source: "/tmp",
 		Type:   ao.TstLocal,
 	}
@@ -287,7 +287,7 @@ func Test_FindTemplate(t *testing.T) {
 		Templates: []ao.TemplateOptions{expTempl},
 	}
 
-	result, err := findTemplate(appOptions, expAlias)
+	result, err := findTemplate(appOptions, expName)
 	r.NoError(err)
 	r.Equal(expTempl, result)
 }
@@ -295,12 +295,12 @@ func Test_FindTemplate(t *testing.T) {
 func Test_FindTemplateInvalidName(t *testing.T) {
 	r := require.New(t)
 
-	expAlias := "Fubar.Was.Here"
+	expName := "Fubar.Was.Here"
 	appOptions := ao.AppOptions{
 		Templates: []ao.TemplateOptions{},
 	}
 
-	_, err := findTemplate(appOptions, expAlias)
+	_, err := findTemplate(appOptions, expName)
 	r.ErrorIs(err, e.AOInvalidTemplateNameError())
 }
 
@@ -322,13 +322,13 @@ func Test_FindTemplateFromInventory(t *testing.T) {
 
 	// And a sample inventory file
 	outputFile := path.Join(invDirName, ".rejig.inv.yml")
-	expAlias := "test1"
+	expName := "test1"
 	invData := fmt.Sprintf(`
 templates:
-  - alias: %s
+  - name: %s
     source: %s
     type: local
-`, expAlias, workDirName)
+`, expName, workDirName)
 	fh, err := os.Create(outputFile)
 	r.NoError(err)
 	_, err = fh.WriteString(invData)
@@ -336,7 +336,7 @@ templates:
 	r.NoError(fh.Close())
 
 	expTempl := ao.TemplateOptions{
-		Alias:  expAlias,
+		Name:   expName,
 		Source: workDirName,
 		Type:   ao.TstLocal,
 	}
@@ -354,7 +354,7 @@ templates:
 		Inventories: []ao.InventoryOptions{tempInvOpts},
 	}
 
-	result, err := findTemplate(appOptions, expNamespace+"."+expAlias)
+	result, err := findTemplate(appOptions, expNamespace+"."+expName)
 	r.NoError(err)
 	r.Equal(expTempl, result)
 }

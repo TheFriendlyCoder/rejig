@@ -165,8 +165,8 @@ func (i *InventoryOptions) GetTemplateDefinitions() ([]TemplateOptions, error) {
 
 	// TODO: consider how/where I should be validating the contents of the templates
 	// TODO: consider how to handle duplicate templates
-	// TODO: consider forcing the "alias" field to be unique in each inventory
-	// TODO: consider pre-pending namespace to alias to ensure uniqueness
+	// TODO: consider forcing the "name" field to be unique in each inventory
+	// TODO: consider pre-pending namespace to name to ensure uniqueness
 	// TODO: probably should not allow "local" type for templates defined in a Git inventory
 	return inventory.Templates, nil
 }

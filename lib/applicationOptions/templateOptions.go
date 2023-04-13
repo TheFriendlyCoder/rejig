@@ -81,15 +81,15 @@ type TemplateOptions struct {
 	Type TemplateSourceType
 	// Source Path or URL where the source template can be found
 	Source string
-	// Alias friendly name associated with the template. Used when referring to the template
+	// Name friendly name associated with the template. Used when referring to the template
 	// from the command line
-	Alias string
+	Name string
 }
 
 // GetName friendly name associated with the template. Used when referring to the template
 // from the command line
 func (t *TemplateOptions) GetName() string {
-	return t.Alias
+	return t.Name
 }
 
 // GetSource Path or URL where the source template can be found

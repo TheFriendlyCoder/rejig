@@ -49,7 +49,7 @@ template:
 
 	options := ao.TemplateOptions{
 		Source: tmpDir,
-		Alias:  "MyAlias",
+		Name:   "MyName",
 		Type:   ao.TstLocal,
 	}
 
@@ -86,7 +86,7 @@ func Test_templateManagerConstructor_NoManifest(t *testing.T) {
 
 	options := ao.TemplateOptions{
 		Source: tmpDir,
-		Alias:  "MyAlias",
+		Name:   "MyName",
 		Type:   ao.TstLocal,
 	}
 
@@ -115,7 +115,7 @@ func Test_templateManagerConstructor_InvalidManifest(t *testing.T) {
 
 	options := ao.TemplateOptions{
 		Source: tmpDir,
-		Alias:  "MyAlias",
+		Name:   "MyName",
 		Type:   ao.TstLocal,
 	}
 
@@ -177,7 +177,7 @@ template:
 
 			options := ao.TemplateOptions{
 				Source: tmpDir,
-				Alias:  "MyAlias",
+				Name:   "MyName",
 				Type:   ao.TstLocal,
 			}
 
@@ -242,7 +242,7 @@ func Test_templateManagerGenerate(t *testing.T) {
 
 			options := ao.TemplateOptions{
 				Source: data.sourceDir,
-				Alias:  "MyAlias",
+				Name:   "MyName",
 				Type:   data.templateType,
 			}
 
@@ -284,7 +284,7 @@ func Test_templateManagerFailToGenerate(t *testing.T) {
 
 	options := ao.TemplateOptions{
 		Source: getProjectDir("simple"),
-		Alias:  "MyAlias",
+		Name:   "MyName",
 		Type:   ao.TstLocal,
 	}
 

@@ -20,28 +20,28 @@ import (
 type rootArgs struct {
 	// targetPath path to the folder where the new project is to be created
 	targetPath string
-	// templateAlias name of the template to use to create the new project from
-	templateAlias string
+	// templateName name of the template to use to create the new project from
+	templateName string
 }
 
 // findTemplate looks up a specific template in the template inventory
-// Alias names must be of one of the forms:
-// <template_alias>
-// <inventory_namespace>.<template_alias>
-func findTemplate(appOptions ao.AppOptions, alias string) (ao.TemplateOptions, error) {
-	parts := strings.Split(alias, ".")
+// Name names must be of one of the forms:
+// <template_name>
+// <inventory_namespace>.<template_name>
+func findTemplate(appOptions ao.AppOptions, name string) (ao.TemplateOptions, error) {
+	parts := strings.Split(name, ".")
 	if len(parts) > 2 {
 		return ao.TemplateOptions{}, e.AOInvalidTemplateNameError()
 	}
 	var templates []ao.TemplateOptions
-	var newAlias string
+	var newName string
 	if len(parts) == 1 {
 		templates = appOptions.Templates
-		newAlias = alias
+		newName = name
 	} else {
 		inv := appOptions.FindInventory(parts[0])
 		if inv == nil {
-			return ao.TemplateOptions{}, e.NewUnknownTemplateError(alias)
+			return ao.TemplateOptions{}, e.NewUnknownTemplateError(name)
 		}
 		// iterate through all inventory templates
 		var err error
@@ -53,16 +53,16 @@ func findTemplate(appOptions ao.AppOptions, alias string) (ao.TemplateOptions, e
 			//		 template can be found elsewhere
 			return ao.TemplateOptions{}, err
 		}
-		newAlias = parts[1]
+		newName = parts[1]
 	}
 
 	for _, t := range templates {
-		if t.GetName() == newAlias {
+		if t.GetName() == newName {
 			return t, nil
 		}
 	}
 
-	return ao.TemplateOptions{}, e.NewUnknownTemplateError(alias)
+	return ao.TemplateOptions{}, e.NewUnknownTemplateError(name)
 }
 
 // run Primary entry point function for our generator
@@ -70,14 +70,14 @@ func run(cmd *cobra.Command, args rootArgs) error {
 	// We have to use cmd.OutOrStdout() to ensure output is redirected to Cobra
 	// stream handler, to facilitate testing (ie: it allows us to capture output
 	// during unit testing to validate results of CLI operations)
-	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Loading template %s...\n", args.templateAlias))
+	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Loading template %s...\n", args.templateName))
 
 	appOptions, ok := cmd.Context().Value(shared.CkOptions).(ao.AppOptions)
 	if !ok {
 		return e.NewInternalError("Failed to retrieve app options")
 	}
 
-	curTemplate, err := findTemplate(appOptions, args.templateAlias)
+	curTemplate, err := findTemplate(appOptions, args.templateName)
 	if err != nil {
 		return err
 	}
@@ -140,8 +140,8 @@ func CreateCmd() *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			parsedArgs := rootArgs{
-				targetPath:    args[0],
-				templateAlias: args[1],
+				targetPath:   args[0],
+				templateName: args[1],
 			}
 			err := run(cmd, parsedArgs)
 			if err != nil {
