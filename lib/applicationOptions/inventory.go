@@ -2,46 +2,18 @@ package applicationOptions
 
 import (
 	"fmt"
-	"path"
-	"strconv"
 
-	"github.com/TheFriendlyCoder/rejigger/lib"
 	e "github.com/TheFriendlyCoder/rejigger/lib/errors"
 	"github.com/pkg/errors"
 	"github.com/spf13/afero"
 	"gopkg.in/yaml.v3"
 )
 
-const inventoryFileName = ".rejig.inv.yml"
-
-// InventorySourceType enum for all supported source locations for template inventories
-type InventorySourceType int64
-
-const (
-	// IstUndefined No inventory type defined
-	IstUndefined InventorySourceType = iota
-	// IstUnknown Inventory type provided but not currently supported
-	IstUnknown
-	// IstLocal Inventory source is stored on the local file system
-	IstLocal
-	// IstGit Inventory source is stored in a Git repository
-	IstGit
-)
-
-// InventoryOptions configuration parameters for an inventory
-type InventoryOptions struct {
-	// Type identifier describing the protocol to use when retrieving template inventories
-	Type InventorySourceType
-	// Source path or URL to the inventory
-	Source string
-	// Namespace prefix to add to all templates contained in this inventory
-	Namespace string
-}
-
 // InventoryData stores data parsed from a template inventory definition file
 type InventoryData struct {
 	// Templates list of templates defined in the inventory
 	Templates []TemplateOptions `yaml:"templates"`
+
 	// TODO: consider if we should allow inventories to be nested
 	//		 would have to watch out for circular imports
 }
@@ -55,16 +27,11 @@ func decodeInventoryOptions(raw interface{}) (map[string]interface{}, error) {
 	}
 
 	var newVal InventorySourceType
-	switch inventoryData["type"] {
-	case nil:
-		return nil, e.AOInventoryOptionsDecodeError()
-	case "git":
-		newVal = IstGit
-	case "local":
-		newVal = IstLocal
-	default:
-		newVal = IstUnknown
+	temp, ok := inventoryData["type"].(string)
+	if !ok {
+		return nil, e.AOTemplateOptionsDecodeError()
 	}
+	newVal.fromString(temp)
 	inventoryData["type"] = newVal
 	return inventoryData, nil
 }
@@ -106,67 +73,4 @@ func parseInventory(srcFS afero.Fs, path string) (InventoryData, error) {
 	}
 
 	return retval, nil
-}
-
-// getFilesystem loads an appropriate virtual file system to allow reading of the
-// inventory data based on the source type, in a filesystem agnostic way
-func (i *InventoryOptions) getFilesystem() (afero.Fs, error) {
-	switch i.Type {
-	case IstLocal:
-		return afero.NewOsFs(), nil
-	case IstGit:
-		return lib.GetGitFilesystem(i.Source)
-	case IstUnknown:
-		fallthrough
-	case IstUndefined:
-		fallthrough
-	default:
-		panic("should never happen: unsupported inventory type: " + strconv.FormatInt(int64(i.Type), 10))
-	}
-}
-
-// getPath gets the path to the inventory file, taking into account the file system type
-// used by the inventory
-func (i *InventoryOptions) getPath() string {
-	switch i.Type {
-	case IstLocal:
-		return i.Source
-	case IstGit:
-		return "."
-	case IstUnknown:
-		fallthrough
-	case IstUndefined:
-		fallthrough
-	default:
-		panic("should never happen: unsupported inventory type: " + strconv.FormatInt(int64(i.Type), 10))
-	}
-}
-
-// GetTemplateDefinitions gets a list of all templates defined in this inventory
-func (i *InventoryOptions) GetTemplateDefinitions() ([]TemplateOptions, error) {
-	fileSystem, err := i.getFilesystem()
-	if err != nil {
-		return nil, err
-	}
-	rootDir := i.getPath()
-
-	// Read in the inventory file
-	inventoryPath := path.Join(rootDir, inventoryFileName)
-	_, err = fileSystem.Stat(inventoryPath)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	// TODO: Cache these results so they can be reused
-	inventory, err := parseInventory(fileSystem, inventoryPath)
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: consider how/where I should be validating the contents of the templates
-	// TODO: consider how to handle duplicate templates
-	// TODO: consider forcing the "name" field to be unique in each inventory
-	// TODO: consider pre-pending namespace to name to ensure uniqueness
-	// TODO: probably should not allow "local" type for templates defined in a Git inventory
-	return inventory.Templates, nil
 }

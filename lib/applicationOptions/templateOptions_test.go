@@ -131,7 +131,7 @@ func Test_TemplateOptionsGetFilesystem(t *testing.T) {
 	}
 }
 
-func Test_TemplateOptionsGetManifestPath(t *testing.T) {
+func Test_TemplateOptionsGetManifestFile(t *testing.T) {
 	a := assert.New(t)
 
 	tests := map[string]struct {
@@ -176,7 +176,7 @@ func Test_TemplateOptionsGetManifestPath(t *testing.T) {
 				Root:   data.expSubdir,
 			}
 
-			a.Equal(data.expPath, opts.GetManifestPath())
+			a.Equal(data.expPath, opts.GetManifestFile())
 		})
 	}
 }
@@ -208,7 +208,7 @@ func Test_TemplateOptionsGettersPanic(t *testing.T) {
 				_, err := opts.GetFilesystem()
 				a.NoError(err)
 			})
-			a.Panics(func() { opts.GetManifestPath() })
+			a.Panics(func() { opts.GetManifestFile() })
 		})
 	}
 }
