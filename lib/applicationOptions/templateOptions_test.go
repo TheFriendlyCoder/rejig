@@ -137,17 +137,32 @@ func Test_TemplateOptionsGetManifestPath(t *testing.T) {
 	tests := map[string]struct {
 		expSource string
 		expPath   string
+		expSubdir string
 		expType   TemplateSourceType
 	}{
-		"Git manifest path": {
+		"Git manifest path no subfolder": {
 			expSource: "https://url/to/repo",
 			expPath:   ".rejig.yml",
 			expType:   TstGit,
+			expSubdir: "",
 		},
-		"Local manifest path": {
+		"Git manifest path with subfolder": {
+			expSource: "https://url/to/repo",
+			expPath:   "fubar/.rejig.yml",
+			expType:   TstGit,
+			expSubdir: "fubar",
+		},
+		"Local manifest path no subdir": {
 			expSource: "/path/to/template",
 			expPath:   "/path/to/template/.rejig.yml",
 			expType:   TstLocal,
+			expSubdir: "",
+		},
+		"Local manifest path with subdir": {
+			expSource: "/path/to/template",
+			expPath:   "/path/to/template/fubar/.rejig.yml",
+			expType:   TstLocal,
+			expSubdir: "fubar",
 		},
 	}
 
@@ -158,6 +173,7 @@ func Test_TemplateOptionsGetManifestPath(t *testing.T) {
 				Source: data.expSource,
 				Type:   data.expType,
 				Name:   "MyTemplate",
+				Root:   data.expSubdir,
 			}
 
 			a.Equal(data.expPath, opts.GetManifestPath())
