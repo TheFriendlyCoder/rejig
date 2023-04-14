@@ -57,7 +57,6 @@ func (a AppOptions) validateInventory() []string {
 // parseInventory parses a template manifest file and returns a reference to
 // the parsed representation of the contents of the file
 func parseInventory(srcFS afero.Fs, path string) (InventoryData, error) {
-	// TODO: Write validator for inventory
 	var retval InventoryData
 	buf, err := afero.ReadFile(srcFS, path)
 	if err != nil {
