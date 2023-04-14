@@ -38,7 +38,7 @@ go test ./... -race -coverprofile "${COVERAGE_FILE}" -covermode atomic
 # Display ASCII report to console
 go tool cover -func="${COVERAGE_FILE}"
 # Display HTML report in default browser
-# go tool cover -html="${COVERAGE_FILE}"
+go tool cover -html="${COVERAGE_FILE}"
 
 # Check coverage threshold
 # Extract the coverage total from the coverage report. The line being parsed should look

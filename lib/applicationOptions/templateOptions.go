@@ -147,8 +147,8 @@ func (t *TemplateOptions) GetRoot() string {
 	}
 }
 
-// GetManifestPath gets the path, relative to the filesystem root, where the template manifest
+// GetManifestFile gets the path, relative to the filesystem root, where the template manifest
 // file for this template is found
-func (t *TemplateOptions) GetManifestPath() string {
+func (t *TemplateOptions) GetManifestFile() string {
 	return path.Join(t.GetRoot(), manifestFileName)
 }

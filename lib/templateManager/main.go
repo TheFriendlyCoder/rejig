@@ -49,7 +49,7 @@ func New(options ao.TemplateOptions) (templateManager, error) {
 	}
 
 	// Parse manifest file
-	manifestPath := options.GetManifestPath()
+	manifestPath := options.GetManifestFile()
 	_, err = retval.srcFilesystem.Stat(manifestPath)
 	if err != nil {
 		return retval, errors.WithStack(err)
