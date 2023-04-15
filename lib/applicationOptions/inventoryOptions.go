@@ -149,10 +149,24 @@ func (i *InventoryOptions) GetTemplateDefinitions() ([]TemplateOptions, error) {
 		return nil, err
 	}
 
+	// Rework the template metadata, inheriting properties from the
+	// parent inventory
+	retval := make([]TemplateOptions, 0, len(inventory.Templates))
+	for _, curTemplate := range inventory.Templates {
+		temp := TemplateOptions{
+			Type:   TemplateSourceType(i.Type),
+			Root:   curTemplate.Source,
+			Source: i.Source,
+			// TODO: Consider setting name to i.Namespace + "." + curTemplate.Name
+			Name: curTemplate.Name,
+		}
+		retval = append(retval, temp)
+	}
+
 	// TODO: consider how/where I should be validating the contents of the templates
 	// TODO: consider how to handle duplicate templates
 	// TODO: consider forcing the "name" field to be unique in each inventory
 	// TODO: consider pre-pending namespace to name to ensure uniqueness
 	// TODO: probably should not allow "local" type for templates defined in a Git inventory
-	return inventory.Templates, nil
+	return retval, nil
 }

@@ -79,7 +79,7 @@ type TemplateOptions struct {
 	// Type identifier describing the protocol to use when retrieving template content
 	Type TemplateSourceType
 	// Source Path or URL where the source template can be found
-	Source string
+	Source string // TODO: make this member private
 	// Name friendly name associated with the template. Used when referring to the template
 	// from the command line
 	Name string
@@ -93,11 +93,6 @@ type TemplateOptions struct {
 // from the command line
 func (t *TemplateOptions) GetName() string {
 	return t.Name
-}
-
-// GetSource Path or URL where the source template can be found
-func (t *TemplateOptions) GetSource() string {
-	return t.Source
 }
 
 // GetType identifier describing the protocol to use when retrieving template content

@@ -210,15 +210,14 @@ func Test_getLocalTemplateDefinitions(t *testing.T) {
 	// And a sample config file
 	outputFile := path.Join(tmpDir, inventoryFileName)
 	expName := "test1"
-	expType := TstGit
-	expTypeStr := "git"
-	expSource := "http://some/repo"
+	expNamespace := "FuBar"
+	expType := TstLocal
+	expSource := "my/subdir"
 	invData := fmt.Sprintf(`
 templates:
   - name: %s
     source: %s
-    type: %s
-`, expName, expSource, expTypeStr)
+`, expName, expSource)
 	fh, err := os.Create(outputFile)
 	r.NoError(err)
 	_, err = fh.WriteString(invData)
@@ -227,14 +226,14 @@ templates:
 
 	inv := InventoryOptions{
 		Type:      IstLocal,
-		Namespace: "FuBar",
+		Namespace: expNamespace,
 		Source:    tmpDir,
 	}
 	opts, err := inv.GetTemplateDefinitions()
 	r.NoError(err)
 	a.Equal(1, len(opts))
-	a.Equal(expType, opts[0].Type)
-	a.Equal(expSource, opts[0].Source)
+	a.Equal(expType, opts[0].GetType())
+	a.Equal(path.Join(tmpDir, expSource), opts[0].GetRoot())
 	a.Equal(expName, opts[0].GetName())
 }
 

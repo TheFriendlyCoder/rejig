@@ -312,22 +312,17 @@ func Test_FindTemplateFromInventory(t *testing.T) {
 	r.NoError(err)
 	defer os.RemoveAll(tmpDir)
 
-	invDirName := path.Join(tmpDir, "inventory")
-	err = os.Mkdir(invDirName, 0700)
-	r.NoError(err)
-
-	workDirName := path.Join(tmpDir, "working")
+	workDirName := path.Join(tmpDir, "mytemplate")
 	err = os.Mkdir(workDirName, 0700)
 	r.NoError(err)
 
 	// And a sample inventory file
-	outputFile := path.Join(invDirName, ".rejig.inv.yml")
+	outputFile := path.Join(tmpDir, ".rejig.inv.yml")
 	expName := "test1"
 	invData := fmt.Sprintf(`
 templates:
   - name: %s
     source: %s
-    type: local
 `, expName, workDirName)
 	fh, err := os.Create(outputFile)
 	r.NoError(err)
@@ -337,13 +332,14 @@ templates:
 
 	expTempl := ao.TemplateOptions{
 		Name:   expName,
-		Source: workDirName,
+		Source: tmpDir,
+		Root:   path.Join(tmpDir, "mytemplate"),
 		Type:   ao.TstLocal,
 	}
 	expNamespace := "MyNS"
 	tempInvOpts := ao.InventoryOptions{
 		Type:      ao.IstLocal,
-		Source:    invDirName,
+		Source:    tmpDir,
 		Namespace: expNamespace,
 	}
 

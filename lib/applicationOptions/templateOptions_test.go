@@ -91,7 +91,6 @@ func Test_TemplateOptionsBasicGetters(t *testing.T) {
 	}
 
 	a.Equal(expType, opts.GetType())
-	a.Equal(expSource, opts.GetSource())
 	a.Equal(expName, opts.GetName())
 }
 
