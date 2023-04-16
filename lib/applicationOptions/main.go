@@ -26,8 +26,8 @@ func FromViper(v *viper.Viper) (AppOptions, error) {
 }
 
 // New constructor for a new set of application options
-func New() (AppOptions, error) {
-	return AppOptions{}, nil
+func New() AppOptions {
+	return AppOptions{}
 }
 
 // Validate checks the contents of the parsed application options to make sure they
