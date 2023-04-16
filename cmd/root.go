@@ -22,6 +22,9 @@ var rootCmd = &cobra.Command{
 	Short: "Project templating tool",
 	Long: `The rejigger app allows you to generate source code projects from
 specially formatted files stored on disk or in Git repositories`,
+	// By default, cmd will always show the app usage message if the command
+	// fails and returns an error. This flag disables that behavior.
+	SilenceUsage: true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// Parse options file, if it exists, and register the results
 		// in our command context
