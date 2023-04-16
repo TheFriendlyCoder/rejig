@@ -19,6 +19,7 @@ func Test_successfulValidation(t *testing.T) {
 	tests := map[string]struct {
 		templateOptions  []TemplateOptions
 		inventoryOptions []InventoryOptions
+		otherOptions     OtherOptions
 	}{
 		"Local template file system type": {
 			templateOptions: []TemplateOptions{{
@@ -47,6 +48,9 @@ func Test_successfulValidation(t *testing.T) {
 				Source:    "https://some/location",
 				Type:      IstGit,
 			}},
+		},
+		"Dark theme": {
+			otherOptions: OtherOptions{Theme: ThtDark},
 		},
 	}
 
@@ -272,6 +276,86 @@ inventories:
 			a.Equal(data.TypeEnum, options.Inventories[0].Type)
 		})
 	}
+}
+
+func Test_fromViperParseOtherOptions(t *testing.T) {
+	r := require.New(t)
+	a := assert.New(t)
+
+	tests := map[string]struct {
+		ThemeStr  string
+		ThemeEnum ThemeType
+	}{
+		"Dark theme": {
+			ThemeStr:  "dark",
+			ThemeEnum: ThtDark,
+		},
+	}
+
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			// Given an empty temp folder
+			tmpDir, err := os.MkdirTemp("", "")
+			r.NoError(err)
+			defer os.RemoveAll(tmpDir)
+
+			// And a sample application options file
+			cfgFilePath := path.Join(tmpDir, "sample.yml")
+			fh, err := os.Create(cfgFilePath)
+			r.NoError(err)
+			cfgData := fmt.Sprintf(`
+options:
+   theme: %s
+`, data.ThemeStr)
+			_, err = fh.WriteString(cfgData)
+			r.NoError(err)
+
+			// Point viper to our config file
+			v := viper.New()
+			v.SetConfigFile(cfgFilePath)
+			r.NoError(v.ReadInConfig())
+
+			// When we try instantiating our app options from Viper
+			options, err := FromViper(v)
+
+			// We expect the operation to succeed
+			r.NoError(err)
+			a.Equal(data.ThemeEnum, options.Other.Theme)
+		})
+	}
+}
+
+func Test_fromViperParseFailThemeName(t *testing.T) {
+	r := require.New(t)
+
+	// Given an empty temp folder
+	tmpDir, err := os.MkdirTemp("", "")
+	r.NoError(err)
+	defer os.RemoveAll(tmpDir)
+
+	// config file where theme is a list type instead of a string type
+	cfgFilePath := path.Join(tmpDir, "sample.yml")
+	fh, err := os.Create(cfgFilePath)
+	r.NoError(err)
+
+	cfgData := `
+options:
+   theme:
+     - MyTheme
+`
+	_, err = fh.WriteString(cfgData)
+	r.NoError(err)
+
+	// Point viper to our config file
+	v := viper.New()
+	v.SetConfigFile(cfgFilePath)
+	r.NoError(v.ReadInConfig())
+
+	// When we try instantiating our app options from Viper
+	_, err = FromViper(v)
+
+	// We expect the operation to succeed
+	r.Error(err)
 }
 
 func Test_fromViperParseFail(t *testing.T) {

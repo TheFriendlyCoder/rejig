@@ -9,13 +9,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-// TODO: replace this exported symbol with an interface of the same name
-
 // AppOptions parsed config options supported by the app
 type AppOptions struct {
 	// Templates 0 or more sources where template projects are to be found
-	Templates   []TemplateOptions
-	Inventories []InventoryOptions
+	Templates []TemplateOptions `mapstructure:"templates"`
+	// Inventories 0 or more inventories where groups of templates may be defined
+	Inventories []InventoryOptions `mapstructure:"inventories"`
+	// Other miscellaneous config options for the app
+	Other OtherOptions `mapstructure:"options"`
 }
 
 // FromViper constructs a new set of application options from a Viper config file
@@ -64,25 +65,36 @@ func appOptionsDecoder() mapstructure.DecodeHookFuncType {
 		target reflect.Type,
 		raw interface{},
 	) (interface{}, error) {
-
+		// TODO: rework this implementation to work with standard GO yaml / json parsers
+		//		 something like described here:
+		//			https://github.com/mitchellh/mapstructure/issues/115
 		// TODO: Find a way to detect partial / incomplete parse matches
-		// ie: if a template option is missing one field, viper won't map
-		//		it to the correct type and it just gets ignored
+		// 		 ie: if a template option is missing one field, viper won't map
+		//		 it to the correct type and it just gets ignored
 		// TODO: Find a way to enable strict mode decoding here
 		//		 that might work better
 		// TODO: Replace application config parser with simple YAML parsing
 		//		 because it seems simpler
 		//		https://github.com/spf13/viper/issues/338
-		if (target == reflect.TypeOf(TemplateOptions{})) {
+
+		switch target {
+		case reflect.TypeOf(TemplateOptions{}):
 			newData, err := decodeTemplateOptions(raw)
 			return newData, err
-		}
-
-		if (target == reflect.TypeOf(InventoryOptions{})) {
+		case reflect.TypeOf(InventoryOptions{}):
 			newData, err := decodeInventoryOptions(raw)
 			return newData, err
+		case reflect.TypeOf(ThemeType(0)):
+			retval := ThemeType(0)
+			themeTypeStr, ok := raw.(string)
+			if !ok {
+				return retval, e.AOTemplateOptionsDecodeError()
+			}
+			retval.FromString(themeTypeStr)
+			return retval, nil
+		default:
+			return raw, nil
 		}
-		return raw, nil
 
 	}
 }

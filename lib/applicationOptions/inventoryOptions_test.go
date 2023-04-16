@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_InventorySourceTypeStringConverstion(t *testing.T) {
+func Test_InventorySourceTypeStringConversion(t *testing.T) {
 	r := require.New(t)
 
 	tests := map[string]struct {

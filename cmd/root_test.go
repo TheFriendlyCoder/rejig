@@ -2,11 +2,15 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"path"
 	"runtime"
+	"strconv"
 	"testing"
 
+	"github.com/TheFriendlyCoder/rejigger/cmd/shared"
+	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -66,6 +70,53 @@ func Test_helpCommand(t *testing.T) {
 
 	r.NoError(err)
 	a.Contains(actual.String(), "rejigger")
+}
+
+func Test_rootSetupValidation(t *testing.T) {
+	// We set up the app environment through Execute now, and the Cobra code should
+	// have some sanity checks in the PreRun to validate that we haven't messed something
+	// up
+
+	r := require.New(t)
+	// Redirect our user home folder to an empty temp dir
+	// to ensure test doesn't try to use the current users
+	// config file
+	tmpDir, err := os.MkdirTemp("", "")
+	r.NoError(err)
+	defer os.RemoveAll(tmpDir)
+
+	oldHome := setHome(t, tmpDir)
+	defer restoreHome(t, oldHome)
+
+	// Construct partial app contexts to test various scenarios
+	// TODO: Find some way to detect number of values in ContextKey enum
+	//		 and then make sure we are testing every permutation here
+	ctxNoViper := context.Background()
+	ctxNoViper = context.WithValue(ctxNoViper, shared.CkOptions, ao.AppOptions{})
+
+	ctxNoAppOptions := context.Background()
+	ctxNoAppOptions = context.WithValue(ctxNoAppOptions, shared.CkViper, viper.New())
+
+	tests := map[string]struct {
+		context context.Context
+	}{
+		"Missing Viper config": {
+			context: ctxNoViper,
+		},
+		"Missing app config": {
+			context: ctxNoAppOptions,
+		},
+	}
+
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+
+			// When we run the help command
+			rootCmd := RootCmd()
+			rootCmd.SetArgs([]string{"help"})
+			r.Panics(func() { r.NoError(rootCmd.ExecuteContext(data.context)) })
+		})
+	}
 }
 
 func Test_rootInitInvalidConfig(t *testing.T) {
@@ -215,4 +266,17 @@ func Test_initViperFileNoPermission(t *testing.T) {
 
 	// TODO: validate error message
 	// TODO: Make sure error has a stack that includes our application
+}
+
+func Test_allColorThemesExist(t *testing.T) {
+	r := require.New(t)
+
+	numThemes := int64(ao.ThtDark) + 1
+
+	for i := int64(0); i < numThemes; i++ {
+		t.Run("Processing theme "+strconv.FormatInt(i, 10), func(t *testing.T) {
+			curType := ao.ThemeType(i)
+			r.Contains(CobraThemes, curType)
+		})
+	}
 }
