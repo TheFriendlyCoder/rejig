@@ -28,6 +28,9 @@ func setHome(t *testing.T, newHome string) string {
 	return oldHome
 }
 
+// restoreHome restores the users home folder configuration
+// used as a deferred operation in unit tests to undo the changes
+// made by the setHome helper method
 func restoreHome(t *testing.T, newHome string) {
 	envVar := "HOME"
 	switch runtime.GOOS {
@@ -53,15 +56,48 @@ func Test_helpCommand(t *testing.T) {
 	defer restoreHome(t, oldHome)
 
 	// When we run the help command
+	rootCmd := RootCmd()
 	actual := new(bytes.Buffer)
 	rootCmd.SetOut(actual)
 	rootCmd.SetErr(actual)
 
 	rootCmd.SetArgs([]string{"help"})
-	err = rootCmd.Execute()
+	err = Execute(&rootCmd)
 
 	r.NoError(err)
 	a.Contains(actual.String(), "rejigger")
+}
+
+func Test_rootInitInvalidConfig(t *testing.T) {
+	r := require.New(t)
+
+	// Redirect our user home folder to an empty temp dir
+	// to force the command to load default options
+	tmpDir, err := os.MkdirTemp("", "")
+	r.NoError(err)
+	defer os.RemoveAll(tmpDir)
+
+	oldHome := setHome(t, tmpDir)
+	defer restoreHome(t, oldHome)
+
+	// Create an invalid config file
+	configFile := path.Join(tmpDir, ".rejig")
+	fh, err := os.Create(configFile)
+	r.NoError(err)
+	_, err = fh.WriteString("templates: fubar")
+	r.NoError(err)
+	r.NoError(fh.Close())
+
+	// When we run the help command
+	rootCmd := RootCmd()
+	actual := new(bytes.Buffer)
+	rootCmd.SetOut(actual)
+	rootCmd.SetErr(actual)
+
+	rootCmd.SetArgs([]string{"help"})
+	err = Execute(&rootCmd)
+
+	r.Error(err)
 }
 
 func Test_executeConfigFileInvalidYAML(t *testing.T) {
@@ -87,20 +123,20 @@ func Test_executeConfigFileInvalidYAML(t *testing.T) {
 
 	// When we run the root command with a custom config file
 	actual := new(bytes.Buffer)
+	rootCmd := RootCmd()
 	rootCmd.SetOut(actual)
 	rootCmd.SetErr(actual)
 
 	rootCmd.SetArgs([]string{"help"})
-	err = rootCmd.Execute()
+	err = Execute(&rootCmd)
 	r.Error(err)
 }
 
-func Test_initConfigDefaults(t *testing.T) {
+func Test_initViperDefaults(t *testing.T) {
 	r := require.New(t)
-	a := assert.New(t)
 
 	// Redirect our user home folder to an empty temp dir
-	// to force the command to load default options
+	// to avoid conflicts with current users home folder
 	tmpDir, err := os.MkdirTemp("", "")
 	r.NoError(err)
 	defer os.RemoveAll(tmpDir)
@@ -110,52 +146,27 @@ func Test_initConfigDefaults(t *testing.T) {
 
 	// When we try to init a new config
 	v := viper.New()
-	opts, err := initConfig(v)
-
-	// We expect the operation to succeed
-	r.NoError(err)
-
-	// And a set of default options to be returned
-	a.Equal(0, len(opts.Templates))
-	a.Equal(0, len(opts.Inventories))
+	r.NoError(initViper(v))
 }
 
-func Test_initConfigSuccessfulParse(t *testing.T) {
+func Test_initViperMissingHome(t *testing.T) {
 	r := require.New(t)
-	a := assert.New(t)
 
-	// Redirect our user home folder to an empty temp dir
-	// to force the command to load default options
-	tmpDir, err := os.MkdirTemp("", "")
-	r.NoError(err)
-	defer os.RemoveAll(tmpDir)
-
-	oldHome := setHome(t, tmpDir)
+	// Remove the default users home folder from the environment
+	// This case should trigger an immediate panic
+	oldHome := setHome(t, "")
 	defer restoreHome(t, oldHome)
 
-	// Create a valid config file
-	configFile := path.Join(tmpDir, ".rejig")
-	fh, err := os.Create(configFile)
-	r.NoError(err)
-	_, err = fh.WriteString("")
-	r.NoError(err)
-	r.NoError(fh.Close())
-
 	// When we try to init a new config
+	// We expect the operation to panic
 	v := viper.New()
-	opts, err := initConfig(v)
-
-	// We expect the operation to succeed
-	r.NoError(err)
-
-	// And a set of default options to be returned
-	a.Equal(0, len(opts.Templates))
-	a.Equal(0, len(opts.Inventories))
+	r.Panics(func() {
+		r.NoError(initViper(v))
+	})
 }
 
-func Test_initConfigFileNotExist(t *testing.T) {
+func Test_initViperConfigFileNotExist(t *testing.T) {
 	r := require.New(t)
-	a := assert.New(t)
 
 	// Redirect our user home folder, which is where the application
 	// will look for an app config file
@@ -166,19 +177,14 @@ func Test_initConfigFileNotExist(t *testing.T) {
 	oldHome := setHome(t, tmpDir)
 	defer restoreHome(t, oldHome)
 
-	// When we attempt to initialize our app config
+	// When we attempt to initialize our app config the operation
+	// should complete successfully (ie: a user defined config file
+	// should be optional)
 	v := viper.New()
-	opts, err := initConfig(v)
-
-	// We should not get any errors
-	r.NoError(err)
-
-	// And default options should be returned
-	a.Equal(0, len(opts.Templates))
-	a.Equal(0, len(opts.Inventories))
+	r.NoError(initViper(v))
 }
 
-func Test_initConfigFileNoPermission(t *testing.T) {
+func Test_initViperFileNoPermission(t *testing.T) {
 	r := require.New(t)
 
 	// Redirect our user home folder, which is where the application
@@ -202,57 +208,11 @@ func Test_initConfigFileNoPermission(t *testing.T) {
 
 	// When we attempt to initialize our app
 	v := viper.New()
-	_, err = initConfig(v)
+	err = initViper(v)
 
 	// The operation should fail
 	r.Error(err)
-}
 
-func Test_initConfigFileInvalidYAML(t *testing.T) {
-	r := require.New(t)
-
-	// Redirect our user home folder, which is where the application
-	// will look for an app config file
-	tmpDir, err := os.MkdirTemp("", "")
-	r.NoError(err)
-	defer os.RemoveAll(tmpDir)
-
-	oldHome := setHome(t, tmpDir)
-	defer restoreHome(t, oldHome)
-
-	// Create an app options file
-	configFile := path.Join(tmpDir, ".rejig")
-	fh, err := os.Create(configFile)
-	r.NoError(err)
-	_, err = fh.WriteString("templates: fubar")
-	r.NoError(err)
-	r.NoError(fh.Close())
-
-	// Attempt to load the app config
-	v := viper.New()
-	_, err = initConfig(v)
-
-	// The operation should fail
-	r.Error(err)
-}
-
-func Test_initConfigMissingHome(t *testing.T) {
-	r := require.New(t)
-
-	// Redirect our user home folder to an empty temp dir
-	// to force the command to load default options
-	tmpDir, err := os.MkdirTemp("", "")
-	r.NoError(err)
-	defer os.RemoveAll(tmpDir)
-
-	oldHome := setHome(t, "")
-	defer restoreHome(t, oldHome)
-
-	// When we try to init a new config
-	// We expect the operation to panic
-	v := viper.New()
-	r.Panics(func() {
-		_, err = initConfig(v)
-		r.NoError(err)
-	})
+	// TODO: validate error message
+	// TODO: Make sure error has a stack that includes our application
 }

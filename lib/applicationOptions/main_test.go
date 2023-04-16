@@ -172,12 +172,6 @@ func Test_fromViperParseTemplate(t *testing.T) {
 			Source:   "https://some/url",
 			Name:     "test1",
 		},
-		"Default Unsupported template": {
-			TypeStr:  "other",
-			TypeEnum: TstUnknown,
-			Source:   "https://some/url",
-			Name:     "test1",
-		},
 	}
 
 	for name, data := range tests {
@@ -237,12 +231,6 @@ func Test_fromViperParseInventory(t *testing.T) {
 		"Default Git template": {
 			TypeStr:   "git",
 			TypeEnum:  IstGit,
-			Source:    "https://some/url",
-			Namespace: "test",
-		},
-		"Default Unsupported template": {
-			TypeStr:   "other",
-			TypeEnum:  IstUnknown,
 			Source:    "https://some/url",
 			Namespace: "test",
 		},

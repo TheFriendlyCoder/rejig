@@ -5,7 +5,7 @@ set -e
 #goreleaser build --single-target --clean --snapshot
 
 # Run tests
-./test.sh
+./test.sh "$@"
 
 # Run linter
 golangci-lint run
