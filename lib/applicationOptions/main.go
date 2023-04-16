@@ -20,14 +20,16 @@ type AppOptions struct {
 
 // FromViper constructs a new set of application options from a Viper config file
 func FromViper(v *viper.Viper) (AppOptions, error) {
+	// TODO: think about how to handle "default options" here
+	//		 should Viper control all default options?
 	var retval AppOptions
 	err := v.Unmarshal(&retval, viper.DecodeHook(appOptionsDecoder()))
-	return retval, errors.Wrap(err, "Failed decoding application options")
-}
+	if err != nil {
+		return retval, errors.WithStack(err)
+	}
 
-// New constructor for a new set of application options
-func New() AppOptions {
-	return AppOptions{}
+	// Then validate the results to make sure they meet the application requirements
+	return retval, errors.Wrap(retval.Validate(), "Failed decoding application options")
 }
 
 // Validate checks the contents of the parsed application options to make sure they

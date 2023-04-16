@@ -2,6 +2,9 @@
 # Stop on first error
 set -e
 
+# Pass in "-b" or "--browse" to open test report in browser
+BROWSER="$1"
+
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 #                                                         CONSTANTS
 # minimum code coverage we expect from our code project
@@ -35,10 +38,16 @@ go test ./... -race -coverprofile "${COVERAGE_FILE}" -covermode atomic
 #  #       apparently the -i option is not supported cross platform
 #  #  sed -i '' "/${curFile//\//\\/}/d" "${COVERAGE_FILE}"
 #done
-# Display ASCII report to console
+# Always display ASCII report to console
 go tool cover -func="${COVERAGE_FILE}"
-# Display HTML report in default browser
-# go tool cover -html="${COVERAGE_FILE}"
+
+# Display HTML report in default browser upon request
+if [ "${BROWSER}" == "-b" ] || [ "${BROWSER}" == "--browse" ];
+then
+  go tool cover -html="${COVERAGE_FILE}"
+fi
+
+
 
 # Check coverage threshold
 # Extract the coverage total from the coverage report. The line being parsed should look
