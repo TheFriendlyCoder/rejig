@@ -9,3 +9,6 @@ set -e
 
 # Run linter
 golangci-lint run
+
+# Generate docs
+hugo server -D -s docs
