@@ -1,0 +1,10 @@
+versions:
+  schema: 1.0
+  rejigger: 0.0.1
+  template: 1.0
+template:
+  args:
+    - name: project_name
+      description: Name of the source code project
+    - name: version
+      description: Initial version number for the project

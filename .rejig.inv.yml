@@ -1,0 +1,18 @@
+# This is a sample inventory file which is referenced in the user docs
+# Here we provide a set of sample templates that people can use to test
+# various features of the Rejigger app
+#
+# All templates defined in this inventory are for demonstration and
+# reference purposes only, and are not meant to produce actual, working
+# source projects
+#
+# To access these samples, simply add the following inventory definition to
+# the ~/.rejig configuration file on your local machine:
+#
+#   inventories:
+#     - namespace: demo
+#       type: git
+#       source: https://github.com/TheFriendlyCoder/rejigger.git
+templates:
+  - name: simple
+    source: ./samples/simple
