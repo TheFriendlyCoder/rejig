@@ -155,7 +155,7 @@ func (i *InventoryOptions) GetTemplateDefinitions() ([]TemplateOptions, error) {
 	for _, curTemplate := range inventory.Templates {
 		temp := TemplateOptions{
 			Type:   TemplateSourceType(i.Type),
-			Root:   curTemplate.Source,
+			Root:   curTemplate.GetSource(),
 			Source: i.Source,
 			// TODO: Consider setting name to i.Namespace + "." + curTemplate.Name
 			Name: curTemplate.Name,

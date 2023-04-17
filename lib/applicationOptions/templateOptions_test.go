@@ -2,6 +2,7 @@ package applicationOptions
 
 import (
 	"os"
+	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,7 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func Test_TemplateSourceTypeStringConverstion(t *testing.T) {
+func Test_TemplateSourceTypeStringConversion(t *testing.T) {
 	r := require.New(t)
 
 	tests := map[string]struct {
@@ -92,6 +93,45 @@ func Test_TemplateOptionsBasicGetters(t *testing.T) {
 
 	a.Equal(expType, opts.GetType())
 	a.Equal(expName, opts.GetName())
+	a.Equal(expSource, opts.GetSource())
+}
+
+func Test_TemplateOptionsGetSourceHomeFolder(t *testing.T) {
+	r := require.New(t)
+	a := assert.New(t)
+
+	home, err := os.UserHomeDir()
+	r.NoError(err)
+
+	tests := map[string]struct {
+		inSource  string
+		inType    TemplateSourceType
+		expSource string
+	}{
+		"Local template with home folder": {
+			inSource:  "~/template",
+			inType:    TstLocal,
+			expSource: path.Join(home, "template"),
+		},
+		"Git template with home folder": {
+			inSource:  "~/template",
+			inType:    TstGit,
+			expSource: "~/template",
+		},
+	}
+
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+
+			opts := TemplateOptions{
+				Source: data.inSource,
+				Type:   data.inType,
+				Name:   "MyName",
+			}
+
+			a.Equal(data.expSource, opts.GetSource())
+		})
+	}
 }
 
 func Test_TemplateOptionsGetFilesystem(t *testing.T) {

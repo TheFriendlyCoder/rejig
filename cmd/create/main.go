@@ -91,6 +91,11 @@ func run(cmd *cobra.Command, args rootArgs) error {
 	}
 	lib.SNF(fmt.Fprintf(cmd.OutOrStdout(), "Generating project %s from template %s...\n", args.targetPath, curTemplate.GetName()))
 
+	// Make sure our output folder exists
+	if err = os.MkdirAll(args.targetPath, 0700); err != nil {
+		return errors.WithStack(err)
+	}
+
 	return tm.Generate(args.targetPath)
 	// TODO: after generating, put an archive file in the root folder summarizing what we did so we
 	//		 can regenerate or update the project later
