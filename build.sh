@@ -11,4 +11,4 @@ set -e
 golangci-lint run
 
 # Generate docs
-hugo server -D -s docs
+# hugo server -D -s docs

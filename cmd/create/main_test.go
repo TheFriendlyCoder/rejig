@@ -122,6 +122,8 @@ func Test_CreateCommandSucceeds(t *testing.T) {
 	r.NoError(err)
 	defer os.RemoveAll(tmpDir)
 
+	outputDir := path.Join(tmpDir, "output")
+
 	// and an app options file with a template pointing to our project
 	templateName := "MyTemplate"
 	srcDir := internal.GetProjectDir("simple")
@@ -149,23 +151,23 @@ func Test_CreateCommandSucceeds(t *testing.T) {
 	createCmd.SetIn(fakeInput)
 	ctx := context.TODO()
 	ctx = context.WithValue(ctx, shared.CkOptions, appOptions)
-	createCmd.SetArgs([]string{tmpDir, templateName})
+	createCmd.SetArgs([]string{outputDir, templateName})
 	err = createCmd.ExecuteContext(ctx)
 	r.NoError(err, "CLI command should have succeeded")
 
 	r.Contains(output.String(), templateName)
-	r.Contains(output.String(), tmpDir)
+	r.Contains(output.String(), outputDir)
 
-	a.DirExists(filepath.Join(tmpDir, "MyProj"))
-	a.NoFileExists(filepath.Join(tmpDir, ".rejig.yml"))
+	a.DirExists(filepath.Join(outputDir, "MyProj"))
+	a.NoFileExists(filepath.Join(outputDir, ".rejig.yml"))
 
-	act := filepath.Join(tmpDir, ".gitignore")
+	act := filepath.Join(outputDir, ".gitignore")
 	a.FileExists(act)
 
-	act = filepath.Join(tmpDir, "version.txt")
+	act = filepath.Join(outputDir, "version.txt")
 	a.FileExists(act)
 
-	act = filepath.Join(tmpDir, "MyProj", "main.txt")
+	act = filepath.Join(outputDir, "MyProj", "main.txt")
 	a.FileExists(act)
 	// TODO: add stack-trace support throughout error handlers
 	// TODO: add error helpers to unit tests to make sure all errors have a stack trace

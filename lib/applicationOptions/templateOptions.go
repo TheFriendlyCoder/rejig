@@ -1,7 +1,9 @@
 package applicationOptions
 
 import (
+	"os"
 	"path"
+	"strings"
 
 	"github.com/TheFriendlyCoder/rejigger/lib"
 	"github.com/pkg/errors"
@@ -89,6 +91,23 @@ type TemplateOptions struct {
 	Root string
 }
 
+func (t *TemplateOptions) GetSource() string {
+	if t.Type != TstLocal {
+		return t.Source
+	}
+	if !strings.HasPrefix(t.Source, "~/") {
+		return t.Source
+	}
+	// TODO: Put the home dir in the global settings / context, and validate it on application start,
+	// 		 that way I don't need to worry about it anywhere else
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		panic("Users home directory not defined")
+	}
+	// TODO: Consider adding support for env var expansion using os.ExpandEnv()
+	return path.Join(homeDir, t.Source[1:])
+}
+
 // GetName friendly name associated with the template. Used when referring to the template
 // from the command line
 func (t *TemplateOptions) GetName() string {
@@ -122,9 +141,9 @@ func (t *TemplateOptions) GetRoot() string {
 	switch t.Type {
 	case TstLocal:
 		if t.Root == "" {
-			return t.Source
+			return t.GetSource()
 		} else {
-			return path.Join(t.Source, t.Root)
+			return path.Join(t.GetSource(), t.Root)
 		}
 
 	case TstGit:

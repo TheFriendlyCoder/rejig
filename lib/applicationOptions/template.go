@@ -37,7 +37,7 @@ func (a AppOptions) validateTemplates() []string {
 		} else if curTemplate.Type == TstUnknown {
 			retval = append(retval, fmt.Sprintf("template %d type is not supported", i))
 		}
-		if len(curTemplate.Source) == 0 {
+		if len(curTemplate.GetSource()) == 0 {
 			retval = append(retval, fmt.Sprintf("template %d source is undefined", i))
 		}
 	}

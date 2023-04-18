@@ -14,7 +14,7 @@ You can provide a direct link to an individual template using the `templates` pr
 
 ```yaml
 inventories:
-  - namepace: demo
+  - namespace: demo
     type: git
     source: https://github.com/TheFriendlyCoder/rejigger.git
 ```
