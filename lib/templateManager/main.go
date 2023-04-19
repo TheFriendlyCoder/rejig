@@ -92,5 +92,5 @@ func (t *templateManager) Generate(targetPath string) error {
 		return err
 	}
 	// TODO: add these support methods to the manager class as private methods
-	return generate(fs, t.Options.GetRoot(), targetPath, t.templateContext)
+	return generate(fs, t.Options, targetPath, t.templateContext)
 }

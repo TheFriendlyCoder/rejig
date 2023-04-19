@@ -3,6 +3,7 @@ package applicationOptions
 import (
 	"os"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/TheFriendlyCoder/rejigger/lib"
@@ -87,10 +88,53 @@ type TemplateOptions struct {
 	Name string
 	// Root optional sub-folder from the source root where the inventory resides
 	// If not provided, the template root is assumed to be the root of the source folder
-	// Typically used by Git type templates that are stored in a subfolder of a remote repo
+	// Typically used by Git type templates that are stored in a sub-folder of a remote repo
 	Root string
+	// Exclusions set of 0 or more regular expressions defining files to be excluded from
+	// template processing
+	Exclusions []string
+
+	// regexExclusions cache of pre-compiled regular expressions built from the Exclusions list
+	regexExclusions []*regexp.Regexp
 }
 
+// buildRegex populates the regexExclusions cache in the TemplateOptions struct
+// performs a no-op if the cache has already been populated
+func (t *TemplateOptions) buildRegex() error {
+	if t.regexExclusions != nil {
+		return nil
+	}
+
+	ignoreList := make([]*regexp.Regexp, 0, len(t.Exclusions))
+	for _, curExpr := range t.Exclusions {
+		curIgnore, err := regexp.Compile(curExpr)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		ignoreList = append(ignoreList, curIgnore)
+	}
+	t.regexExclusions = ignoreList
+	return nil
+}
+
+// IsFileExcluded returns true if the given file path should be excluded based on the
+// exclusion rules provided by the template options, false if not
+func (t *TemplateOptions) IsFileExcluded(curFile string) bool {
+	// TODO: move this regex builder into object creation to avoid having a panic here
+	err := t.buildRegex()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	for _, curIgnore := range t.regexExclusions {
+		if curIgnore.Match([]byte(curFile)) {
+			return true
+		}
+	}
+	return false
+}
+
+// GetSource gets the path to the source folder where the template definition lives
 func (t *TemplateOptions) GetSource() string {
 	if t.Type != TstLocal {
 		return t.Source

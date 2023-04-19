@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	ao "github.com/TheFriendlyCoder/rejigger/lib/applicationOptions"
 	"github.com/flosch/pongo2/v6"
 	"github.com/pkg/errors"
 	"github.com/spf13/afero"
@@ -13,7 +14,9 @@ import (
 // generate applies a set of user defined options (ie: the 'context') to a set of template
 // files stored in srcPath, and produces a complete project in the targetPath with the
 // user defined parameters applied throughout
-func generate(srcFS afero.Fs, rootDir string, targetPath string, context map[string]any) error {
+func generate(srcFS afero.Fs, templateOptions ao.TemplateOptions, targetPath string, context map[string]any) error {
+	rootDir := templateOptions.GetRoot()
+
 	// loop through all files
 	err := afero.Walk(srcFS, rootDir, func(path string, info fs.FileInfo, err error) error {
 		// If walk encountered an error attempting to enumerate the file system object
@@ -23,6 +26,11 @@ func generate(srcFS afero.Fs, rootDir string, targetPath string, context map[str
 		//		https://pkg.go.dev/io/fs#WalkDirFunc
 		if err != nil {
 			return err
+		}
+
+		// Skip excluded files
+		if templateOptions.IsFileExcluded(path) {
+			return nil
 		}
 
 		relPath, err := filepath.Rel(rootDir, path)

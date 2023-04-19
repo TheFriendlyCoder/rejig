@@ -224,7 +224,7 @@ func Test_templateManagerGenerate(t *testing.T) {
 		templateType ao.TemplateSourceType
 	}{
 		"Local file system template": {
-			sourceDir:    getProjectDir("simple"),
+			sourceDir:    getProjectDir(),
 			subDir:       "",
 			templateType: ao.TstLocal,
 		},
@@ -287,7 +287,7 @@ func Test_templateManagerFailToGenerate(t *testing.T) {
 	r.NoError(os.Mkdir(outputDir, 0400))
 
 	options := ao.TemplateOptions{
-		Source: getProjectDir("simple"),
+		Source: getProjectDir(),
 		Name:   "MyName",
 		Type:   ao.TstLocal,
 	}
