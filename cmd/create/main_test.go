@@ -335,7 +335,7 @@ templates:
 	expTempl := ao.TemplateOptions{
 		Name:   expName,
 		Source: tmpDir,
-		Root:   path.Join(tmpDir, "mytemplate"),
+		SubDir: path.Join(tmpDir, "mytemplate"),
 		Type:   ao.TstLocal,
 	}
 	expNamespace := "MyNS"

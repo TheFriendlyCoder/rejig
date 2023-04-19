@@ -267,7 +267,7 @@ func Test_TemplateOptionsGetManifestFile(t *testing.T) {
 				Source: data.expSource,
 				Type:   data.expType,
 				Name:   "MyTemplate",
-				Root:   data.expSubdir,
+				SubDir: data.expSubdir,
 			}
 
 			a.Equal(data.expPath, opts.GetManifestFile())
@@ -297,7 +297,7 @@ func Test_TemplateOptionsGettersPanic(t *testing.T) {
 				Type:   data.expType,
 				Name:   "MyTemplate",
 			}
-			a.Panics(func() { opts.GetRoot() })
+			a.Panics(func() { opts.GetProjectRoot() })
 			a.Panics(func() {
 				_, err := opts.GetFilesystem()
 				a.NoError(err)

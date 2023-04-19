@@ -86,10 +86,10 @@ type TemplateOptions struct {
 	// Name friendly name associated with the template. Used when referring to the template
 	// from the command line
 	Name string
-	// Root optional sub-folder from the source root where the inventory resides
-	// If not provided, the template root is assumed to be the root of the source folder
-	// Typically used by Git type templates that are stored in a sub-folder of a remote repo
-	Root string
+	// SubDir optional sub-directory under the template Source location where the template
+	// definition is found. If not provided, the template is expected to exist in the root
+	// folder of the Source location
+	SubDir string
 	// Exclusions set of 0 or more regular expressions defining files to be excluded from
 	// template processing
 	Exclusions []string
@@ -179,22 +179,22 @@ func (t *TemplateOptions) GetFilesystem() (afero.Fs, error) {
 	}
 }
 
-// GetRoot gets the path to the root folder of the virtual file system associated with
+// GetProjectRoot gets the path to the root folder of the virtual file system associated with
 // this template
-func (t *TemplateOptions) GetRoot() string {
+func (t *TemplateOptions) GetProjectRoot() string {
 	switch t.Type {
 	case TstLocal:
-		if t.Root == "" {
+		if t.SubDir == "" {
 			return t.GetSource()
 		} else {
-			return path.Join(t.GetSource(), t.Root)
+			return path.Join(t.GetSource(), t.SubDir)
 		}
 
 	case TstGit:
-		if t.Root == "" {
+		if t.SubDir == "" {
 			return "."
 		} else {
-			return t.Root
+			return t.SubDir
 		}
 	case TstUnknown:
 		fallthrough
@@ -208,5 +208,5 @@ func (t *TemplateOptions) GetRoot() string {
 // GetManifestFile gets the path, relative to the filesystem root, where the template manifest
 // file for this template is found
 func (t *TemplateOptions) GetManifestFile() string {
-	return path.Join(t.GetRoot(), manifestFileName)
+	return path.Join(t.GetProjectRoot(), manifestFileName)
 }
