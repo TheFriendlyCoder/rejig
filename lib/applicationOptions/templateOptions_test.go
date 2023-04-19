@@ -96,6 +96,61 @@ func Test_TemplateOptionsBasicGetters(t *testing.T) {
 	a.Equal(expSource, opts.GetSource())
 }
 
+func Test_TemplateOptionsIsFileExcluded(t *testing.T) {
+	r := require.New(t)
+
+	tests := map[string]struct {
+		exclusions []string
+		result     bool
+		filename   string
+	}{
+		"No exclusions": {
+			exclusions: []string{},
+			result:     false,
+			filename:   "something.txt",
+		},
+		"Exclusions don't match": {
+			exclusions: []string{".*/other.txt"},
+			result:     false,
+			filename:   "something.txt",
+		},
+		"Regex matches": {
+			exclusions: []string{".*/other.txt$"},
+			result:     true,
+			filename:   "some/path/other.txt",
+		},
+		"Regex partial match fails": {
+			exclusions: []string{".*/other.txt$"},
+			result:     false,
+			filename:   "some/path/other.txt/folder",
+		},
+	}
+
+	for name, data := range tests {
+		t.Run(name, func(t *testing.T) {
+			opts := TemplateOptions{
+				Source:     "mypath",
+				Name:       "MyTemplate",
+				Type:       TstLocal,
+				Exclusions: data.exclusions,
+			}
+			r.Equal(data.result, opts.IsFileExcluded(data.filename))
+		})
+	}
+}
+
+func Test_TemplateOptionsIsFileExcludedInvalidRegex(t *testing.T) {
+	r := require.New(t)
+
+	opts := TemplateOptions{
+		Source:     "mypath",
+		Name:       "MyTemplate",
+		Type:       TstLocal,
+		Exclusions: []string{"**/notvalid/*?."},
+	}
+	r.Panics(func() { opts.IsFileExcluded("main.txt") })
+}
+
 func Test_TemplateOptionsGetSourceHomeFolder(t *testing.T) {
 	r := require.New(t)
 	a := assert.New(t)

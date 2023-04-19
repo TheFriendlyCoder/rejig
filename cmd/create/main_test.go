@@ -126,7 +126,7 @@ func Test_CreateCommandSucceeds(t *testing.T) {
 
 	// and an app options file with a template pointing to our project
 	templateName := "MyTemplate"
-	srcDir := internal.GetProjectDir("simple")
+	srcDir := internal.GetProjectDir()
 
 	appOptions := ao.AppOptions{
 		Templates: []ao.TemplateOptions{{
@@ -241,7 +241,7 @@ func Test_CreateCommandGenerateFailure(t *testing.T) {
 
 	// and an app options file with a template pointing to our project
 	templateName := "MyTemplate"
-	srcDir := internal.GetProjectDir("simple")
+	srcDir := internal.GetProjectDir()
 	appOptions := ao.AppOptions{
 		Templates: []ao.TemplateOptions{{
 			Type:   ao.TstLocal,

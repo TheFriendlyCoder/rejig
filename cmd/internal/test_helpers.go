@@ -7,7 +7,8 @@ import (
 )
 
 // GetProjectDir Gets the path to a specific test project
-func GetProjectDir(projectName string) string {
+func GetProjectDir() string {
+	projectName := "simple"
 	retval := path.Join("..", "..", "testdata", "projects", projectName)
 	var info, err = os.Stat(retval)
 	if err != nil {
