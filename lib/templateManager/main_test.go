@@ -247,7 +247,7 @@ func Test_templateManagerGenerate(t *testing.T) {
 				Source: data.sourceDir,
 				Name:   "MyName",
 				Type:   data.templateType,
-				Root:   data.subDir,
+				SubDir: data.subDir,
 			}
 
 			// and a fake command with some user input to respond to prompts from the template

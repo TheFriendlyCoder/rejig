@@ -15,7 +15,7 @@ import (
 // files stored in srcPath, and produces a complete project in the targetPath with the
 // user defined parameters applied throughout
 func generate(srcFS afero.Fs, templateOptions ao.TemplateOptions, targetPath string, context map[string]any) error {
-	rootDir := templateOptions.GetRoot()
+	rootDir := templateOptions.GetProjectRoot()
 
 	// loop through all files
 	err := afero.Walk(srcFS, rootDir, func(path string, info fs.FileInfo, err error) error {

@@ -233,7 +233,7 @@ templates:
 	r.NoError(err)
 	a.Equal(1, len(opts))
 	a.Equal(expType, opts[0].GetType())
-	a.Equal(path.Join(tmpDir, expSource), opts[0].GetRoot())
+	a.Equal(path.Join(tmpDir, expSource), opts[0].GetProjectRoot())
 	a.Equal(expName, opts[0].GetName())
 }
 
