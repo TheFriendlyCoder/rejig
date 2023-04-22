@@ -46,6 +46,6 @@ templates:
 	r.NoError(err)
 	r.Equal(1, len(result.Templates))
 	a.Equal(expType, result.Templates[0].Type)
-	a.Equal(expSource, result.Templates[0].Source)
+	a.Equal(expSource, result.Templates[0].GetSource())
 	a.Equal(expName, result.Templates[0].GetName())
 }
