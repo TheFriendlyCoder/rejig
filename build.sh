@@ -12,3 +12,5 @@ golangci-lint run
 
 # Generate docs
 # hugo server -D -s docs
+# Clean hugo cache - fixes build problems with themes
+# hugo mod clean

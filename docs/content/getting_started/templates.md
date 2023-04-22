@@ -5,7 +5,7 @@ weight = 2
 
 ## Overview
 
-Templates in **Rejigger** are simply specially formatted folders containing a YAML file in the root folder named `.rejig.yml` (referred to as the template manifest) and a set of example source files that will be used to generate new projects from it.
+Templates in **Rejigger** are simply specially formatted folders containing a [YAML](https://yaml.org) file in the root folder named `.rejig.yml` (referred to as the template manifest) and a set of example source files that will be used to generate new projects from it.
 
 ## Creating a template
 
