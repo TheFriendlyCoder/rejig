@@ -82,17 +82,17 @@ type TemplateOptions struct {
 	// Type identifier describing the protocol to use when retrieving template content
 	Type TemplateSourceType
 	// Source Path or URL where the source template can be found
-	Source string // TODO: make this member private
+	Source string `yaml:"source"` // TODO: make this member private
 	// Name friendly name associated with the template. Used when referring to the template
 	// from the command line
-	Name string
+	Name string `yaml:"name"`
 	// SubDir optional sub-directory under the template Source location where the template
 	// definition is found. If not provided, the template is expected to exist in the root
 	// folder of the Source location
-	SubDir string
+	SubDir string `yaml:"subdir"`
 	// Exclusions set of 0 or more regular expressions defining files to be excluded from
 	// template processing
-	Exclusions []string
+	Exclusions []string `yaml:"exclusions"`
 
 	// regexExclusions cache of pre-compiled regular expressions built from the Exclusions list
 	regexExclusions []*regexp.Regexp

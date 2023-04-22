@@ -210,7 +210,7 @@ templates:
 			r.NoError(err)
 			a.Equal(1, len(options.Templates))
 			a.Equal(data.Name, options.Templates[0].GetName())
-			a.Equal(data.Source, options.Templates[0].Source)
+			a.Equal(data.Source, options.Templates[0].GetSource())
 			a.Equal(data.TypeEnum, options.Templates[0].Type)
 		})
 	}
