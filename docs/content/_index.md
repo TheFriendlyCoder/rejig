@@ -15,4 +15,4 @@ rejig create . MyTemplate
 
 In a professional setting, **Rejigger** allows your build engineers or infrastructure teams to develop patterns for how projects should be structured to work efficiently with specific tools and technologies. That way dev teams can focus on writing code instead of trying to figure out the nuances of how the different build and automation tools work.
 
-To get a feel for how **Rejigger** works, check out the [quickstart guide](getting_started/quickstart).
+To get a feel for how **Rejigger** works, check out the [quickstart guide](getting_started).

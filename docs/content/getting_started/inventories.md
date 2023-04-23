@@ -5,7 +5,7 @@ weight = 3
 
 ## Overview
 
-Inventories are simply YAML files containing lists of templates which are stored together in a common location for easy access. Inventories may be stored in different locations including on the local file system as well as in Git repositories. The recommended best practice is to store inventories in Git so they can be more easily shared. 
+Inventories are simply [YAML](https://yaml.org) files containing lists of templates which are stored together in a common location for easy access. Inventories may be stored in different locations including on the local file system as well as in Git repositories. The recommended best practice is to store inventories in Git so they can be more easily shared. 
 
 ## Creating a Git-based inventory
 
@@ -40,4 +40,6 @@ replacing `<repoURL>` with the URL to your new Git repo. Now you can make use of
 rejig create ./projdir personal.python
 ```
 
-**TIP:** Templates within an inventory are referenced by their namespace name AND template name using the format `<namespace>.<template>`.
+{{% notice tip "Tip" %}}
+Templates within an inventory are referenced by their namespace name AND template name using the format `<namespace>.<template>`.
+{{% /notice %}}

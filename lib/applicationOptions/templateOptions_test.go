@@ -234,25 +234,25 @@ func Test_TemplateOptionsGetManifestFile(t *testing.T) {
 		expSubdir string
 		expType   TemplateSourceType
 	}{
-		"Git manifest path no subfolder": {
+		"Git manifest path no sub-folder": {
 			expSource: "https://url/to/repo",
 			expPath:   ".rejig.yml",
 			expType:   TstGit,
 			expSubdir: "",
 		},
-		"Git manifest path with subfolder": {
+		"Git manifest path with sub-folder": {
 			expSource: "https://url/to/repo",
 			expPath:   "fubar/.rejig.yml",
 			expType:   TstGit,
 			expSubdir: "fubar",
 		},
-		"Local manifest path no subdir": {
+		"Local manifest path no sub-dir": {
 			expSource: "/path/to/template",
 			expPath:   "/path/to/template/.rejig.yml",
 			expType:   TstLocal,
 			expSubdir: "",
 		},
-		"Local manifest path with subdir": {
+		"Local manifest path with sub-dir": {
 			expSource: "/path/to/template",
 			expPath:   "/path/to/template/fubar/.rejig.yml",
 			expType:   TstLocal,
