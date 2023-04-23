@@ -13,4 +13,4 @@ rejig create . MyTemplate
 
 In a professional setting, **Rejigger** allows your build engineers or infrastructure teams to develop patterns for how projects should be structured to work efficiently with specific tools and technologies. That way dev teams can focus on writing code instead of trying to figure out the nuances of how the different build and automation tools work.
 
-To learn more see the online users guide [here](https://thefriendlycoder.github.io/rejigger/), or jump right in with both feet using the [quickstart guide](https://thefriendlycoder.github.io/rejigger/getting_started/quickstart).
+To learn more see the online users guide [here](https://thefriendlycoder.github.io/rejigger/), or jump right in with both feet using the [quickstart guide](https://thefriendlycoder.github.io/rejigger/getting_started).
