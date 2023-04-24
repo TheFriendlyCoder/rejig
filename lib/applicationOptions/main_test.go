@@ -11,8 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO: Split some tests out of here for testing inventory and template options
-
 func Test_successfulValidation(t *testing.T) {
 	a := assert.New(t)
 
@@ -101,6 +99,19 @@ func Test_validationFailures(t *testing.T) {
 				Type: TstGit,
 			}},
 		},
+		"Template duplicate names": {
+			templateOptions: []TemplateOptions{
+				{
+					Name:   "My Template",
+					Source: "https://some/location",
+					Type:   TstGit,
+				},
+				{
+					Name:   "My Template",
+					Source: "/tmp/location",
+					Type:   TstLocal,
+				}},
+		},
 		"Inventory missing type": {
 			inventoryOptions: []InventoryOptions{{
 				Namespace: "Fubar",
@@ -113,11 +124,24 @@ func Test_validationFailures(t *testing.T) {
 				Type:      IstLocal,
 			}},
 		},
-		"Inventory missing namespsce": {
+		"Inventory missing namespace": {
 			inventoryOptions: []InventoryOptions{{
 				Source: "https://some/location",
 				Type:   IstLocal,
 			}},
+		},
+		"Inventory duplicate namespace": {
+			inventoryOptions: []InventoryOptions{
+				{
+					Namespace: "MyNamespace",
+					Source:    "/tmp/location",
+					Type:      IstLocal,
+				},
+				{
+					Namespace: "MyNamespace",
+					Source:    "https://some/location",
+					Type:      IstGit,
+				}},
 		},
 	}
 
