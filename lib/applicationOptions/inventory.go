@@ -38,10 +38,13 @@ func decodeInventoryOptions(raw interface{}) (map[string]interface{}, error) {
 
 func (a AppOptions) validateInventory() []string {
 	var retval []string
+	allNames := map[string]int{}
 	for i, curInventory := range a.Inventories {
 		if len(curInventory.Namespace) == 0 {
 			retval = append(retval, fmt.Sprintf("inventory %d namespace is undefined", i))
 		}
+		allNames[curInventory.Namespace] += 1
+
 		if curInventory.Type == IstUndefined {
 			retval = append(retval, fmt.Sprintf("inventory %d type is undefined", i))
 		} else if curInventory.Type == IstUnknown {
@@ -49,6 +52,13 @@ func (a AppOptions) validateInventory() []string {
 		}
 		if len(curInventory.Source) == 0 {
 			retval = append(retval, fmt.Sprintf("inventory %d source is undefined", i))
+		}
+	}
+
+	// Make sure the inventory names are all unique
+	for name, count := range allNames {
+		if count > 1 {
+			retval = append(retval, fmt.Sprintf("there are %d inventories named %s", count, name))
 		}
 	}
 	return retval

@@ -28,10 +28,13 @@ func decodeTemplateOptions(raw interface{}) (map[string]interface{}, error) {
 // options meets the application requirements
 func (a AppOptions) validateTemplates() []string {
 	var retval []string
+	allNames := map[string]int{}
 	for i, curTemplate := range a.Templates {
 		if len(curTemplate.GetName()) == 0 {
 			retval = append(retval, fmt.Sprintf("template %d name is undefined", i))
 		}
+		allNames[curTemplate.GetName()] += 1
+
 		if curTemplate.Type == TstUndefined {
 			retval = append(retval, fmt.Sprintf("template %d type is undefined", i))
 		} else if curTemplate.Type == TstUnknown {
@@ -39,6 +42,13 @@ func (a AppOptions) validateTemplates() []string {
 		}
 		if len(curTemplate.GetSource()) == 0 {
 			retval = append(retval, fmt.Sprintf("template %d source is undefined", i))
+		}
+	}
+
+	// See if any template names are duplicated
+	for name, count := range allNames {
+		if count > 1 {
+			retval = append(retval, fmt.Sprintf("there are %d templates with the name %s", count, name))
 		}
 	}
 	return retval

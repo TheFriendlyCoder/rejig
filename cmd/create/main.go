@@ -43,6 +43,8 @@ func findTemplate(appOptions ao.AppOptions, name string) (ao.TemplateOptions, er
 		if inv == nil {
 			return ao.TemplateOptions{}, e.NewUnknownTemplateError(name)
 		}
+		// TODO: validate remote inventory definition (ie: check for duplication template names, etc.)
+
 		// iterate through all inventory templates
 		var err error
 		templates, err = inv.GetTemplateDefinitions()
