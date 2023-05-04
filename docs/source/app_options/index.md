@@ -1,7 +1,4 @@
-+++
-title = "Application Options"
-weight = 4
-+++
+# Application Options
 
 **Rejigger** makes use of a [YAML](https://yaml.org) formatted configuration file stored on the local machine to find available templates and to customize its behavior. This file is expected to be named `.rejig` or `.rejig.yml` and it should be located in the home folder of the user running the tool. An example of what the app options file should look like is shown below:
 
@@ -21,7 +18,7 @@ options:
 
 ## Templates
 
-This subsection contains a list of 0 or more definitions of the [templates](../templates) currently available to the application. As you create your own templates, or are given links to templates shared by your friends and workmates, you can add them here so they can be used by the application. Each template reference supports the following properties:
+This subsection contains a list of 0 or more definitions of the [templates](../tmpl) currently available to the application. As you create your own templates, or are given links to templates shared by your friends and workmates, you can add them here so they can be used by the application. Each template reference supports the following properties:
 
 * `type` - (required) describes the protocol to be used when accessing the template definition. May be one of the following values:
   * `git` - indicates the template is stored in a remote Git repository
@@ -30,13 +27,12 @@ This subsection contains a list of 0 or more definitions of the [templates](../t
 * `subdir` - (optional) provides a relative path within the `source` location where the template definition exists. If not provided, the application will assume the template definition will be stored in the root folder.
 * `name` - (required) this is a friendly, easy to remember name you give to the template. It is used when referring to the template on the command line, like when using a template to create a new project using the `create` command. It must be unique across all the templates in your options file.
 
-{{% notice note "Note" %}} 
-Make sure to use the URL you would use for checking out a remote template from a Git repository using a git client, and not the URL for the landing page for the GitHub / Gitlab / Bitbucket project (ie: "https://github.com/TheFriendlyCoder/rejigger.git" and not "https://github.com/TheFriendlyCoder/rejigger")
-{{% /notice %}}
+!!! note
+    Make sure to use the URL you would use for checking out a remote template from a Git repository using a git client, and not the URL for the landing page for the GitHub / Gitlab / Bitbucket project (ie: "https://github.com/TheFriendlyCoder/rejigger.git" and not "https://github.com/TheFriendlyCoder/rejigger")
 
-{{% notice warning "Warning" %}}
-**Rejigger** currently only supports pulling templates from authenticated remote Git repos using the SSH protocol. To make sure this works as expected you will need to use the `git` or `ssh` URL instead of the `http` or `https` URL when you define your template source (ie: "git@github.com:TheFriendlyCoder/rejigger.git" instead of "https://github.com/TheFriendlyCoder/rejigger.git"). In addition, you will need to make sure your git client is properly configured to authenticate to the remote repository using an SSH key (ie: typically stored in `~/.ssh/id_rsa`)
-{{% /notice %}}
+
+!!! warning
+    **Rejigger** currently only supports pulling templates from authenticated remote Git repos using the SSH protocol. To make sure this works as expected you will need to use the `git` or `ssh` URL instead of the `http` or `https` URL when you define your template source (ie: "git@github.com:TheFriendlyCoder/rejigger.git" instead of "https://github.com/TheFriendlyCoder/rejigger.git"). In addition, you will need to make sure your git client is properly configured to authenticate to the remote repository using an SSH key (ie: typically stored in `~/.ssh/id_rsa`)
 
 ## Inventories
 
