@@ -1,0 +1,28 @@
+site_name: 'Rejigger Documentation'
+docs_dir: source
+site_dir: public
+repo_url: https://github.com/TheFriendlyCoder/rejigger
+edit_uri: -/blob/main/docs/source
+
+# TODO: make dark theme
+# TODO: test edit links on Github
+# TODO: make sure all docs render properly
+# TODO: make sure template project looks good
+# TODO: See if anchor links are working 
+nav:
+  - Home: index.md
+  - 'Getting Started':
+      - 'Quick Start': getting_started/index.md
+      - Templates: getting_started/templates.md
+      - Inventories: getting_started/inventories.md
+  - Inventories:
+      - Overview: inventories/index.md
+      - 'Manifest Files': inventories/manifest.md
+  - Templates:
+      - Overview: tmpl/index.md
+      - 'Manifest Files': tmpl/manifest.md
+  - 'Application Options':
+      - Overview: app_options/index.md
+
+plugins:
+  - techdocs-core

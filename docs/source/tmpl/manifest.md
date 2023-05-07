@@ -1,7 +1,4 @@
-+++
-title = "Manifest File"
-weight = 1
-+++
+# Template Manifest
 
 In order for **Rejigger** to recognize a folder as containing a template definition, it requires a [YAML](https://yaml.org) formatted manifest file named `.rejig.yml` in the root folder. This file contains a description of the template and various options it supports. An example of a complete manifest file showing all supported options is shown below:
 
@@ -34,11 +31,11 @@ The values for each of these version fields is expected to conform to the format
 
 ## Template
 
-This section contains a set of configuration options that are used to customize the projects generated from the template contents. These values are read by the **Rejigger** application and provide it with instructions on how to gather information from the user to customize the contents of new projects they are creating from the template.
+The values in this section are read by the **Rejigger** application and provide it with instructions on how to customize the projects generated from the template contents.
 
 ### Args
 
-This subsection defines a list of 0 or more customizable arguments or parameters that can be customized, injected into various places in the template during the generation process. *Rejigger* will use the definitions in this section to prompt the user unique values which are relevant for the project they are looking to create. The app will then look for references to these args throughout the template content (files, folders, etc.) and replace references to them with the values provided by the user.
+This optional subsection defines a list of customizable arguments or parameters that can be defined by a user and injected into various places during the generation process. *Rejigger* will use the definitions in this section to prompt the user for values which are relevant for the project they are creating. The app will then look for references to these args throughout the template content (files, folders, etc.) and replace references to them with the values provided by the user.
 
 * `name` - unique variable name to save the custom value provided by the user. This name may then be used anywhere in the template to act as a placeholder for the value provided during generation. When used within the template contents, the argument name must be wrapped in dual curly-braces as in `{{ my_arg_name }}`. This allows the app to distinguish between references to template argument names and plain text which may exist in the template with the same sequence of characters.
 * `description` - contains a very short explanation of the purpose of the argument. This text is displayed to the user by the application so they can understand better how the value they are providing will be used within the template. The text should be as short as possible so it doesn't occupy unnecessary space when shown on the console, while still providing enough detail for the user to understand what it is for.
@@ -55,7 +52,7 @@ template:
 
 When a user then tries to apply your template to create a new project (ie: using the `create` operation) they will be prompted for the following:
 
-```shell
+```linenums="0"
 initial version for your application(version): 
 ```
 
@@ -74,46 +71,44 @@ template:
 
 When the user applies this template to create a new project, they will be prompted as follows:
 
-```shell
+```linenums="0"
 name of the project being generated(project):
 ```
 
 In order to have the template create a new folder with whatever project name the user provides, you would then create a folder in your template named something like `{{project}}`.
 
-```shell
+```linenums="0"
 .
 └── {{project}}
 ```
 
-So if the user said the name of their new project was "ProcessLib", the newly created project would have a folder with than name created in place of the templated one.
+So if the user said the name of their new project was "ProcessLib", the newly created project would have a folder with that name created in place of the templated one.
 
-```shell
+```linenums="0"
 .
 └── ProcessLib
 ```
 
-{{% notice note "Note" %}}
-The reason **Rejigger** uses double curly-braces to delineate argument tokens is to ensure that text within your template does not get accidentally replaced with values provided by the user. For example, suppose your template needs to create a file named "project.props" inside a folder named after the actual project name selected by the user. To ensure the folder whose name must be replaced by the `project` argument, but the file within it keeps its exact name "project.props" you can simply define your template contents as:
-{{% /notice %}}
+!!! note
+    The reason **Rejigger** uses double curly-braces to delineate argument tokens is to ensure that text within your template does not get accidentally replaced with values provided by the user. For example, suppose your template needs to create a file named "project.props" inside a folder named after the actual project name selected by the user. To ensure the folder whose name must be replaced by the `project` argument, but the file within it keeps its exact name "project.props" you can simply define your template contents as:
 
-```shell
-.
-└── {{project}}
-    └── project.props
-```
+    ```linenums="0"
+    .
+    └── {{project}}
+        └── project.props
+    ```
 
-This will result in a generated output that looks something like:
-
-```shell
-.
-└── ProcessLib
-    └── project.props
-```
+    This will result in a generated output that looks something like:
+    
+    ```linenums="0"
+    .
+    └── ProcessLib
+        └── project.props
+    ```
 
 ### Exclusions
 
 This property allows you to provide a list of 0 or more [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) which define files and folders which should be ignored by **Rejigger** when generating new projects from the template. This can be helpful if there are support files, documentation, or other such content stored in the same repository as your template but which should not be included in new projects.
 
-{{% notice tip "Tip" %}}
-It is helpful to use tools like [regex101](https://regex101.com) to test your regular expressions to make sure they work as you expect. Just make sure to select the "golang" language preferences in the tool to ensure you are using a validator that is compatible with **Rejigger**.
-{{% /notice %}}
+!!! note
+    It is helpful to use tools like [regex101](https://regex101.com) to test your regular expressions to make sure they work as you expect. Just make sure to select the "golang" language preferences in the tool to ensure you are using a validator that is compatible with **Rejigger**.

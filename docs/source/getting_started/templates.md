@@ -1,7 +1,4 @@
-+++
-title = "Templates"
-weight = 2
-+++
+# Templates
 
 ## Overview
 
@@ -11,10 +8,10 @@ Templates in **Rejigger** are simply specially formatted folders containing a [Y
 
 You can create a simple template as follows
 
-1. create a new folder to store your template in, say `~/mytemplate`
+1. create a new folder for your template in your home folder, say `~/mytemplate`
 2. create a new file named `.rejig.yml` in the empty folder with the following content:
 
-    ```yaml
+   ```yaml
    versions:
      schema: 1.0
      rejigger: 0.0.1
@@ -23,8 +20,10 @@ You can create a simple template as follows
      args:
        - name: project_name
          description: Name of the source code project
-    ```
-   For details on the contents of this file, see the next section.
+   ```
+   
+   For details on the contents of this file, see [here](/tmpl).
+
 3. Create another file named `README.md` alongside the manifest file, and put the following content in it:
 
    ```markdown
@@ -48,8 +47,9 @@ To test out your newly created template, do the following:
 
 2. Next, run the following command:
 
-   ```shell
+   ```linenums="0"
    rejig create ./MyNewProject MyTemplate
    ```
+   
 3. You should be prompted to enter a value for the `project_name` argument. Type any value that you like (ie: CoolApp)
 4. Once the operation completes, you should see a new folder named `MyNewProject`. In that folder you should see a file named `README.md` with the contents "Welcome to the CoolApp project"!
