@@ -52,7 +52,7 @@ template:
 
 When a user then tries to apply your template to create a new project (ie: using the `create` operation) they will be prompted for the following:
 
-```linenums="0"
+```
 initial version for your application(version): 
 ```
 
@@ -71,20 +71,20 @@ template:
 
 When the user applies this template to create a new project, they will be prompted as follows:
 
-```linenums="0"
+```
 name of the project being generated(project):
 ```
 
 In order to have the template create a new folder with whatever project name the user provides, you would then create a folder in your template named something like `{{project}}`.
 
-```linenums="0"
+```
 .
 └── {{project}}
 ```
 
 So if the user said the name of their new project was "ProcessLib", the newly created project would have a folder with that name created in place of the templated one.
 
-```linenums="0"
+```
 .
 └── ProcessLib
 ```
@@ -92,7 +92,7 @@ So if the user said the name of their new project was "ProcessLib", the newly cr
 !!! note
     The reason **Rejigger** uses double curly-braces to delineate argument tokens is to ensure that text within your template does not get accidentally replaced with values provided by the user. For example, suppose your template needs to create a file named "project.props" inside a folder named after the actual project name selected by the user. To ensure the folder whose name must be replaced by the `project` argument, but the file within it keeps its exact name "project.props" you can simply define your template contents as:
 
-    ```linenums="0"
+    ```
     .
     └── {{project}}
         └── project.props
@@ -100,7 +100,7 @@ So if the user said the name of their new project was "ProcessLib", the newly cr
 
     This will result in a generated output that looks something like:
     
-    ```linenums="0"
+    ```
     .
     └── ProcessLib
         └── project.props

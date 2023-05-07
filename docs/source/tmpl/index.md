@@ -6,7 +6,7 @@
 
 Suppose you have a folder which contains the following files:
 
-```linenums="0"
+```
 .
 ├── .rejig.yml
 ├── {{project_name}}
@@ -29,6 +29,6 @@ templates:
 
 and then use of your new template by doing something like:
 
-```linenums="0"
+```
 rejig ProjDir myFirstTemplate
 ```
