@@ -2,13 +2,8 @@ site_name: 'Rejigger Documentation'
 docs_dir: source
 site_dir: public
 repo_url: https://github.com/TheFriendlyCoder/rejigger
-edit_uri: -/blob/main/docs/source
+edit_uri: blob/main/docs/source
 
-# TODO: make dark theme
-# TODO: test edit links on Github
-# TODO: make sure all docs render properly
-# TODO: make sure template project looks good
-# TODO: See if anchor links are working 
 nav:
   - Home: index.md
   - 'Getting Started':
@@ -23,6 +18,47 @@ nav:
       - 'Manifest Files': tmpl/manifest.md
   - 'Application Options':
       - Overview: app_options/index.md
+  # TIP: to add all MD files in a subfolder without having to
+  #      name them all here in the nav bar do the following:
+  #- ... | flat | sub/dir/*.md
 
 plugins:
-  - techdocs-core
+  # Add search field for
+  - search
+
+markdown_extensions:
+  # Support for !!! tip type markup
+  - admonition
+  # Color coding for code examples
+  - pymdownx.superfences
+  # Add anchors / permalinks for sub-headings
+  - toc:
+      permalink: true
+
+theme:
+  # https://squidfunk.github.io/mkdocs-material/
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.expand
+    - content.action.edit
+    - content.code.copy
+
+# Hide the "made by mkdocs" watermark
+extra:
+  generator: false
+
+
+

@@ -33,10 +33,9 @@ inventories:
 
 replacing `<repoURL>` with the URL to your new Git repo. Now you can make use of templates in your new inventory by referring to them by the namespace name `<NamespaceName>`. So, for example, if you named your inventory namespace `personal` and you've created a template in it named `python`, you can create a new project using that template by running: 
 
-```linenums="0"
+```
 rejig create ./projdir personal.python
 ```
 
-{{% notice tip "Tip" %}}
-Templates within an inventory are referenced by their namespace name AND template name using the format `<namespace>.<template>`.
-{{% /notice %}}
+!!! note
+   Templates within an inventory are referenced by their namespace name AND template name using the format `<namespace>.<template>`.

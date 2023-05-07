@@ -13,7 +13,7 @@ To create an inventory you simply need to create a new folder containing a file 
 
 Suppose you make regular use of two programming languages: GO and Python, and you want to create one template for each type of project. This can be done by creating a folder with two sub-folders, one for each of your templates, and adding an inventory manifest to the root resulting in a folder structure something like this:
 
-```linenums="0"
+```
 .
 ├── .rejig.inv.yml
 ├── golang
@@ -51,7 +51,7 @@ inventories:
 
 and then use of your new templates by doing something like:
 
-```linenums="0"
+```
 rejig Proj1Dir my.go
 rejig Proj2Dir my.python
 ```

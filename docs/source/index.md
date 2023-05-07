@@ -2,7 +2,7 @@ Do you find it tedious to start a new programming project, and having to remembe
 
 Using **Rejigger** you can keep track of your favorite project setups by defining a set of patterns in special template projects, which can then be applied quickly and easily when creating new projects in the future using simple commands like the following:
 
-```linenums="0"
+```
 rejig create . MyTemplate
 ```
 

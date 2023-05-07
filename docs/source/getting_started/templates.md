@@ -22,7 +22,7 @@ You can create a simple template as follows
          description: Name of the source code project
    ```
    
-   For details on the contents of this file, see [here](/tmpl).
+   For details on the contents of this file, see [here](../tmpl).
 
 3. Create another file named `README.md` alongside the manifest file, and put the following content in it:
 
@@ -47,7 +47,7 @@ To test out your newly created template, do the following:
 
 2. Next, run the following command:
 
-   ```linenums="0"
+   ```
    rejig create ./MyNewProject MyTemplate
    ```
    

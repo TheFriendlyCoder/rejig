@@ -19,7 +19,7 @@ This will allow you to make use of the sample projects defined in the **rejigger
 ## Creating a new project
 Once you have the application installed and configured, you can try creating a new project using one of the demonstration templates. This can be done by running the following command:
 
-```linenums="0"
+```
 rejig create ./projdir demo.simple 
 ```
 
