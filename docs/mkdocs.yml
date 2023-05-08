@@ -5,7 +5,7 @@ repo_url: https://github.com/TheFriendlyCoder/rejigger
 edit_uri: blob/main/docs/source
 
 nav:
-  - Home: index.md
+  - Welcome!: index.md
   - 'Getting Started':
       - 'Quick Start': getting_started/index.md
       - Templates: getting_started/templates.md
